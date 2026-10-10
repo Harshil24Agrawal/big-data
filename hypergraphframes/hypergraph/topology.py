@@ -58,15 +58,16 @@ def profile_topology(
     #    r = sqrt( (d-(h) * P) / max(d+(h), 1) )
     #    s = sqrt( (d+(h) * P) / max(d-(h), 1) )
     #    Bounded by r * s <= P
+    p_budget = max(1, int(p_cells))
     hub_meta = (
-        hubs.withColumn("raw_r", expr(f"sqrt(in_deg * {p_cells}.0 / greatest(out_deg, 1))"))
-        .withColumn("raw_s", expr(f"sqrt(out_deg * {p_cells}.0 / greatest(in_deg, 1))"))
+        hubs.withColumn("raw_r", expr(f"sqrt(in_deg * {p_budget}.0 / greatest(out_deg, 1))"))
+        .withColumn("raw_s", expr(f"sqrt(out_deg * {p_budget}.0 / greatest(in_deg, 1))"))
         .withColumn(
             "scale",
-            expr(f"IF(raw_r * raw_s > {p_cells}, sqrt({p_cells}.0 / (raw_r * raw_s)), 1.0)"),
+            expr(f"IF(raw_r * raw_s > {p_budget}, sqrt({p_budget}.0 / (raw_r * raw_s)), 1.0)"),
         )
-        .withColumn("r_final", expr("cast(greatest(1, floor(raw_r * scale)) as int)"))
-        .withColumn("s_final", expr("cast(greatest(1, floor(raw_s * scale)) as int)"))
+        .withColumn("r_final", expr(f"cast(least({p_budget}, greatest(1, floor(raw_r * scale))) as int)"))
+        .withColumn("s_final", expr(f"cast(least({p_budget}, greatest(1, floor(raw_s * scale))) as int)"))
         .select("id", "in_deg", "out_deg", "work", "r_final", "s_final")
         .cache()
     )
