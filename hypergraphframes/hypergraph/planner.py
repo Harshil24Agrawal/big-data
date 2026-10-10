@@ -58,7 +58,7 @@ def parse_2hop_motif(motif_str: str) -> Optional[Dict[str, Any]]:
             ordered_tokens.append(v)
 
     if dst1 == src2:
-        return {
+        spec = {
             "a": src1,
             "e1": e1,
             "b": dst1,
@@ -67,7 +67,7 @@ def parse_2hop_motif(motif_str: str) -> Optional[Dict[str, Any]]:
             "ordered_tokens": ordered_tokens,
         }
     elif dst2 == src1:
-        return {
+        spec = {
             "a": src2,
             "e1": e2,
             "b": dst2,
@@ -75,8 +75,22 @@ def parse_2hop_motif(motif_str: str) -> Optional[Dict[str, Any]]:
             "c": dst1,
             "ordered_tokens": ordered_tokens,
         }
+    else:
+        return None
 
-    return None
+    # Reject degenerate motifs (a == b, b == c, reused edge alias, or edge/vertex name collision)
+    # so they transparently fall back to native GraphFrame.find().
+    a_tok, b_tok, c_tok = spec["a"], spec["b"], spec["c"]
+    e1_tok, e2_tok = spec["e1"], spec["e2"]
+    if a_tok == b_tok or b_tok == c_tok:
+        return None
+    if e1_tok is not None and e2_tok is not None and e1_tok == e2_tok:
+        return None
+    vertex_tokens = {a_tok, b_tok, c_tok}
+    if (e1_tok in vertex_tokens) or (e2_tok in vertex_tokens):
+        return None
+
+    return spec
 
 
 def run_hypercube_2hop(
