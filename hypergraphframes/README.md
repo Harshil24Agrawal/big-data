@@ -39,7 +39,7 @@ pip install hypergraphframes
 ```
 
 > **Note on GraphFrames Dependency:**
-> `hypergraphframes` requires Apache Spark (`pyspark>=3.0.0`). The underlying `graphframes` library must be supplied via Spark's package manager when creating the `SparkSession` (e.g., `--packages graphframes:graphframes:0.8.3-spark3.5-s_2.13` or `.config("spark.jars.packages", "graphframes:graphframes:0.8.3-spark3.5-s_2.13")`).
+> `hypergraphframes` requires Apache Spark (`pyspark>=3.5.0`). The underlying `graphframes` library must be supplied via Spark's package manager when creating the `SparkSession` using the Scala coordinate matching your PySpark build (for standard PySpark 3.5.x on Scala 2.12: `--packages graphframes:graphframes:0.8.3-spark3.5-s_2.12` or `.config("spark.jars.packages", "graphframes:graphframes:0.8.3-spark3.5-s_2.12")`; for Scala 2.13 builds: `graphframes:graphframes:0.8.3-spark3.5-s_2.13`).
 
 ---
 
@@ -52,10 +52,10 @@ from pyspark.sql import SparkSession
 from graphframes import GraphFrame
 from hypergraph import HyperGraphFrame
 
-# 1. Initialize SparkSession with GraphFrames package
+# 1. Initialize SparkSession with GraphFrames package (Scala 2.12 for PySpark 3.5.x)
 spark = (
     SparkSession.builder.appName("HyperGraphDemo")
-    .config("spark.jars.packages", "graphframes:graphframes:0.8.3-spark3.5-s_2.13")
+    .config("spark.jars.packages", "graphframes:graphframes:0.8.3-spark3.5-s_2.12")
     .getOrCreate()
 )
 

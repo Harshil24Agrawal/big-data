@@ -39,6 +39,9 @@ def build_run_list(variants, regimes, aqe_modes, num_runs, seed=42):
     for r in range(1, num_runs + 1):
         for reg in regimes:
             for v in variants:
+                # hypercube_vjoin is only distinct from hypercube in the id_only regime
+                if v == "hypercube_vjoin" and reg != "id_only":
+                    continue
                 for aqe in aqe_modes:
                     items.append({
                         "variant": v,
@@ -53,7 +56,11 @@ def build_run_list(variants, regimes, aqe_modes, num_runs, seed=42):
 
 def main():
     parser = argparse.ArgumentParser(description="Run controlled benchmark matrix")
-    parser.add_argument("--variants", nargs="+", default=["native", "edgejoin", "salt1d", "hypercube"])
+    parser.add_argument(
+        "--variants",
+        nargs="+",
+        default=["native", "edgejoin", "salt1d", "hypercube", "hypercube_vjoin"],
+    )
     parser.add_argument("--regimes", nargs="+", default=["id_only", "with_attrs"])
     parser.add_argument("--aqe", nargs="+", default=["off", "on"])
     parser.add_argument("--action", default="noop", choices=["noop", "count"])

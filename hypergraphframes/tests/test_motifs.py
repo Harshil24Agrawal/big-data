@@ -19,8 +19,21 @@ from hypergraph import HyperGraphFrame, profile_topology, run_hypercube_2hop, pa
 
 
 def setup_test_env():
-    """Maps Windows Hadoop utilities if present."""
+    """Maps Windows Hadoop utilities and local Temurin 17 (on PySpark 3.x) if present."""
+    import pyspark
+    os.environ["PYSPARK_PYTHON"] = sys.executable
+    os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
     if os.name == "nt":
+        if pyspark.__version__.startswith("3.") and not os.environ.get("BENCH_FORCE_SYSTEM_JAVA"):
+            temurin_root = os.path.join(os.environ.get("LOCALAPPDATA", ""), "Programs", "Temurin")
+            if os.path.exists(temurin_root):
+                for entry in sorted(os.listdir(temurin_root), reverse=True):
+                    cand_java = os.path.join(temurin_root, entry, "bin", "java.exe")
+                    if os.path.exists(cand_java):
+                        jdk_home = os.path.join(temurin_root, entry)
+                        os.environ["JAVA_HOME"] = jdk_home
+                        os.environ["PATH"] = os.path.join(jdk_home, "bin") + os.pathsep + os.environ.get("PATH", "")
+                        break
         candidates = [
             os.path.join(os.getcwd(), "hadoop"),
             os.path.abspath(os.path.join(os.getcwd(), "..", "hadoop")),
@@ -35,6 +48,13 @@ def setup_test_env():
                 break
 
 
+def get_graphframes_jar() -> str:
+    import pyspark
+    if pyspark.__version__.startswith("3."):
+        return "graphframes:graphframes:0.8.3-spark3.5-s_2.12"
+    return "graphframes:graphframes:0.8.3-spark3.5-s_2.13"
+
+
 class TestHyperGraphFrames(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -42,7 +62,7 @@ class TestHyperGraphFrames(unittest.TestCase):
         cls.spark = (
             SparkSession.builder.appName("HyperGraphFramesTestSuite")
             .master("local[2]")
-            .config("spark.jars.packages", "graphframes:graphframes:0.8.3-spark3.5-s_2.13")
+            .config("spark.jars.packages", get_graphframes_jar())
             .config("spark.sql.shuffle.partitions", "4")
             .getOrCreate()
         )

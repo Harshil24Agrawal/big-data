@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hypergraphframes"
-version = "0.1.1"
+version = "0.1.2"
 description = "Topology-aware skew handling middleware for PySpark GraphFrames"
 readme = {file = "README.md", content-type = "text/markdown"}
 license = "MIT"
@@ -31,11 +31,8 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: System :: Distributed Computing",
 ]

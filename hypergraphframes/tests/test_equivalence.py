@@ -34,8 +34,21 @@ from hypergraph import HyperGraphFrame
 
 
 def setup_test_env():
-    """Configure Windows Hadoop winutils if present."""
+    """Configure Windows Hadoop winutils and local Temurin 17 (on PySpark 3.x) if present."""
+    import pyspark
+    os.environ["PYSPARK_PYTHON"] = sys.executable
+    os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
     if os.name == "nt":
+        if pyspark.__version__.startswith("3.") and not os.environ.get("BENCH_FORCE_SYSTEM_JAVA"):
+            temurin_root = os.path.join(os.environ.get("LOCALAPPDATA", ""), "Programs", "Temurin")
+            if os.path.exists(temurin_root):
+                for entry in sorted(os.listdir(temurin_root), reverse=True):
+                    cand_java = os.path.join(temurin_root, entry, "bin", "java.exe")
+                    if os.path.exists(cand_java):
+                        jdk_home = os.path.join(temurin_root, entry)
+                        os.environ["JAVA_HOME"] = jdk_home
+                        os.environ["PATH"] = os.path.join(jdk_home, "bin") + os.pathsep + os.environ.get("PATH", "")
+                        break
         env_hadoop = os.environ.get("HADOOP_HOME")
         candidates = [
             *([env_hadoop] if env_hadoop else []),
@@ -51,6 +64,13 @@ def setup_test_env():
                 if bin_dir not in os.environ.get("PATH", ""):
                     os.environ["PATH"] = bin_dir + os.pathsep + os.environ.get("PATH", "")
                 break
+
+
+def get_graphframes_jar() -> str:
+    import pyspark
+    if pyspark.__version__.startswith("3."):
+        return "graphframes:graphframes:0.8.3-spark3.5-s_2.12"
+    return "graphframes:graphframes:0.8.3-spark3.5-s_2.13"
 
 
 def generate_seeded_powerlaw_graph(
@@ -110,7 +130,7 @@ class TestRowSetEquivalence(unittest.TestCase):
         cls.spark = (
             SparkSession.builder.appName("HyperGraphEquivalenceSuite")
             .master("local[2]")
-            .config("spark.jars.packages", "graphframes:graphframes:0.8.3-spark3.5-s_2.13")
+            .config("spark.jars.packages", get_graphframes_jar())
             .config("spark.sql.shuffle.partitions", "4")
             .config("spark.ui.enabled", "false")
             .getOrCreate()
@@ -715,6 +735,59 @@ class TestRowSetEquivalence(unittest.TestCase):
         expected = g.find(motif)
         self.assertEqual(hg.hub_count, 2)
         self.assert_ExactEquivalence(expected, actual)
+
+    def test_21_positive_control_optin_diverges_on_dangling_and_duplicate_vertices(self):
+        """
+        Positive-control test: verifies that skip_id_only_vertex_join=True (opt-in)
+        genuinely DIVERGES from native GraphFrames when id-only vertices have
+        dangling edge endpoints or duplicate vertex IDs, whereas the default
+        skip_id_only_vertex_join=False matches native exactly.
+        """
+        from graphframes import GraphFrame
+
+        # 21a. Dangling endpoints: vertex 888 and 999 in edges but missing from vertices
+        v_dangling = self.spark.createDataFrame([(i,) for i in range(15)], ["id"])
+        e_dangling = self.spark.createDataFrame(
+            [(i, 0) for i in range(1, 8)]
+            + [(0, i) for i in range(8, 15)]
+            + [(888, 0), (0, 999)],
+            ["src", "dst"],
+        )
+        g_dang = GraphFrame(v_dangling, e_dangling)
+        native_dang = g_dang.find(self.MOTIF_2HOP)
+
+        hg_dang_default = HyperGraphFrame(g_dang, work_threshold=10, p_cells=4, skip_id_only_vertex_join=False)
+        self.assert_ExactEquivalence(native_dang, hg_dang_default.find(self.MOTIF_2HOP))
+
+        hg_dang_optin = HyperGraphFrame(g_dang, work_threshold=10, p_cells=4, skip_id_only_vertex_join=True)
+        optin_dang_df = hg_dang_optin.find(self.MOTIF_2HOP)
+        self.assertGreater(
+            optin_dang_df.count(),
+            native_dang.count(),
+            "Positive control failed: skip_id_only_vertex_join=True must emit extra rows when edges have dangling endpoints",
+        )
+        self.assertGreater(optin_dang_df.exceptAll(native_dang).count(), 0)
+
+        # 21b. Duplicate vertex IDs: hub 0 appears twice in vertices
+        v_dup = self.spark.createDataFrame([(i,) for i in range(15)] + [(0,)], ["id"])
+        e_dup = self.spark.createDataFrame(
+            [(i, 0) for i in range(1, 8)] + [(0, i) for i in range(8, 15)],
+            ["src", "dst"],
+        )
+        g_dup = GraphFrame(v_dup, e_dup)
+        native_dup = g_dup.find(self.MOTIF_2HOP)
+
+        hg_dup_default = HyperGraphFrame(g_dup, work_threshold=10, p_cells=4, skip_id_only_vertex_join=False)
+        self.assert_ExactEquivalence(native_dup, hg_dup_default.find(self.MOTIF_2HOP))
+
+        hg_dup_optin = HyperGraphFrame(g_dup, work_threshold=10, p_cells=4, skip_id_only_vertex_join=True)
+        optin_dup_df = hg_dup_optin.find(self.MOTIF_2HOP)
+        self.assertLess(
+            optin_dup_df.count(),
+            native_dup.count(),
+            "Positive control failed: skip_id_only_vertex_join=True must emit fewer rows than native when vertices has duplicate IDs",
+        )
+        self.assertGreater(native_dup.exceptAll(optin_dup_df).count(), 0)
 
 
 if __name__ == "__main__":

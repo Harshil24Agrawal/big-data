@@ -39,11 +39,48 @@ for p in [THIS_DIR, PKG_ROOT, REPO_ROOT]:
 from hypergraph import HyperGraphFrame, __version__ as hg_version
 from salting_1d import Salted1DGraphFrame, EdgeJoinGraphFrame
 
-GRAPHFRAMES_PACKAGE = "graphframes:graphframes:0.8.3-spark3.5-s_2.13"
+GRAPHFRAMES_JAR_SCALA212 = "graphframes:graphframes:0.8.3-spark3.5-s_2.12"
+GRAPHFRAMES_JAR_SCALA213 = "graphframes:graphframes:0.8.3-spark3.5-s_2.13"
 DEFAULT_SHUFFLE_PARTITIONS = 200
 DEFAULT_WORK_THRESHOLD = 1_000_000
 DEFAULT_P_CELLS = 100
 MOTIF_QUERY = "(a)-[e1]->(b); (b)-[e2]->(c)"
+
+
+def resolve_graphframes_package() -> str:
+    """Select the matching GraphFrames jar coordinate for the active PySpark version (Scala 2.12 vs 2.13)."""
+    import pyspark
+    if pyspark.__version__.startswith("3."):
+        return GRAPHFRAMES_JAR_SCALA212
+    return GRAPHFRAMES_JAR_SCALA213
+
+
+def get_git_state() -> Dict[str, Any]:
+    """Return current git commit hash and dirty-working-tree flag."""
+    commit = "unknown"
+    dirty = None
+    try:
+        r1 = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if r1.returncode == 0:
+            commit = r1.stdout.strip()
+        r2 = subprocess.run(
+            ["git", "status", "--porcelain", "-uno"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if r2.returncode == 0:
+            dirty = bool(r2.stdout.strip())
+    except Exception:
+        pass
+    return {"git_commit": commit, "git_dirty_tree": dirty}
 
 JAVA_ADD_OPENS = (
     "--add-opens=java.base/java.lang=ALL-UNNAMED "
@@ -64,8 +101,23 @@ JAVA_ADD_OPENS = (
 
 
 def setup_env() -> Optional[str]:
-    """Configure Windows Hadoop winutils path using relative or environment resolution."""
+    """Configure Windows Hadoop winutils path and local Temurin JDK 17 (for Spark 3.5) inside the process only."""
+    import pyspark
+    os.environ["PYSPARK_PYTHON"] = sys.executable
+    os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
     if os.name == "nt":
+        # If running PySpark 3.x and local Temurin 17 is available, point JAVA_HOME to it in-process
+        if pyspark.__version__.startswith("3.") and not os.environ.get("BENCH_FORCE_SYSTEM_JAVA"):
+            temurin_root = os.path.join(os.environ.get("LOCALAPPDATA", ""), "Programs", "Temurin")
+            if os.path.exists(temurin_root):
+                for entry in sorted(os.listdir(temurin_root), reverse=True):
+                    cand_java = os.path.join(temurin_root, entry, "bin", "java.exe")
+                    if os.path.exists(cand_java):
+                        jdk_home = os.path.join(temurin_root, entry)
+                        os.environ["JAVA_HOME"] = jdk_home
+                        os.environ["PATH"] = os.path.join(jdk_home, "bin") + os.pathsep + os.environ.get("PATH", "")
+                        break
+
         env_hadoop = os.environ.get("HADOOP_HOME")
         candidates = [
             *([env_hadoop] if env_hadoop else []),
@@ -91,13 +143,14 @@ def create_spark(aqe: str, app_name: str = "HyperGraphControlledBench") -> Spark
     """
     setup_env()
     aqe_bool = "true" if aqe.lower() == "on" else "false"
+    gf_pkg = resolve_graphframes_package()
     spark = (
         SparkSession.builder.appName(app_name)
         .master("local[*]")
         .config("spark.driver.extraJavaOptions", JAVA_ADD_OPENS)
         .config("spark.executor.extraJavaOptions", JAVA_ADD_OPENS)
         .config("spark.driver.memory", "6g")
-        .config("spark.jars.packages", GRAPHFRAMES_PACKAGE)
+        .config("spark.jars.packages", gf_pkg)
         .config("spark.sql.shuffle.partitions", str(DEFAULT_SHUFFLE_PARTITIONS))
         .config("spark.sql.autoBroadcastJoinThreshold", "-1")
         .config("spark.sql.adaptive.enabled", aqe_bool)
@@ -116,8 +169,10 @@ def get_system_and_version_info(spark: SparkSession) -> Dict[str, Any]:
 
     java_ver = spark.sparkContext._gateway.jvm.java.lang.System.getProperty("java.version")
     java_vm = spark.sparkContext._gateway.jvm.java.lang.System.getProperty("java.vm.name")
+    scala_ver = spark.sparkContext._gateway.jvm.scala.util.Properties.versionNumberString()
     mem = psutil.virtual_memory()
     disk = psutil.disk_usage(REPO_ROOT)
+    git_state = get_git_state()
 
     try:
         gf_py_ver = importlib.metadata.version("graphframes")
@@ -133,12 +188,15 @@ def get_system_and_version_info(spark: SparkSession) -> Dict[str, Any]:
         "python_version": sys.version.split()[0],
         "python_full": sys.version,
         "pyspark_version": pyspark.__version__,
+        "scala_version": scala_ver,
         "java_version": java_ver,
         "java_vm": java_vm,
-        "graphframes_jar": GRAPHFRAMES_PACKAGE,
+        "graphframes_jar": resolve_graphframes_package(),
         "graphframes_python_wrapper": gf_py_ver,
         "hypergraphframes_version": hg_version,
         "hypergraphframes_dist_version": hg_dist_ver,
+        "git_commit": git_state["git_commit"],
+        "git_dirty_tree": git_state["git_dirty_tree"],
         "os": platform.platform(),
         "cpu_model": "AMD Ryzen AI 7 350 w/ Radeon 860M",
         "cpu_physical_cores": psutil.cpu_count(logical=False),
@@ -374,9 +432,14 @@ def execute_action(df, action: str) -> Optional[int]:
 
 def main():
     parser = argparse.ArgumentParser(description="Controlled benchmark runner for HyperGraphFrames")
-    parser.add_argument("--variant", required=True, choices=["native", "edgejoin", "salt1d", "hypercube"])
+    parser.add_argument(
+        "--variant",
+        required=True,
+        choices=["native", "edgejoin", "salt1d", "hypercube", "hypercube_vjoin"],
+    )
     parser.add_argument("--regime", default="id_only", choices=["id_only", "with_attrs"],
-                        help="id_only: vertices has only 'id' (edgejoin/salt1d/hypercube elide vertex joins); "
+                        help="id_only: vertices has only 'id' (edgejoin/salt1d/hypercube elide vertex joins; "
+                             "hypercube_vjoin keeps default skip_id_only_vertex_join=False); "
                              "with_attrs: vertices has extra attribute column so vertex joins are mandatory for all variants")
     parser.add_argument("--aqe", required=True, choices=["on", "off"])
     parser.add_argument("--action", required=True, choices=["noop", "count"])
@@ -495,12 +558,13 @@ def main():
             query_metrics = collect_window_metrics(ui_url, app_id, before_query_ids, after_query_completed)
             total_metrics = collect_window_metrics(ui_url, app_id, before_prof_ids, after_query_completed)
 
-        elif args.variant == "hypercube":
+        elif args.variant in ("hypercube", "hypercube_vjoin"):
+            eff_skip_vjoin = False if args.variant == "hypercube_vjoin" else skip_id_only_vjoin
             hg = HyperGraphFrame(
                 g,
                 work_threshold=args.work_threshold,
                 p_cells=args.p_cells,
-                skip_id_only_vertex_join=skip_id_only_vjoin,
+                skip_id_only_vertex_join=eff_skip_vjoin,
             )
             before_prof_ids = snapshot_stage_ids(ui_url, app_id)
 
@@ -539,6 +603,9 @@ def main():
         with open(plan_path, "w", encoding="utf-8") as pf:
             pf.write(explain_str)
 
+        eff_skip_recorded = (
+            False if args.variant in ("native", "hypercube_vjoin") else skip_id_only_vjoin
+        )
         result_payload = {
             "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "config": {
@@ -556,10 +623,10 @@ def main():
                 "retained_tasks": 1000000,
             },
             "variant_parameters": {
-                "work_threshold": args.work_threshold if args.variant in ("salt1d", "hypercube") else None,
-                "p_cells": args.p_cells if args.variant == "hypercube" else None,
+                "work_threshold": args.work_threshold if args.variant in ("salt1d", "hypercube", "hypercube_vjoin") else None,
+                "p_cells": args.p_cells if args.variant in ("hypercube", "hypercube_vjoin") else None,
                 "salt_buckets": args.p_cells if args.variant == "salt1d" else None,
-                "skip_id_only_vertex_join": skip_id_only_vjoin if args.variant != "native" else False,
+                "skip_id_only_vertex_join": eff_skip_recorded,
                 "hubs_identified": hub_count,
             },
             "dataset": {

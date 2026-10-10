@@ -147,7 +147,7 @@ def main():
             discrepancies.append((cond, counts))
 
     summary_rows = []
-    variant_order = {"edgejoin": 0, "salt1d": 1, "hypercube": 2, "native": 3}
+    variant_order = {"edgejoin": 0, "salt1d": 1, "hypercube": 2, "hypercube_vjoin": 3, "native": 4}
 
     for group_key, runs in sorted(
         runs_by_group.items(),
@@ -262,7 +262,12 @@ def main():
 
                 act_rows = [r for r in summary_rows if r["action"] == act and r["regime"] == reg]
                 for r in act_rows:
-                    role = "Reference (GraphFrames)" if r["variant"] == "native" else "Headline Comparison"
+                    if r["variant"] == "native":
+                        role = "Reference (GraphFrames)"
+                    elif r["variant"] == "hypercube_vjoin":
+                        role = "Drop-in Default (vjoin=on)"
+                    else:
+                        role = "Headline Comparison"
                     mf.write(
                         f"| **{r['variant']}** | {role} | {r['aqe']} | {r['n']} | "
                         f"`{format_stat(r['query_s'])}` | "
@@ -285,9 +290,10 @@ def main():
                     edge_row = next((r for r in act_rows if r["aqe"] == aqe and r["variant"] == "edgejoin"), None)
                     salt1d_row = next((r for r in act_rows if r["aqe"] == aqe and r["variant"] == "salt1d"), None)
                     hyper_row = next((r for r in act_rows if r["aqe"] == aqe and r["variant"] == "hypercube"), None)
+                    hyper_vj_row = next((r for r in act_rows if r["aqe"] == aqe and r["variant"] == "hypercube_vjoin"), None)
                     native_row = next((r for r in act_rows if r["aqe"] == aqe and r["variant"] == "native"), None)
 
-                    for cand_row in [edge_row, salt1d_row, hyper_row]:
+                    for cand_row in [edge_row, salt1d_row, hyper_row, hyper_vj_row]:
                         if not cand_row or not cand_row["query_s"]["median"]:
                             continue
                         cand_q_med = cand_row["query_s"]["median"]
@@ -342,7 +348,7 @@ def main():
             regimes = sorted(list({r["regime"] for r in summary_rows if r["action"] == act}))
             for reg in regimes:
                 mf.write(f"### Action: `{act}` | Regime: `{reg}` (AQE off)\n\n")
-                for var in ["edgejoin", "salt1d", "hypercube", "native"]:
+                for var in ["edgejoin", "salt1d", "hypercube", "hypercube_vjoin", "native"]:
                     match_row = next(
                         (r for r in summary_rows if r["action"] == act and r["regime"] == reg and r["aqe"] == "off" and r["variant"] == var),
                         None,
