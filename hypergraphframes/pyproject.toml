@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hypergraphframes"
+version = "0.1.1"
+description = "Topology-aware skew handling middleware for PySpark GraphFrames"
+readme = {file = "README.md", content-type = "text/markdown"}
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    {name = "Rayirth Misra", email = "rayirthmisra25@gmail.com"}
+]
+maintainers = [
+    {name = "Rayirth Misra", email = "rayirth@example.com"}
+]
+keywords = [
+    "pyspark",
+    "graphframes",
+    "graph-algorithms",
+    "motif-finding",
+    "hypercube-partitioning",
+    "distributed-systems",
+    "data-skew",
+    "big-data"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: System :: Distributed Computing",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "pyspark>=3.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov",
+    "build",
+    "twine"
+]
+
+[project.urls]
+Homepage = "https://github.com/Rayirth556/hypergraphframes"
+Documentation = "https://github.com/Rayirth556/hypergraphframes#readme"
+Repository = "https://github.com/Rayirth556/hypergraphframes.git"
+"Bug Tracker" = "https://github.com/Rayirth556/hypergraphframes/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hypergraph*"]
+exclude = ["tests*", "hadoop*"]

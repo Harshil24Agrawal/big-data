@@ -1,2 +1,9 @@
 *.gz
 pokec_edges_parquet/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv*/
+
