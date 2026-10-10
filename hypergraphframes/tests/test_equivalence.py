@@ -192,12 +192,16 @@ class TestRowSetEquivalence(unittest.TestCase):
         self.assertGreaterEqual(hg_attr.hub_count, 3, "Planted hubs must be classified as heavy hubs")
         self.assert_ExactEquivalence(expected_attr, actual_attr)
 
-        # 1b. With id-only vertices (exercises planner's id-only projection optimization)
+        # 1b. With id-only vertices (default skip_id_only_vertex_join=False and opt-in True)
         v_id_only = v_df.select("id")
         g_id = GraphFrame(v_id_only, e_df.select("src", "dst"))
-        hg_id = HyperGraphFrame(g_id, work_threshold=200, p_cells=12)
-        self.assert_ExactEquivalence(g_id.find(self.MOTIF_2HOP), hg_id.find(self.MOTIF_2HOP))
-        self.assertGreaterEqual(hg_id.hub_count, 3)
+        hg_id_default = HyperGraphFrame(g_id, work_threshold=200, p_cells=12)
+        self.assert_ExactEquivalence(g_id.find(self.MOTIF_2HOP), hg_id_default.find(self.MOTIF_2HOP))
+        self.assertGreaterEqual(hg_id_default.hub_count, 3)
+
+        hg_id_optin = HyperGraphFrame(g_id, work_threshold=200, p_cells=12, skip_id_only_vertex_join=True)
+        self.assert_ExactEquivalence(g_id.find(self.MOTIF_2HOP), hg_id_optin.find(self.MOTIF_2HOP))
+        self.assertGreaterEqual(hg_id_optin.hub_count, 3)
 
     def test_02_heavy_hub_symmetric(self):
         """Symmetric heavy hub (d_in == d_out = 30, W = 900 > threshold=100, p_cells=16)."""

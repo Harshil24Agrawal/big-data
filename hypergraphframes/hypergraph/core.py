@@ -26,6 +26,12 @@ class HyperGraphFrame:
         Cartesian workload threshold (d_in * d_out) to classify a vertex as a heavy hub.
     p_cells : int, default=100
         Grid capacity budget (r * s <= p_cells) allocated per hub.
+    skip_id_only_vertex_join : bool, default=False
+        Opt-in optimization: when True and vertices only contains the 'id' column,
+        construct vertex structs directly from edge endpoints without joining the
+        vertices DataFrame. Only valid when vertices is known to contain every
+        edge endpoint exactly once. Default False preserves exact native GraphFrames
+        inner-join semantics (filtering dangling endpoints and preserving duplicate vertex IDs).
     """
 
     def __init__(
@@ -33,10 +39,12 @@ class HyperGraphFrame:
         graph_frame: Any,
         work_threshold: int = 1_000_000,
         p_cells: int = 100,
+        skip_id_only_vertex_join: bool = False,
     ):
         self._gf = graph_frame
         self.work_threshold = work_threshold
         self.p_cells = p_cells
+        self.skip_id_only_vertex_join = skip_id_only_vertex_join
 
         # Lazy Profiling cache
         self._hub_meta: Optional[DataFrame] = None
@@ -147,6 +155,7 @@ class HyperGraphFrame:
                 hub_ids=self._hub_ids,
                 motif_spec=motif_spec,
                 hub_count=self._hub_count,
+                skip_id_only_vertex_join=self.skip_id_only_vertex_join,
             )
 
         # Fallback to native GraphFrames.find() for unsupported motifs

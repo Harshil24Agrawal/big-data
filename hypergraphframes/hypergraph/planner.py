@@ -100,6 +100,7 @@ def run_hypercube_2hop(
     hub_ids: DataFrame,
     motif_spec: Dict[str, Any],
     hub_count: int,
+    skip_id_only_vertex_join: bool = False,
 ) -> DataFrame:
     """
     Executes the 2-hop motif query using Topology-Aware Degree-Balanced 2D Hypercube Partitioning.
@@ -210,9 +211,10 @@ def run_hypercube_2hop(
 
     # ------------------ OUTPUT SHAPING (STRUCTS) ------------------------
     if vertices is not None:
-        # Optimization: If vertices only contains 'id', we directly project from the joined edge keys
-        # avoiding 3 redundant multi-million/billion-row shuffle joins with the vertex table.
-        if set(v_cols) == {"id"}:
+        # Opt-in optimization: If skip_id_only_vertex_join is True and vertices only contains 'id',
+        # directly project from the joined edge keys. By default (False), join vertices to preserve
+        # exact native GraphFrames semantics on dangling endpoints and duplicate vertex IDs.
+        if skip_id_only_vertex_join and set(v_cols) == {"id"}:
             struct_map: Dict[str, Any] = {
                 motif_spec["a"]: struct(col("__e1_src").alias("id")).alias(motif_spec["a"]),
                 motif_spec["b"]: struct(col("__e1_dst").alias("id")).alias(motif_spec["b"]),
