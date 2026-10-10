@@ -25,7 +25,7 @@ from typing import Dict, Any, Set, Optional
 import psutil
 import requests
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col, broadcast
 
 # Ensure local repo root, bench/, and hypergraphframes/ are importable
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -478,13 +478,16 @@ def main():
             .distinct()
         )
         if args.regime == "with_attrs":
-            vertices = base_vertices.withColumn("v_attr", (col("id") % 100).cast("int")).cache()
+            vertices_cached = base_vertices.withColumn("v_attr", (col("id") % 100).cast("int")).cache()
             skip_id_only_vjoin = False
         else:
-            vertices = base_vertices.cache()
+            vertices_cached = base_vertices.cache()
             skip_id_only_vjoin = True
 
-        vertex_count = int(vertices.count())
+        vertex_count = int(vertices_cached.count())
+        # Broadcast-hint the cached vertex lookup table uniformly across all variants
+        # while keeping spark.sql.autoBroadcastJoinThreshold = -1 for the edge-to-edge join.
+        vertices = broadcast(vertices_cached)
 
         print(f"[{app_name}] Materialized {edge_count:,} edges and {vertex_count:,} vertices (regime={args.regime}).")
 
