@@ -13,7 +13,7 @@ authors = [
     {name = "Rayirth Misra", email = "rayirthmisra25@gmail.com"}
 ]
 maintainers = [
-    {name = "Rayirth Misra", email = "rayirth@example.com"}
+    {name = "Rayirth Misra", email = "rayirthmisra25@gmail.com"}
 ]
 keywords = [
     "pyspark",
