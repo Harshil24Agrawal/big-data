@@ -89,7 +89,7 @@ def snapshot_stages(app_id, ui_url):
 
 def collect_metrics(app_id, ui_url, before_ids):
     """Poll Spark REST API and parse task straggler and spill metrics."""
-    time.sleep(2.0)  # Allow UI listener bus to flush event log[cite: 4]
+    time.sleep(2.0)  # Allow UI listener bus to flush event log
     try:
         url = f"{ui_url}/api/v1/applications/{app_id}/stages"
         all_stages = requests.get(url, timeout=5).json()
@@ -141,7 +141,7 @@ def collect_metrics(app_id, ui_url, before_ids):
         if not stage_metrics_list:
             return None
 
-        # Identify bottleneck join stage by maximum task duration[cite: 4]
+        # Identify bottleneck join stage by maximum task duration
         bottleneck = max(stage_metrics_list, key=lambda x: x["max_task_ms"])
 
         return {
@@ -191,7 +191,7 @@ def main():
     g = GraphFrame(vertices, edges)
 
     motif_query = "(a)-[e1]->(b); (b)-[e2]->(c)"
-    print(f"\nExecuting native GraphFrames motif query: {motif_query}[cite: 4]")
+    print(f"\nExecuting native GraphFrames motif query: {motif_query}")
     motifs = g.find(motif_query)
 
     before_ids = snapshot_stages(app_id, ui_url)
@@ -231,7 +231,7 @@ def main():
     print(f"  Total Shuffle Write             : {shuf_write_mb} MB")
     print("=" * 78)
 
-    # Export structured metrics to JSON for LaTeX/paper compilation[cite: 4]
+    # Export structured metrics to JSON for LaTeX/paper compilation
     with open("baseline_graphframes_metrics.json", "w") as f:
         json.dump(metrics, f, indent=2)
     print("\nMetrics written to baseline_graphframes_metrics.json")

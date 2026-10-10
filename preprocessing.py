@@ -4,14 +4,20 @@ import sys
 # 1. Map the Windows Hadoop utilities FIRST
 def setup_env():
     if os.name == "nt":
-        hadoop_home = r"C:\Users\rayir\Documents\research\hadoop"
+        env_hadoop = os.environ.get("HADOOP_HOME")
+        candidates = [
+            *( [env_hadoop] if env_hadoop else [] ),
+            os.path.join(os.getcwd(), "hadoop"),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "hadoop")),
+        ]
+        hadoop_home = next((c for c in candidates if os.path.exists(c)), candidates[-1])
         bin_dir = os.path.join(hadoop_home, "bin")
-        
+
         # Failsafe check
         if not os.path.exists(os.path.join(bin_dir, "winutils.exe")):
             print(f"🛑 STOP: Could not find winutils.exe at {bin_dir}\\winutils.exe")
             sys.exit(1)
-            
+
         os.environ["HADOOP_HOME"] = hadoop_home
         os.environ["hadoop.home.dir"] = hadoop_home
         os.environ["PATH"] = bin_dir + os.pathsep + os.environ.get("PATH", "")
