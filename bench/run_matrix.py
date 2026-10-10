@@ -27,10 +27,10 @@ def check_disk_space(required_gb: float = 25.0) -> float:
     usage = psutil.disk_usage(REPO_ROOT)
     free_gb = usage.free / (1024 ** 3)
     if free_gb < required_gb:
-        print(f"⚠️ WARNING: Free disk space is {free_gb:.1f} GB, which is below the recommended {required_gb} GB.")
+        print(f"[WARN] Free disk space is {free_gb:.1f} GB, which is below the recommended {required_gb} GB.")
         print("Large SortMergeJoin memory/disk spills could risk filling the drive.")
     else:
-        print(f"✓ Free disk space check passed: {free_gb:.1f} GB available (threshold: {required_gb} GB).")
+        print(f"[OK] Free disk space check passed: {free_gb:.1f} GB available (threshold: {required_gb} GB).")
     return free_gb
 
 
@@ -127,11 +127,11 @@ def main():
         run_elapsed = time.perf_counter() - t_run0
 
         if proc.returncode != 0:
-            print(f"❌ ERROR: Run failed with exit code {proc.returncode} for {out_filename}")
+            print(f"[ERROR] Run failed with exit code {proc.returncode} for {out_filename}")
             sys.exit(proc.returncode)
 
         completed += 1
-        print(f"✓ Completed [{i}/{total_runs}] in {run_elapsed:.1f}s")
+        print(f"[OK] Completed [{i}/{total_runs}] in {run_elapsed:.1f}s")
 
     t_total = time.perf_counter() - t_start
     print(f"\n=======================================================")
