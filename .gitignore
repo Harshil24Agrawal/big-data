@@ -7,5 +7,7 @@ dist/
 build/
 .venv*/
 bench/results*/
+bench/figures/
+bench/plot_*.py
 
 

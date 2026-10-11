@@ -22,7 +22,7 @@ def _resolve_version() -> str:
                         return match.group(1)
             except Exception:
                 pass
-        return "0.1.2"
+        return "0.1.3"
 
 
 __version__ = _resolve_version()
