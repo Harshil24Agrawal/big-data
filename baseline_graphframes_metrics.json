@@ -1,0 +1,15 @@
+{
+  "bottleneck_stage_id": 45,
+  "num_tasks": 17,
+  "max_task_ms": 65830,
+  "p95_task_ms": 65830,
+  "median_task_ms": 63776,
+  "mean_task_ms": 57566.06,
+  "task_cv": 0.1986,
+  "shuffle_read_bytes": 2324137826,
+  "shuffle_write_bytes": 2324137826,
+  "disk_spill_bytes": 482363773,
+  "mem_spill_bytes": 43622777728,
+  "wall_clock_s": 162.197,
+  "total_paths": 1780294899
+}
