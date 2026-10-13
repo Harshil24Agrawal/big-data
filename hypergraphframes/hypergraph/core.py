@@ -161,6 +161,26 @@ class HyperGraphFrame:
         # Fallback to native GraphFrames.find() for unsupported motifs
         return self._gf.find(pattern)
 
+    def show_motifs(
+        self,
+        pattern: str,
+        n: int = 10,
+        truncate: bool = False,
+    ) -> DataFrame:
+        """Print up to ``n`` motif matches and return the result DataFrame.
+
+        This is a convenience for demos and interactive use. It triggers a Spark
+        action to display the sample; it does not collect or print the full result.
+        Use ``find()`` when a lazy DataFrame is preferred.
+        """
+        if n < 0:
+            raise ValueError("n must be non-negative")
+
+        matches = self.find(pattern)
+        print(f"Sample of motif matches (up to {n} rows):")
+        matches.show(n=n, truncate=truncate)
+        return matches
+
     def __getattr__(self, name: str) -> Any:
         """
         Passes through any non-intercepted attributes or algorithms to the underlying GraphFrame.
