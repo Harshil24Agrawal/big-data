@@ -74,3 +74,17 @@ Its 17 raw records are kept (see `ABORTED.txt` in the campaign directory) and ar
 * Raw: `datasets/raw_runs/20261019T140509Z-pilot-reduced-e1367c/{runs.jsonl,run_details.jsonl,logs/,campaign.json}`
 * Derived: `datasets/derived/20261019T140509Z-pilot-reduced-e1367c/{strategy_summary.csv,graph_summary.csv,SOURCE.txt}`
 * Manifest: `datasets/manifest/dataset_manifest.csv`
+
+## 6. Hand-off status and agreed next steps (2026-10-19)
+
+1. **Secure the code:** branch `phase1-data-collection` is committed locally (2 commits) and in `phase1-data-collection.bundle`.
+   Pushing is blocked until GitHub is linked to the Claude session (neither `Rayirth556/hypergraph` nor `Harshil24Agrawal/big-data`
+   is authorized) or the bundle is pushed manually.
+2. **Complete the campaign:** run the skipped graphs and the full 60 on a capable machine, one consistent config, 1 warm-up + 5 measured runs.
+3. **Investigate skew:** build cases that actually trigger AQE skew-partition splitting (a partition above the 256 MB threshold and
+   5x the median) alongside compute-skewed cases that do not, so the two regimes can be separated. Not started.
+4. **Confirm the downstream schema** with Members 2-4 before they build pipelines on it. Not yet confirmed.
+5. **Do not train the ML selector on the preliminary fastest-strategy labels** (see `datasets/derived/*/PRELIMINARY.md`).
+
+Member 2 can receive the generator and data-loading deliverables now to inspect and test feature extraction, with the benchmark
+data labelled preliminary; the timings are not validated training targets.
