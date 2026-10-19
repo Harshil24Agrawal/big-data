@@ -18,5 +18,10 @@
     "status": "done",
     "seconds": 1171.1,
     "finished_utc": "2026-10-19T22:16:33.430945+00:00"
+  },
+  "powerlaw_balanced-small-s404-e8eecf7c": {
+    "status": "done",
+    "seconds": 1133.3,
+    "finished_utc": "2026-10-19T22:35:26.708829+00:00"
   }
 }
