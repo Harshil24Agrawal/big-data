@@ -14,3 +14,11 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [powerlaw_balanced-small-s303-4a3cdfd7] gate hypercube_unified__aqe_off   ok       match n=50404353
 [powerlaw_balanced-small-s303-4a3cdfd7] gate edgejoin__aqe_on             ok       match n=50404353
 [powerlaw_balanced-small-s303-4a3cdfd7] warmup   r0 hypercube__aqe_off           ok       q=22.0611s total=32.8529s paths=50404353 dom max/med=8.8519 cv=0.8182 skew=None
+[powerlaw_balanced-small-s303-4a3cdfd7] warmup   r0 native__aqe_on               ok       q=15.8538s total=15.8538s paths=50404353 dom max/med=3.2174 cv=0.3407 skew=0
+[powerlaw_balanced-small-s303-4a3cdfd7] warmup   r0 hypercube_unified__aqe_off   ok       q=12.4028s total=20.5587s paths=50404353 dom max/med=7.2381 cv=0.7382 skew=None
+[powerlaw_balanced-small-s303-4a3cdfd7] warmup   r0 edgejoin__aqe_on             ok       q=23.4337s total=23.4337s paths=50404353 dom max/med=1.8081 cv=0.1283 skew=0
+[powerlaw_balanced-small-s303-4a3cdfd7] warmup   r0 native__aqe_off              ok       q=22.3355s total=22.3355s paths=50404353 dom max/med=2.2 cv=0.1543 skew=None
+[powerlaw_balanced-small-s303-4a3cdfd7] warmup   r0 salt1d__aqe_off              ok       q=20.1836s total=35.2816s paths=50404353 dom max/med=10.3077 cv=0.88 skew=None
+[powerlaw_balanced-small-s303-4a3cdfd7] warmup   r0 edgejoin__aqe_off            ok       q=8.602s total=8.602s paths=50404353 dom max/med=21.9615 cv=1.295 skew=None
+[powerlaw_balanced-small-s303-4a3cdfd7] measured r1 edgejoin__aqe_off            ok       q=9.5423s total=9.5423s paths=50404353 dom max/med=19.2857 cv=1.2243 skew=None
+[powerlaw_balanced-small-s303-4a3cdfd7] measured r1 native__aqe_off              ok       q=11.3187s total=11.3187s paths=50404353 dom max/med=19.0833 cv=1.1979 skew=None
