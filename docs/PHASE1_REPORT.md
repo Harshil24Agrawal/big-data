@@ -45,10 +45,9 @@ Its 17 raw records are kept (see `ABORTED.txt` in the campaign directory) and ar
 * Observed qualitatively (small graphs, ~5–50M paths): `edgejoin` was fastest by median on most graphs; split/unified
   hypercube and salt1d paid a visible planning/hub-detection overhead in `total_s` (compare `total_s` vs `query_s`).
   Hubs were absent or few at these scales (work threshold 1,000,000), so hub-handling strategies had little to fix.
-  The AQE skew-split path did not trigger on any measured run (`aqe_skew_split_any_run` = False on all 42 populated rows); AQE only coalesced
+  The AQE skew-split path did not trigger on any measured run (`plan_skew_split` was false in the final adaptive plan of every AQE-on run; the legacy field `aqe_skew_split_applied` is null = not captured, and an earlier version of this report wrongly read it as false); AQE only coalesced
   partitions (`aqe_partitions` = 4–6). A skew-driven regime needs the larger/hub-heavy graphs that were not run.
-* `aqe_plan_metrics` populates `aqe_partitions`; `aqe_skewed_partitions` / `aqe_skew_splits` stayed empty because no
-  skewed read occurred. This is a known unverified path under real skew.
+* `aqe_plan_metrics` populates `aqe_partitions`; `aqe_skewed_partitions` / `aqe_skew_splits` are null (not captured) on every AQE-on record; the absence of a skew split rests on `plan_skew_split`. This is a known unverified path under real skew.
 
 ## 3. Failures and constraints encountered
 

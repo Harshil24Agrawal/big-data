@@ -226,6 +226,7 @@ def main():
                    order_in_round=None, start_utc=utcnow())
         group = f"gate-{gid}-{s['strategy']}"
         to = None
+        r = None
         try:
             rec["aqe_conf"] = apply_aqe(spark, s["aqe"])
             sc.setJobGroup(group, group, interruptOnCancel=True)
@@ -246,8 +247,6 @@ def main():
             rec.update(status="ok", correctness_status="match" if ok else "mismatch",
                        correctness_reference=reference["strategy"], **checks)
             gate_ok[s["strategy"]] = ok
-            if hasattr(r, "uncache_topology"):
-                r.uncache_topology()
         except Exception as e:
             rec.update(status="timeout" if (to is not None and to.fired) else "failed",
                        error_type=type(e).__name__, error_message=str(e)[:2000],
@@ -255,6 +254,13 @@ def main():
             gate_ok[s["strategy"]] = False
         finally:
             sc.setLocalProperty("spark.jobGroup.id", None)
+            # Release cached hub/topology tables even when the gate run failed, so a failure cannot
+            # leave memory pinned for the strategies gated after it.
+            if r is not None and hasattr(r, "uncache_topology"):
+                try:
+                    r.uncache_topology()
+                except Exception:
+                    pass
         rec["end_utc"] = utcnow()
         emit(rec)
         print(f"[{gid}] gate {s['strategy']:<28} {rec['status']:<8} {rec.get('correctness_status')} "

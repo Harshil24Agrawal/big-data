@@ -156,35 +156,51 @@ def aqe_plan_metrics(df) -> Dict[str, Any]:
     """
     from run_single_ablation import find_aqe_reads
 
-    totals = {"aqe_shuffle_read_nodes": 0, "aqe_partitions": None, "aqe_coalesced_partitions": None,
-              "aqe_skewed_partitions": None, "aqe_skew_splits": None, "aqe_empty_partitions": None,
-              "aqe_partition_data_size_bytes": None}
-    key_map = {"numPartitions": "aqe_partitions", "numCoalescedPartitions": "aqe_coalesced_partitions",
-               "numSkewedPartitions": "aqe_skewed_partitions", "numSkewedSplits": "aqe_skew_splits",
-               "numEmptyPartitions": "aqe_empty_partitions", "partitionDataSize": "aqe_partition_data_size_bytes"}
     nodes = []
     try:
         reads = find_aqe_reads(df._jdf.queryExecution().executedPlan())
     except Exception as e:
-        return {"totals": totals, "nodes": [], "error": str(e)}
+        return {"totals": aggregate_aqe_nodes([]), "nodes": [], "error": str(e)}
     for r in reads:
-        totals["aqe_shuffle_read_nodes"] += 1
         node = {}
         try:
             m = r.metrics()
             it = m.keysIterator()
             while it.hasNext():
                 k = it.next()
-                v = int(m.apply(k).value())
-                node[k] = v
-                if k in key_map:
-                    tk = key_map[k]
-                    totals[tk] = (totals[tk] or 0) + v
+                node[k] = int(m.apply(k).value())
         except Exception as e:
             node["error"] = str(e)
         nodes.append(node)
+    return {"totals": aggregate_aqe_nodes(nodes), "nodes": nodes}
+
+
+AQE_KEY_MAP = {"numPartitions": "aqe_partitions", "numCoalescedPartitions": "aqe_coalesced_partitions",
+               "numSkewedPartitions": "aqe_skewed_partitions", "numSkewedSplits": "aqe_skew_splits",
+               "numEmptyPartitions": "aqe_empty_partitions", "partitionDataSize": "aqe_partition_data_size_bytes"}
+# Spark 3.5 AQEShuffleReadExec only *registers* these metrics when the read actually has a skewed /
+# coalesced partition. On a node whose metric map is present (it has numPartitions), a missing key
+# therefore means 0, not "unknown".
+_CONDITIONAL_AQE_KEYS = ("numSkewedPartitions", "numSkewedSplits", "numCoalescedPartitions")
+
+
+def aggregate_aqe_nodes(nodes: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Sum AQEShuffleRead node metrics. None = not observable (no readable node), never a guessed 0."""
+    totals: Dict[str, Any] = {"aqe_shuffle_read_nodes": len(nodes)}
+    totals.update({v: None for v in AQE_KEY_MAP.values()})
+    for node in nodes:
+        if "error" in node:
+            continue
+        readable = "numPartitions" in node
+        for k, tk in AQE_KEY_MAP.items():
+            v = node.get(k)
+            if v is None and readable and k in _CONDITIONAL_AQE_KEYS:
+                v = 0
+            if v is not None:
+                totals[tk] = (totals[tk] or 0) + int(v)
     if totals["aqe_skewed_partitions"] is not None:
         totals["aqe_skew_split_applied"] = totals["aqe_skewed_partitions"] > 0
     else:
-        totals["aqe_skew_split_applied"] = None if totals["aqe_shuffle_read_nodes"] else False
-    return {"totals": totals, "nodes": nodes}
+        # No AQE read node at all (AQE off, or no shuffle): a skew split cannot have been applied.
+        totals["aqe_skew_split_applied"] = None if nodes else False
+    return totals

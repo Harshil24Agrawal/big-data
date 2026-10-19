@@ -1,0 +1,5 @@
+derived_utc=2026-10-19T17:34:35.446261+00:00
+raw_file=datasets/raw_runs/20261019T163326Z-pilot-full-5d1324/runs.jsonl
+raw_sha256=891ba8ce99ab66f71505ed90ea4211ca6649a87590cc7928e00bff5cd59d16da
+raw_records=122
+filter=run_kind==measured & status==ok & correctness_status==match

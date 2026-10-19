@@ -145,5 +145,82 @@ class TestRawRecordSchema(unittest.TestCase):
                         self.assertTrue(rec.get("skip_reason"))
 
 
+class TestAqeNodeAggregation(unittest.TestCase):
+    """Pure tests for phase1_metrics.aggregate_aqe_nodes (Spark 3.5 conditional AQE metrics)."""
+
+    def test_coalesce_only_node_means_zero_skew(self):
+        from phase1_metrics import aggregate_aqe_nodes
+        t = aggregate_aqe_nodes([{"numPartitions": 4, "numCoalescedPartitions": 4, "partitionDataSize": 100}])
+        self.assertEqual(t["aqe_skewed_partitions"], 0)
+        self.assertEqual(t["aqe_skew_splits"], 0)
+        self.assertIs(t["aqe_skew_split_applied"], False)
+        self.assertEqual(t["aqe_partitions"], 4)
+
+    def test_skewed_node_is_reported(self):
+        from phase1_metrics import aggregate_aqe_nodes
+        t = aggregate_aqe_nodes([{"numPartitions": 10, "numSkewedPartitions": 2, "numSkewedSplits": 7},
+                                 {"numPartitions": 3, "numCoalescedPartitions": 3}])
+        self.assertEqual((t["aqe_skewed_partitions"], t["aqe_skew_splits"]), (2, 7))
+        self.assertEqual(t["aqe_coalesced_partitions"], 3)
+        self.assertIs(t["aqe_skew_split_applied"], True)
+
+    def test_unreadable_or_absent_nodes_stay_unknown(self):
+        from phase1_metrics import aggregate_aqe_nodes
+        t = aggregate_aqe_nodes([{"error": "py4j"}])
+        self.assertIsNone(t["aqe_skewed_partitions"])
+        self.assertIsNone(t["aqe_skew_split_applied"])
+        t0 = aggregate_aqe_nodes([])
+        self.assertIs(t0["aqe_skew_split_applied"], False)
+        self.assertEqual(t0["aqe_shuffle_read_nodes"], 0)
+
+
+class TestAggregatorAcceptanceRule(unittest.TestCase):
+    """phase1_aggregate keeps only measured & ok & match records of the latest Spark app per graph."""
+
+    def test_only_valid_latest_measured_runs_enter_statistics(self):
+        import csv
+        import tempfile
+        import phase1_aggregate as agg
+
+        base = {"graph_id": "g1", "strategy": "edgejoin__aqe_off", "family": "uniform", "size_tier": "small",
+                "seed": 1, "variant": "edgejoin", "aqe": "off", "config_id": "c", "machine_id": "m",
+                "graph_source": "synthetic", "expected_path_count": 10}
+        recs = [
+            dict(base, spark_app_id="app-old", run_kind="measured", status="ok", correctness_status="match", total_s=999.0),
+            dict(base, spark_app_id="app-new", run_kind="correctness", status="ok", correctness_status="match"),
+            dict(base, spark_app_id="app-new", run_kind="warmup", status="ok", correctness_status="match", total_s=50.0),
+            dict(base, spark_app_id="app-new", run_kind="measured", status="ok", correctness_status="match", total_s=2.0),
+            dict(base, spark_app_id="app-new", run_kind="measured", status="ok", correctness_status="match", total_s=4.0),
+            dict(base, spark_app_id="app-new", run_kind="measured", status="ok", correctness_status="mismatch", total_s=0.1),
+            dict(base, spark_app_id="app-new", run_kind="measured", status="timeout", correctness_status="unchecked"),
+            dict(base, spark_app_id="app-new", run_kind="measured", status="failed", correctness_status="unchecked"),
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            raw, derived = os.path.join(tmp, "raw"), os.path.join(tmp, "derived")
+            os.makedirs(os.path.join(raw, "camp"))
+            with open(os.path.join(raw, "camp", "runs.jsonl"), "w") as f:
+                for r in recs:
+                    f.write(json.dumps(r) + "\n")
+            old = (agg.RAW_DIR, agg.DERIVED_DIR)
+            agg.RAW_DIR, agg.DERIVED_DIR = raw, derived
+            try:
+                agg.main(["camp"])
+            finally:
+                agg.RAW_DIR, agg.DERIVED_DIR = old
+            rows = list(csv.DictReader(open(os.path.join(derived, "camp", "strategy_summary.csv"))))
+            grows = list(csv.DictReader(open(os.path.join(derived, "camp", "graph_summary.csv"))))
+        # 2 valid runs < the 5-run default target -> a "fastest" value exists but is not a usable label
+        self.assertEqual(grows[0]["label_eligible"], "False")
+        self.assertEqual(int(grows[0]["min_measured_runs_per_strategy"]), 2)
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        self.assertEqual(int(row["n_measured_ok"]), 2)              # mismatch, timeout, failed, warm-up excluded
+        self.assertEqual(float(row["total_s_median"]), 3.0)         # median of 2.0 and 4.0 only
+        self.assertEqual(int(row["n_measured_timeout"]), 1)
+        self.assertEqual(int(row["n_measured_failed"]), 1)
+        self.assertEqual(int(row["n_superseded_records"]), 1)       # app-old record not used
+        self.assertEqual(row["gate_status"], "match")
+
+
 if __name__ == "__main__":
     unittest.main()

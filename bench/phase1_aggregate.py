@@ -55,6 +55,24 @@ def stats(vals):
             "max": max(vals), "iqr": (q(vals, 0.75) - q(vals, 0.25)), "mean": statistics.mean(vals)}
 
 
+MIN_RUNS_FOR_LABEL = 5
+
+
+def _campaign(cid):
+    """The campaign's own campaign.json ({} if unavailable)."""
+    try:
+        with open(os.path.join(RAW_DIR, cid, "campaign.json")) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _any_known(records, key):
+    """True/False if at least one record has a non-null value for key, else '' (unknown / not captured)."""
+    vals = [r.get(key) for r in records if r.get(key) is not None]
+    return any(bool(v) for v in vals) if vals else ""
+
+
 def main(campaign_ids):
     for cid in campaign_ids:
         path = os.path.join(RAW_DIR, cid, "runs.jsonl")
@@ -100,7 +118,11 @@ def main(campaign_ids):
                 "n_superseded_records": superseded[(gid, sid)],
                 "n_warmup_ok": sum(r["run_kind"] == "warmup" and r["status"] == "ok" for r in rs),
                 "hub_count": next((r.get("hub_count") for r in good if r.get("hub_count") is not None), ""),
-                "aqe_skew_split_any_run": any(bool(r.get("aqe_skew_split_applied")) for r in good) if good else "",
+                # None means "not captured", never False. aqe_skew_split_applied is currently null on all AQE-on
+                # rows; the evidence of record is plan_skew_split read from the final adaptive plan.
+                "aqe_skew_split_any_run": _any_known(good, "aqe_skew_split_applied"),
+                "plan_skew_split_any_run": _any_known(good, "plan_skew_split"),
+                "plan_final_runs": sum(bool(r.get("plan_is_final")) for r in good),
             }
             for m in METRICS:
                 st = stats([r.get(m) for r in good])
@@ -115,14 +137,28 @@ def main(campaign_ids):
             w.writeheader()
             w.writerows(rows)
 
+        # A "fastest strategy" is only meaningful when every candidate strategy was measured enough times.
+        # label_eligible makes that explicit; downstream labelling must filter on it.
+        camp = _campaign(cid)
+        min_runs = int(camp.get("core_config", {}).get("measured_runs") or MIN_RUNS_FOR_LABEL)
+        strategies_by_graph = defaultdict(set, {})
+        for r in rows:
+            strategies_by_graph[r["graph_id"]].add(r["strategy"])
+        if camp.get("strategies"):
+            for gid in strategies_by_graph:
+                strategies_by_graph[gid] |= set(camp["strategies"])
         by_graph = defaultdict(list)
         for r in rows:
             if r["n_measured_ok"]:
                 by_graph[r["graph_id"]].append(r)
         grows = []
         for gid, rs in sorted(by_graph.items()):
+            expected = len(strategies_by_graph[gid])
+            min_n = min(r["n_measured_ok"] for r in rs)
             g = {"campaign_id": cid, "graph_id": gid, "family": rs[0]["family"], "size_tier": rs[0]["size_tier"],
-                 "seed": rs[0]["seed"], "strategies_with_results": len(rs)}
+                 "seed": rs[0]["seed"], "strategies_expected": expected, "strategies_with_results": len(rs),
+                 "min_measured_runs_per_strategy": min_n, "required_runs": min_runs,
+                 "label_eligible": len(rs) == expected and min_n >= min_runs}
             for metric in ("total_s", "query_s"):
                 ranked = sorted(rs, key=lambda r: r[f"{metric}_median"])
                 g[f"fastest_by_median_{metric}"] = ranked[0]["strategy"]

@@ -55,6 +55,13 @@ Spark partitioning or the machine. Existing graph directories are never overwrit
 * Self-loops removed. Duplicate `(src, dst)` pairs removed (simple digraph).
 * When cleaning drops edges, more are drawn from the same distribution, then a seeded random
   subset of exactly `m_target` is kept. Dropped counts are recorded per graph.
+  **Exceptions (verified against the manifest):** `uniform` is a k-regular construction with no
+  top-up, so the few colliding/self-loop edges are simply dropped (e.g. 699,974 of 700,000); in
+  `multi_hub` the background is topped up to target but hub/background overlaps are removed
+  afterwards (e.g. 699,995 of 700,000). The shortfall is < 0.01 % and always recorded as the actual
+  `num_edges`. The `EDGE_POLICY` text in `datagen/config.py` is deliberately left unchanged because it
+  is part of the `graph_id` hash; editing it would change every future graph id and break
+  reproduction of existing graphs.
 * Under this policy `work_sum = Σ_v d_in(v)·d_out(v)` is the **exact** number of 2-hop paths
   (rows of `e1 ⋈ e1.dst = e2.src e2`, including `a = c` 2-cycles), not an approximation.
   It is not a runtime estimate.
@@ -168,6 +175,66 @@ keyed by `record_id`. `campaign.json` holds the machine, core config and safety 
 **Aggregating:** filter `run_kind == "measured" and status == "ok" and correctness_status == "match"`,
 group by `(graph_id, strategy)`. Never average across different `config_id`/`machine_id` without
 saying so. Campaigns named `smoke` are harness checks; exclude them.
+
+### Handoff reference for Member 2 (field meanings, valid runs, gaps)
+
+**Linking:** `dataset_manifest.csv.graph_id` == `runs.jsonl.graph_id`. One manifest row per graph; many run records per graph.
+
+**Run status** (`status`):
+| status | meaning | usable as a timing? |
+|---|---|---|
+| `ok` | the query finished and returned a count | only if `run_kind == "measured"` and `correctness_status == "match"` |
+| `failed` | the run raised an error (`error_type`, `error_message` set) | never |
+| `timeout` | cancelled after `run_timeout_s` | never |
+| `skipped` | not executed (safety gate, failed correctness gate, or graph time cap); `skip_reason` says why, `run_kind` may be `planned` | never; a skipped graph/strategy is *missing*, not a success |
+
+An attempt killed from outside (sandbox restart, process kill) writes **no** record for the run in flight. Such attempts are
+visible only as a `spark_app_id` with fewer records than planned and are listed in `INTERRUPTIONS.md` in the campaign directory.
+
+**Run kinds** (`run_kind`): `correctness` = untimed result-equivalence gate against the native strategy (count + two
+order-independent checksums); `warmup` = timed but discarded (1 per strategy); `measured` = the only kind to aggregate;
+`planned` = placeholder written for combinations that were never executed.
+
+**Valid measured run** = `run_kind == "measured" AND status == "ok" AND correctness_status == "match"`, restricted to the
+latest `spark_app_id` for that `graph_id` within a campaign (earlier applications of the same graph are superseded
+attempts after a resume) and to a single `config_id`/`machine_id`.
+
+**Timing fields** (seconds, wall clock from `time.perf_counter`): `profiling_s` = hub-detection/planning pass that only the
+hypercube variants perform (0.0 otherwise); `query_s` = the motif query executed with a `toRdd().count()` action;
+`total_s = profiling_s + query_s`. Use `total_s` for end-to-end comparisons and `query_s` for execution-only comparisons.
+
+**Guarantees / optional / gaps (verified against the pilot records):**
+- Always present on every record: `schema_version`, `record_id` (unique), `campaign_id`, `config_id`, `machine_id`, `graph_id`,
+  `strategy`, `variant`, `aqe`, `run_kind`, `status`.
+- Present when a run executed: `start_utc`, `end_utc`, timing fields, `path_count`, `correctness_status`, shuffle/spill totals, `dom_*` task statistics.
+- Optional / sometimes empty: `skip_reason`, `error_type`, `error_message`, `hub_count` (hypercube variants only), `aqe_partitions` (AQE-on runs; null if no AQE read node), `aqe_conf`.
+- **Known gap:** `aqe_skew_split_applied`, `aqe_skewed_partitions` and `aqe_skew_splits` are `null` (not captured) on every AQE-on record so far. They are **not** `false`/`0`. The usable evidence of skew handling is `plan_skew_split` (read from the final adaptive plan; `plan_is_final` must be `true`), which was `false` in all 45 AQE-on pilot runs with a final plan. AQE-off rows have `false`.
+- **Known gap:** `plan_*` fields are absent/false on AQE-off rows, as expected (no adaptive plan).
+- `run_details.jsonl` (per-stage/task detail) is keyed by `record_id`; it is optional for feature work.
+
+**Real example** (one measured record from campaign `20261019T140509Z-pilot-reduced-e1367c`, abridged; the full record has ~100 fields):
+
+```json
+{"schema_version": "phase1-run-v1", "record_id": "5506df74a08548f9ad7c58f584fb6aca",
+ "campaign_id": "20261019T140509Z-pilot-reduced-e1367c", "graph_id": "in_heavy-small-s101-addf9e1e",
+ "family": "in_heavy", "size_tier": "small", "seed": 101, "num_vertices": 100000, "num_edges": 700000,
+ "strategy": "edgejoin__aqe_on", "variant": "edgejoin", "aqe": "on", "run_kind": "measured",
+ "round_index": 1, "measured_index": 1, "order_in_round": 0, "order_seed": 2113255929,
+ "status": "ok", "correctness_status": "match", "expected_path_count": 4968986, "path_count": 4968986,
+ "query_s": 5.5669, "profiling_s": 0.0, "total_s": 5.5669,
+ "shuffle_read_bytes": 22422879, "memory_spill_bytes": 0, "disk_spill_bytes": 0,
+ "dom_task_median_ms": 24.0, "dom_task_p95_ms": 34.0, "dom_task_max_ms": 49.0, "dom_task_cv": 0.1995,
+ "aqe_partitions": 4, "aqe_skew_split_applied": null, "spark_version": "3.5.5",
+ "config_id": "e133b2f5a9", "machine_id": "6c5d1cb517a4"}
+```
+
+**Status of the data (read before using):** all benchmark data so far is **preliminary** (see `docs/PHASE1_REPORT.md` and
+`datasets/derived/*/PRELIMINARY.md`). Graph files and the manifest are valid inputs for feature extraction now; timings are
+not validated training targets.
+
+**Proposed backward-compatible changes (not applied):** (1) populate `aqe_skew_split_applied` from `plan_skew_split` so the
+legacy field stops being null; (2) emit an explicit `run_kind: "aborted"` marker when a worker is resumed over an unfinished
+application, instead of relying on `INTERRUPTIONS.md`. Both only add information; neither renames or removes a field.
 
 ### `datasets/derived/<campaign_id>/` (convenience, regenerable)
 
