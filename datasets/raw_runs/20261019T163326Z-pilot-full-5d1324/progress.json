@@ -28,5 +28,25 @@
     "status": "done",
     "seconds": 1491.0,
     "finished_utc": "2026-10-19T19:02:19.315253+00:00"
+  },
+  "powerlaw_balanced-small-s101-aa30b13b": {
+    "status": "done",
+    "seconds": 1291.7,
+    "finished_utc": "2026-10-19T19:23:51.011900+00:00"
+  },
+  "out_heavy-large-s101-2c9ecb7d": {
+    "status": "done",
+    "seconds": 1700.5,
+    "finished_utc": "2026-10-19T19:52:11.488434+00:00"
+  },
+  "powerlaw_balanced-small-s202-206df433": {
+    "status": "done",
+    "seconds": 1208.4,
+    "finished_utc": "2026-10-19T20:12:19.926378+00:00"
+  },
+  "multi_hub-medium-s101-7241a078": {
+    "status": "done",
+    "seconds": 1717.9,
+    "finished_utc": "2026-10-19T20:40:57.798130+00:00"
   }
 }

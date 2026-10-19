@@ -1,0 +1,189 @@
+{
+  "graph_id": "in_heavy-small-s404-28001ba0",
+  "spec": {
+    "family": "in_heavy",
+    "size_tier": "small",
+    "seed": 404,
+    "num_vertices": 100000,
+    "avg_degree": 7,
+    "m_target": 700000,
+    "params": {
+      "hub_edge_fraction": 0.25,
+      "hubs_per_100k": 10,
+      "hub_zipf_s": 1.0
+    },
+    "generator_version": "phase1-gen-v1",
+    "edge_policy": {
+      "directed": true,
+      "self_loops": "removed",
+      "duplicate_edges": "removed (simple digraph: at most one src->dst edge)",
+      "id_type": "int32",
+      "id_range": "[0, num_vertices)",
+      "top_up": "when cleaning drops edges, extra edges are sampled from the same distribution until m_target unique edges exist, then a seeded random subset of exactly m_target is kept"
+    }
+  },
+  "created_utc": "2026-10-19T20:45:08.313171+00:00",
+  "generation_seconds": 1.282,
+  "validation_seconds": 0.337,
+  "edges_sha256": "b5231617c6c97d9076b8082d87e370be84ca5bb85d172742ea8b8c93156592d5",
+  "files": [
+    {
+      "path": "datasets/synthetic/in_heavy/in_heavy-small-s404-28001ba0/edges.parquet",
+      "format": "parquet",
+      "bytes": 3164890,
+      "sha256": "b6e4cdf572611cb76e7170d3453f5c12f9692dfbd4a307679017bbfd5d05ba4b"
+    }
+  ],
+  "schema": {
+    "src": "int32",
+    "dst": "int32"
+  },
+  "cleaning": {
+    "raw_edges_sampled": 728289,
+    "self_loops_removed": 4,
+    "duplicates_removed": 25678,
+    "sampling_rounds": 2,
+    "unique_edges_before_subsample": 702607
+  },
+  "family_meta": {
+    "hub_count": 10,
+    "hub_ids": [
+      30288,
+      13743,
+      72132,
+      77689,
+      58295,
+      30434,
+      40782,
+      55661,
+      45235,
+      92346
+    ]
+  },
+  "measured": {
+    "num_vertices": 100000,
+    "num_edges": 700000,
+    "num_active_vertices": 100000,
+    "hub_k": 10,
+    "work_threshold": 1000000,
+    "work_sum": 4716843,
+    "work_max": 415629,
+    "work_max_vertex": 30288,
+    "work_max_share": 0.088116,
+    "num_work_hubs": 0,
+    "work_in_hubs_share": 0.0,
+    "top_hubs_work_share": 0.192629,
+    "top_hubs_min_over_max_work": 0.040758,
+    "log_degree_corr": -0.0033,
+    "max_in_over_max_out": 2199.0952,
+    "in_mean": 7.0,
+    "in_std": 195.4518,
+    "in_cv": 27.9217,
+    "in_max": 46181,
+    "in_p50": 5.0,
+    "in_p99": 12.0,
+    "in_p999": 14.0,
+    "in_max_over_mean": 6597.2857,
+    "in_gini": 0.4084,
+    "in_top1pct_edge_share": 0.2403,
+    "in_top_hub_edge_share": 0.2224,
+    "in_zero_degree_vertices": 432,
+    "out_mean": 7.0,
+    "out_std": 2.5695,
+    "out_cv": 0.3671,
+    "out_max": 21,
+    "out_p50": 7.0,
+    "out_p99": 14.0,
+    "out_p999": 16.0,
+    "out_max_over_mean": 3.0,
+    "out_gini": 0.2052,
+    "out_top1pct_edge_share": 0.0211,
+    "out_top_hub_edge_share": 0.0003,
+    "out_zero_degree_vertices": 69
+  },
+  "structure": {
+    "min_id": 0,
+    "max_id": 99999,
+    "ids_in_range": true,
+    "self_loops": 0,
+    "duplicate_edges": 0
+  },
+  "validation_status": "PASS",
+  "family_checks": [
+    {
+      "metric": "in_max_over_mean",
+      "op": ">=",
+      "target": 100.0,
+      "measured": 6597.2857,
+      "passed": true
+    },
+    {
+      "metric": "out_max_over_mean",
+      "op": "<=",
+      "target": 5.0,
+      "measured": 3.0,
+      "passed": true
+    },
+    {
+      "metric": "in_top_hub_edge_share",
+      "op": ">=",
+      "target": 0.15,
+      "measured": 0.2224,
+      "passed": true
+    },
+    {
+      "metric": "out_cv",
+      "op": "<=",
+      "target": 0.6,
+      "measured": 0.3671,
+      "passed": true
+    },
+    {
+      "metric": "ids_in_range",
+      "op": "==",
+      "target": true,
+      "measured": true,
+      "passed": true
+    },
+    {
+      "metric": "self_loops==0",
+      "op": "==",
+      "target": true,
+      "measured": true,
+      "passed": true
+    },
+    {
+      "metric": "duplicate_edges==0",
+      "op": "==",
+      "target": true,
+      "measured": true,
+      "passed": true
+    }
+  ],
+  "spark_validation": {
+    "schema": {
+      "src": "int",
+      "dst": "int"
+    },
+    "rows": 700000,
+    "null_endpoints": 0,
+    "min_id": 0,
+    "max_id": 99999,
+    "self_loops": 0,
+    "duplicate_edges": 0,
+    "active_vertices": 100000,
+    "work_sum": 4716843,
+    "work_max": 415629,
+    "mismatches": [],
+    "status": "PASS",
+    "seconds": 1.55,
+    "validated_utc": "2026-10-19T20:52:40.730610+00:00",
+    "spark_version": "3.5.5"
+  },
+  "environment": {
+    "python": "3.11.17",
+    "numpy": "2.4.6",
+    "pyarrow": "26.0.0",
+    "platform": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39"
+  }
+}

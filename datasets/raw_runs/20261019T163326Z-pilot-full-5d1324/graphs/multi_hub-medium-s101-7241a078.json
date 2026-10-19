@@ -1,0 +1,12 @@
+{
+  "graph_id": "multi_hub-medium-s101-7241a078",
+  "source": "synthetic",
+  "family": "multi_hub",
+  "size_tier": "medium",
+  "seed": 101,
+  "num_vertices": 500000,
+  "num_edges": 3500000,
+  "work_sum": 105015224,
+  "work_max": 5359464,
+  "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/multi_hub/multi_hub-medium-s101-7241a078/edges.parquet"
+}

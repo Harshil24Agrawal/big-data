@@ -1,3 +1,11 @@
 campaign_id,graph_id,family,size_tier,seed,strategies_expected,strategies_with_results,min_measured_runs_per_strategy,required_runs,label_eligible,fastest_by_median_total_s,fastest_median_total_s,runner_up_by_median_total_s,margin_pct_total_s,fastest_by_median_query_s,fastest_median_query_s,runner_up_by_median_query_s,margin_pct_query_s
-20261019T163326Z-pilot-full-5d1324,out_heavy-small-s101-88c36855,out_heavy,small,101,7,7,2,5,False,edgejoin__aqe_on,10.3967,native__aqe_on,22.32,edgejoin__aqe_on,10.3967,salt1d__aqe_off,4.26
+20261019T163326Z-pilot-full-5d1324,in_heavy-medium-s101-9829e80e,in_heavy,medium,101,7,7,5,5,True,edgejoin__aqe_on,11.5128,edgejoin__aqe_off,35.26,edgejoin__aqe_on,11.5128,salt1d__aqe_off,26.19
+20261019T163326Z-pilot-full-5d1324,in_heavy-small-s101-addf9e1e,in_heavy,small,101,7,7,5,5,True,edgejoin__aqe_on,7.262,edgejoin__aqe_off,51.13,edgejoin__aqe_on,7.262,hypercube__aqe_off,25.59
+20261019T163326Z-pilot-full-5d1324,multi_hub-medium-s101-7241a078,multi_hub,medium,101,7,7,5,5,True,edgejoin__aqe_off,16.865,edgejoin__aqe_on,9.92,edgejoin__aqe_off,16.865,edgejoin__aqe_on,9.92
+20261019T163326Z-pilot-full-5d1324,multi_hub-small-s101-cea55efc,multi_hub,small,101,7,7,5,5,True,edgejoin__aqe_on,9.0873,native__aqe_on,34.16,edgejoin__aqe_on,9.0873,native__aqe_on,34.16
+20261019T163326Z-pilot-full-5d1324,out_heavy-large-s101-2c9ecb7d,out_heavy,large,101,7,7,5,5,True,edgejoin__aqe_off,17.1422,edgejoin__aqe_on,29.43,edgejoin__aqe_off,17.1422,hypercube_unified__aqe_off,19.52
+20261019T163326Z-pilot-full-5d1324,out_heavy-small-s101-88c36855,out_heavy,small,101,7,7,5,5,True,edgejoin__aqe_off,10.0438,native__aqe_on,34.64,edgejoin__aqe_off,10.0438,hypercube__aqe_off,3.16
+20261019T163326Z-pilot-full-5d1324,powerlaw_balanced-small-s101-aa30b13b,powerlaw_balanced,small,101,7,7,5,5,True,edgejoin__aqe_on,12.6972,edgejoin__aqe_off,1.18,edgejoin__aqe_on,12.6972,edgejoin__aqe_off,1.18
+20261019T163326Z-pilot-full-5d1324,powerlaw_balanced-small-s202-206df433,powerlaw_balanced,small,202,7,7,5,5,True,edgejoin__aqe_on,9.6327,edgejoin__aqe_off,13.49,edgejoin__aqe_on,9.6327,edgejoin__aqe_off,13.49
+20261019T163326Z-pilot-full-5d1324,uniform-large-s101-57ef5eb7,uniform,large,101,7,7,5,5,True,edgejoin__aqe_off,17.9791,edgejoin__aqe_on,3.59,hypercube__aqe_off,15.3783,salt1d__aqe_off,1.08
 20261019T163326Z-pilot-full-5d1324,uniform-small-s101-f3568c8f,uniform,small,101,7,7,5,5,True,edgejoin__aqe_on,7.7374,native__aqe_on,24.76,edgejoin__aqe_on,7.7374,native__aqe_on,24.76
