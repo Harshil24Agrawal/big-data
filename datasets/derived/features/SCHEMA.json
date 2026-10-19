@@ -1,0 +1,30 @@
+{
+  "id_columns": [
+    "graph_id",
+    "graph_source",
+    "role",
+    "family",
+    "size_tier",
+    "seed"
+  ],
+  "feature_columns": [
+    "log_num_vertices",
+    "log_num_edges",
+    "active_fraction",
+    "in_gini",
+    "out_gini",
+    "log_in_p999",
+    "log_out_p999",
+    "log_work_sum",
+    "work_max_share",
+    "log_num_work_hubs",
+    "work_in_hubs_share"
+  ],
+  "transform": "log1p on counts and p999 percentiles; ratios unchanged",
+  "work_hub_definition": "vertex with d_in*d_out > work_threshold (column work_threshold)",
+  "leakage_note": "no execution results used; join to benchmark data on graph_id",
+  "roles": {
+    "train_candidate": "synthetic graph",
+    "external": "Pokec; outside the synthetic range, test-only"
+  }
+}

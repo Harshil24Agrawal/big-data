@@ -1,0 +1,3 @@
+derived_utc=2026-10-19T21:36:48.314751+00:00
+campaigns_considered=['20261019T140509Z-pilot-reduced-e1367c', '20261019T163326Z-pilot-full-5d1324']
+features_sha256=154d326a71dcae6e9b2e31ca43269addbd6c480e4167ddf5a7553fdf64575144
