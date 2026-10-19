@@ -6,3 +6,7 @@ Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cace
 Setting default log level to "WARN".
 To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
 [powerlaw_balanced-small-s303-4a3cdfd7] loaded 700,000 edges / 99,842 active vertices in 35.691s
+[powerlaw_balanced-small-s303-4a3cdfd7] gate native__aqe_off              ok       match n=50404353
+[powerlaw_balanced-small-s303-4a3cdfd7] gate native__aqe_on               ok       match n=50404353
+[powerlaw_balanced-small-s303-4a3cdfd7] gate edgejoin__aqe_off            ok       match n=50404353
+[powerlaw_balanced-small-s303-4a3cdfd7] gate salt1d__aqe_off              ok       match n=50404353
