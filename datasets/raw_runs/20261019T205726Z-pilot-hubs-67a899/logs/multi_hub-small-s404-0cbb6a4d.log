@@ -47,3 +47,11 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [multi_hub-small-s404-0cbb6a4d] measured r4 native__aqe_off              ok       q=15.0152s total=15.0152s paths=44311428 dom max/med=2.62 cv=0.2538 skew=None
 [multi_hub-small-s404-0cbb6a4d] measured r4 edgejoin__aqe_off            ok       q=10.2539s total=10.2539s paths=44311428 dom max/med=39.75 cv=2.4004 skew=None
 [multi_hub-small-s404-0cbb6a4d] measured r4 hypercube_unified__aqe_off   ok       q=11.0273s total=17.7326s paths=44311428 dom max/med=1.9268 cv=0.1911 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r4 salt1d__aqe_off              ok       q=21.4307s total=33.0577s paths=44311428 dom max/med=4.08 cv=0.27 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r5 salt1d__aqe_off              ok       q=19.7864s total=32.6927s paths=44311428 dom max/med=1.5273 cv=0.1209 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r5 native__aqe_on               ok       q=16.0803s total=16.0803s paths=44311428 dom max/med=1.7636 cv=0.1319 skew=0
+[multi_hub-small-s404-0cbb6a4d] measured r5 edgejoin__aqe_on             ok       q=13.2428s total=13.2428s paths=44311428 dom max/med=1.8462 cv=0.1196 skew=0
+[multi_hub-small-s404-0cbb6a4d] measured r5 edgejoin__aqe_off            ok       q=10.4732s total=10.4732s paths=44311428 dom max/med=1.7895 cv=0.1411 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r5 native__aqe_off              ok       q=9.8157s total=9.8157s paths=44311428 dom max/med=47.8947 cv=2.642 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r5 hypercube__aqe_off           ok       q=23.2849s total=32.9832s paths=44311428 dom max/med=1.551 cv=0.1346 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r5 hypercube_unified__aqe_off   ok       q=13.0139s total=23.2065s paths=44311428 dom max/med=1.5957 cv=0.2103 skew=None

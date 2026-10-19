@@ -1,0 +1,12 @@
+{
+  "graph_id": "powerlaw_balanced-small-s303-4a3cdfd7",
+  "source": "synthetic",
+  "family": "powerlaw_balanced",
+  "size_tier": "small",
+  "seed": 303,
+  "num_vertices": 100000,
+  "num_edges": 700000,
+  "work_sum": 50404353,
+  "work_max": 1863144,
+  "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/powerlaw_balanced/powerlaw_balanced-small-s303-4a3cdfd7/edges.parquet"
+}
