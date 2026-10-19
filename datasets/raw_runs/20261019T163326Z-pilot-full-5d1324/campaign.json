@@ -1,0 +1,192 @@
+{
+  "campaign_id": "20261019T163326Z-pilot-full-5d1324",
+  "created_utc": "2026-10-19T16:33:26.899143+00:00",
+  "name": "pilot-full",
+  "config_id": "ab41b3ff27",
+  "core_config": {
+    "spark_master": "local[*]",
+    "driver_memory": "4g",
+    "shuffle_partitions": 200,
+    "input_partitions": 200,
+    "auto_broadcast_join_threshold": -1,
+    "vertices": "distinct endpoints, cached, broadcast-hinted",
+    "regime": "id_only",
+    "action": "rdd_count (df._jdf.queryExecution().toRdd().count())",
+    "work_threshold": 1000000,
+    "p_cells": 100,
+    "warmup_runs": 1,
+    "measured_runs": 5,
+    "run_timeout_s": 600.0,
+    "graph_timeout_s": 6000.0,
+    "max_work_sum": 110000000,
+    "session_mode": "one fresh Spark application per graph; strategies interleaved, order reshuffled each round"
+  },
+  "machine": {
+    "os": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "cpu_physical_cores": 2,
+    "cpu_logical_cores": 2,
+    "ram_total_gb": 7.84,
+    "python": "3.11.17",
+    "label": "claude-cloud-sandbox (2 vCPU, 7.7 GB RAM)",
+    "machine_id": "6c5d1cb517a4"
+  },
+  "strategies": [
+    "native__aqe_on",
+    "native__aqe_off",
+    "edgejoin__aqe_on",
+    "edgejoin__aqe_off",
+    "salt1d__aqe_off",
+    "hypercube__aqe_off",
+    "hypercube_unified__aqe_off"
+  ],
+  "order_seed": 20261019,
+  "aqe_on_conf": {
+    "spark.sql.adaptive.enabled": "true",
+    "spark.sql.adaptive.skewJoin.enabled": "true",
+    "spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes": "268435456",
+    "spark.sql.adaptive.skewJoin.skewedPartitionFactor": "5.0",
+    "spark.sql.adaptive.coalescePartitions.enabled": "true",
+    "spark.sql.adaptive.advisoryPartitionSizeInBytes": "67108864"
+  },
+  "graphs": [
+    {
+      "graph_id": "in_heavy-medium-s101-9829e80e",
+      "source": "synthetic",
+      "family": "in_heavy",
+      "size_tier": "medium",
+      "seed": 101,
+      "num_vertices": 500000,
+      "num_edges": 3500000,
+      "work_sum": 24250876,
+      "work_max": 974814,
+      "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/in_heavy/in_heavy-medium-s101-9829e80e/edges.parquet"
+    },
+    {
+      "graph_id": "in_heavy-small-s101-addf9e1e",
+      "source": "synthetic",
+      "family": "in_heavy",
+      "size_tier": "small",
+      "seed": 101,
+      "num_vertices": 100000,
+      "num_edges": 700000,
+      "work_sum": 4968986,
+      "work_max": 371264,
+      "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/in_heavy/in_heavy-small-s101-addf9e1e/edges.parquet"
+    },
+    {
+      "graph_id": "multi_hub-medium-s101-7241a078",
+      "source": "synthetic",
+      "family": "multi_hub",
+      "size_tier": "medium",
+      "seed": 101,
+      "num_vertices": 500000,
+      "num_edges": 3500000,
+      "work_sum": 105015224,
+      "work_max": 5359464,
+      "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/multi_hub/multi_hub-medium-s101-7241a078/edges.parquet"
+    },
+    {
+      "graph_id": "multi_hub-small-s101-cea55efc",
+      "source": "synthetic",
+      "family": "multi_hub",
+      "size_tier": "small",
+      "seed": 101,
+      "num_vertices": 100000,
+      "num_edges": 699995,
+      "work_sum": 47151493,
+      "work_max": 5630345,
+      "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/multi_hub/multi_hub-small-s101-cea55efc/edges.parquet"
+    },
+    {
+      "graph_id": "out_heavy-large-s101-2c9ecb7d",
+      "source": "synthetic",
+      "family": "out_heavy",
+      "size_tier": "large",
+      "seed": 101,
+      "num_vertices": 1000000,
+      "num_edges": 7000000,
+      "work_sum": 50176337,
+      "work_max": 2303920,
+      "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/out_heavy/out_heavy-large-s101-2c9ecb7d/edges.parquet"
+    },
+    {
+      "graph_id": "out_heavy-small-s101-88c36855",
+      "source": "synthetic",
+      "family": "out_heavy",
+      "size_tier": "small",
+      "seed": 101,
+      "num_vertices": 100000,
+      "num_edges": 700000,
+      "work_sum": 4968648,
+      "work_max": 371208,
+      "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/out_heavy/out_heavy-small-s101-88c36855/edges.parquet"
+    },
+    {
+      "graph_id": "powerlaw_balanced-medium-s101-2b210362",
+      "source": "synthetic",
+      "family": "powerlaw_balanced",
+      "size_tier": "medium",
+      "seed": 101,
+      "num_vertices": 500000,
+      "num_edges": 3500000,
+      "work_sum": 535117762,
+      "work_max": 43374171,
+      "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/powerlaw_balanced/powerlaw_balanced-medium-s101-2b210362/edges.parquet"
+    },
+    {
+      "graph_id": "powerlaw_balanced-small-s101-aa30b13b",
+      "source": "synthetic",
+      "family": "powerlaw_balanced",
+      "size_tier": "small",
+      "seed": 101,
+      "num_vertices": 100000,
+      "num_edges": 700000,
+      "work_sum": 49928247,
+      "work_max": 1815414,
+      "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/powerlaw_balanced/powerlaw_balanced-small-s101-aa30b13b/edges.parquet"
+    },
+    {
+      "graph_id": "powerlaw_balanced-small-s202-206df433",
+      "source": "synthetic",
+      "family": "powerlaw_balanced",
+      "size_tier": "small",
+      "seed": 202,
+      "num_vertices": 100000,
+      "num_edges": 700000,
+      "work_sum": 50437159,
+      "work_max": 1840824,
+      "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/powerlaw_balanced/powerlaw_balanced-small-s202-206df433/edges.parquet"
+    },
+    {
+      "graph_id": "uniform-large-s101-57ef5eb7",
+      "source": "synthetic",
+      "family": "uniform",
+      "size_tier": "large",
+      "seed": 101,
+      "num_vertices": 1000000,
+      "num_edges": 6999969,
+      "work_sum": 48999576,
+      "work_max": 49,
+      "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/uniform/uniform-large-s101-57ef5eb7/edges.parquet"
+    },
+    {
+      "graph_id": "uniform-small-s101-f3568c8f",
+      "source": "synthetic",
+      "family": "uniform",
+      "size_tier": "small",
+      "seed": 101,
+      "num_vertices": 100000,
+      "num_edges": 699974,
+      "work_sum": 4899644,
+      "work_max": 49,
+      "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/uniform/uniform-small-s101-f3568c8f/edges.parquet"
+    }
+  ],
+  "safety_skipped": [
+    {
+      "graph_id": "powerlaw_balanced-medium-s101-2b210362",
+      "reason": "work_sum 535,117,762 exceeds safety limit 110,000,000"
+    }
+  ]
+}
