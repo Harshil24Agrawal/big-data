@@ -33,3 +33,14 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [multi_hub-small-s404-0cbb6a4d] measured r2 native__aqe_off              ok       q=14.3004s total=14.3004s paths=44311428 dom max/med=1.3929 cv=0.1136 skew=None
 [multi_hub-small-s404-0cbb6a4d] measured r2 native__aqe_on               ok       q=16.8593s total=16.8593s paths=44311428 dom max/med=1.7 cv=0.1596 skew=0
 [multi_hub-small-s404-0cbb6a4d] measured r2 hypercube_unified__aqe_off   ok       q=15.0491s total=25.433s paths=44311428 dom max/med=1.7679 cv=0.1164 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r2 hypercube__aqe_off           ok       q=24.8749s total=37.4411s paths=44311428 dom max/med=1.5094 cv=0.1996 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r3 native__aqe_on               ok       q=10.984s total=10.984s paths=44311428 dom max/med=1.0 cv=0.1729 skew=0
+[multi_hub-small-s404-0cbb6a4d] measured r3 hypercube__aqe_off           ok       q=19.3889s total=29.4647s paths=44311428 dom max/med=1.6038 cv=0.3094 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r3 edgejoin__aqe_on             ok       q=9.4193s total=9.4193s paths=44311428 dom max/med=1.7568 cv=0.2025 skew=0
+[multi_hub-small-s404-0cbb6a4d] measured r3 salt1d__aqe_off              ok       q=16.1804s total=26.2702s paths=44311428 dom max/med=3.6818 cv=0.5052 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r3 hypercube_unified__aqe_off   ok       q=9.8778s total=21.1011s paths=44311428 dom max/med=1.9024 cv=0.2915 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r3 edgejoin__aqe_off            ok       q=11.763s total=11.763s paths=44311428 dom max/med=2.16 cv=0.2475 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r3 native__aqe_off              ok       q=12.7905s total=12.7905s paths=44311428 dom max/med=44.7778 cv=2.6272 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r4 edgejoin__aqe_on             ok       q=9.1513s total=9.1513s paths=44311428 dom max/med=2.0 cv=0.175 skew=0
+[multi_hub-small-s404-0cbb6a4d] measured r4 hypercube__aqe_off           ok       q=36.3947s total=47.0655s paths=44311428 dom max/med=1.4146 cv=0.0877 skew=None
+[multi_hub-small-s404-0cbb6a4d] measured r4 native__aqe_on               ok       q=18.683s total=18.683s paths=44311428 dom max/med=1.8 cv=0.1297 skew=0
