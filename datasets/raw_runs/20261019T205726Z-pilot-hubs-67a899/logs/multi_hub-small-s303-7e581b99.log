@@ -1,0 +1,20 @@
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=37607 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=37607 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+26/10/20 02:27:28 WARN Utils: Your hostname, vm resolves to a loopback address: 127.0.0.1; using 192.0.2.2 instead (on interface eth0)
+26/10/20 02:27:28 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+26/10/20 02:27:28 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+[multi_hub-small-s303-7e581b99] loaded 699,998 edges / 100,000 active vertices in 30.013s
+[multi_hub-small-s303-7e581b99] gate native__aqe_off              ok       match n=41582600
+[multi_hub-small-s303-7e581b99] gate native__aqe_on               ok       match n=41582600
+[multi_hub-small-s303-7e581b99] gate edgejoin__aqe_off            ok       match n=41582600
+[multi_hub-small-s303-7e581b99] gate salt1d__aqe_off              ok       match n=41582600
+[multi_hub-small-s303-7e581b99] gate hypercube__aqe_off           ok       match n=41582600
+[multi_hub-small-s303-7e581b99] gate hypercube_unified__aqe_off   ok       match n=41582600
+[multi_hub-small-s303-7e581b99] gate edgejoin__aqe_on             ok       match n=41582600
+[multi_hub-small-s303-7e581b99] warmup   r0 native__aqe_off              ok       q=12.7009s total=12.7009s paths=41582600 dom max/med=43.6667 cv=2.4465 skew=None
+[multi_hub-small-s303-7e581b99] warmup   r0 native__aqe_on               ok       q=35.2276s total=35.2276s paths=41582600 dom max/med=2.1053 cv=0.1877 skew=0
+[multi_hub-small-s303-7e581b99] warmup   r0 salt1d__aqe_off              ok       q=47.4765s total=78.3399s paths=41582600 dom max/med=13.9074 cv=0.8668 skew=None
+[multi_hub-small-s303-7e581b99] warmup   r0 hypercube__aqe_off           ok       q=30.1928s total=48.3705s paths=41582600 dom max/med=10.8605 cv=0.8299 skew=None
+[multi_hub-small-s303-7e581b99] warmup   r0 edgejoin__aqe_on             ok       q=8.6402s total=8.6402s paths=41582600 dom max/med=1.0 cv=0.0999 skew=0

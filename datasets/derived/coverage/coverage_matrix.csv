@@ -146,3 +146,10 @@ campaign_id,graph_id,family,size_tier,seed,strategy,target_measured_runs,gate,va
 20261019T163326Z-pilot-full-5d1324,uniform-small-s101-f3568c8f,uniform,small,101,salt1d__aqe_off,5,match,5,1,0,0,0,0,5,True
 20261019T163326Z-pilot-full-5d1324,uniform-small-s101-f3568c8f,uniform,small,101,hypercube__aqe_off,5,match,5,1,0,0,0,0,5,True
 20261019T163326Z-pilot-full-5d1324,uniform-small-s101-f3568c8f,uniform,small,101,hypercube_unified__aqe_off,5,match,5,1,0,0,0,0,5,True
+20261019T205726Z-pilot-hubs-67a899,multi_hub-small-s303-7e581b99,multi_hub,small,303,native__aqe_on,5,match,0,0,0,0,0,0,0,False
+20261019T205726Z-pilot-hubs-67a899,multi_hub-small-s303-7e581b99,multi_hub,small,303,native__aqe_off,5,match,0,0,0,0,0,0,0,False
+20261019T205726Z-pilot-hubs-67a899,multi_hub-small-s303-7e581b99,multi_hub,small,303,edgejoin__aqe_on,5,not_run,0,0,0,0,0,0,0,False
+20261019T205726Z-pilot-hubs-67a899,multi_hub-small-s303-7e581b99,multi_hub,small,303,edgejoin__aqe_off,5,match,0,0,0,0,0,0,0,False
+20261019T205726Z-pilot-hubs-67a899,multi_hub-small-s303-7e581b99,multi_hub,small,303,salt1d__aqe_off,5,match,0,0,0,0,0,0,0,False
+20261019T205726Z-pilot-hubs-67a899,multi_hub-small-s303-7e581b99,multi_hub,small,303,hypercube__aqe_off,5,not_run,0,0,0,0,0,0,0,False
+20261019T205726Z-pilot-hubs-67a899,multi_hub-small-s303-7e581b99,multi_hub,small,303,hypercube_unified__aqe_off,5,not_run,0,0,0,0,0,0,0,False

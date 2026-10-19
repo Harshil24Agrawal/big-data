@@ -3,3 +3,4 @@ campaign_id,status,config_id,warmup_runs,measured_runs_target,graphs_planned,gra
 20261019T135854Z-pilot-8f41eb,aborted,3055d58e2a,1,5,11,0,0,0,17,3,0,7,0,0,ABORTED.txt present
 20261019T140509Z-pilot-reduced-e1367c,finished_with_truncated_graphs,e133b2f5a9,1,3,7,0,0,7,211,64,5,49,0,0,
 20261019T163326Z-pilot-full-5d1324,complete,ab41b3ff27,1,5,10,1,10,0,532,350,70,77,0,0,INTERRUPTIONS.md present (sandbox restarts)
+20261019T205726Z-pilot-hubs-67a899,partial_or_running,ab41b3ff27,1,5,8,0,0,0,4,0,0,7,0,0,
