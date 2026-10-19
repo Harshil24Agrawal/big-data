@@ -11,3 +11,11 @@ bench/figures/
 bench/plot_*.py
 
 
+
+# Phase 1 data collection: large binaries stay local, metadata and run records are committed
+datasets/synthetic/**/edges.parquet
+datasets/synthetic/**/edges.csv.gz
+datasets/pokec/raw/
+datasets/pokec/pokec_edges_parquet*/
+jars/*.jar
+.pytest_cache/

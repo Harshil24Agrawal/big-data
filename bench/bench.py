@@ -55,6 +55,23 @@ def resolve_graphframes_package() -> str:
     return GRAPHFRAMES_JAR_SCALA213
 
 
+def graphframes_jar_conf():
+    """Return the (key, value) Spark config that loads GraphFrames.
+
+    Default: resolve the Maven coordinate via spark.jars.packages (unchanged behaviour).
+    If the GRAPHFRAMES_JAR environment variable points to a local JAR, load that file via
+    spark.jars instead (for offline or firewalled machines) and put the JAR on sys.path,
+    because the GraphFrames Python wrapper ships inside the JAR.
+    """
+    local_jar = os.environ.get("GRAPHFRAMES_JAR")
+    if local_jar:
+        jar = os.path.abspath(local_jar)
+        if jar not in sys.path:
+            sys.path.insert(0, jar)
+        return ("spark.jars", jar)
+    return ("spark.jars.packages", resolve_graphframes_package())
+
+
 def get_git_state() -> Dict[str, Any]:
     """Return current git commit hash and dirty-working-tree flag."""
     commit = "unknown"
@@ -143,14 +160,13 @@ def create_spark(aqe: str, app_name: str = "HyperGraphControlledBench") -> Spark
     """
     setup_env()
     aqe_bool = "true" if aqe.lower() == "on" else "false"
-    gf_pkg = resolve_graphframes_package()
     spark = (
         SparkSession.builder.appName(app_name)
         .master("local[*]")
         .config("spark.driver.extraJavaOptions", JAVA_ADD_OPENS)
         .config("spark.executor.extraJavaOptions", JAVA_ADD_OPENS)
         .config("spark.driver.memory", "6g")
-        .config("spark.jars.packages", gf_pkg)
+        .config(*graphframes_jar_conf())
         .config("spark.sql.shuffle.partitions", str(DEFAULT_SHUFFLE_PARTITIONS))
         .config("spark.sql.autoBroadcastJoinThreshold", "-1")
         .config("spark.sql.adaptive.enabled", aqe_bool)
@@ -161,6 +177,32 @@ def create_spark(aqe: str, app_name: str = "HyperGraphControlledBench") -> Spark
     )
     spark.sparkContext.setLogLevel("ERROR")
     return spark
+
+
+def detect_cpu_model() -> str:
+    """Best-effort CPU model string. BENCH_CPU_MODEL overrides detection."""
+    if os.environ.get("BENCH_CPU_MODEL"):
+        return os.environ["BENCH_CPU_MODEL"]
+    try:
+        if os.path.exists("/proc/cpuinfo"):
+            with open("/proc/cpuinfo") as f:
+                for line in f:
+                    if line.lower().startswith("model name"):
+                        return line.split(":", 1)[1].strip()
+        if os.name == "nt":
+            r = subprocess.run(["powershell", "-NoProfile", "-Command",
+                                "(Get-CimInstance Win32_Processor).Name"],
+                               capture_output=True, text=True, timeout=10)
+            if r.returncode == 0 and r.stdout.strip():
+                return r.stdout.strip().splitlines()[0]
+        if sys.platform == "darwin":
+            r = subprocess.run(["sysctl", "-n", "machdep.cpu.brand_string"],
+                               capture_output=True, text=True, timeout=5)
+            if r.returncode == 0:
+                return r.stdout.strip()
+    except Exception:
+        pass
+    return platform.processor() or "unknown"
 
 
 def get_system_and_version_info(spark: SparkSession) -> Dict[str, Any]:
@@ -191,18 +233,18 @@ def get_system_and_version_info(spark: SparkSession) -> Dict[str, Any]:
         "scala_version": scala_ver,
         "java_version": java_ver,
         "java_vm": java_vm,
-        "graphframes_jar": resolve_graphframes_package(),
+        "graphframes_jar": graphframes_jar_conf()[1],
         "graphframes_python_wrapper": gf_py_ver,
         "hypergraphframes_version": hg_version,
         "hypergraphframes_dist_version": hg_dist_ver,
         "git_commit": git_state["git_commit"],
         "git_dirty_tree": git_state["git_dirty_tree"],
         "os": platform.platform(),
-        "cpu_model": "AMD Ryzen AI 7 350 w/ Radeon 860M",
+        "cpu_model": detect_cpu_model(),
         "cpu_physical_cores": psutil.cpu_count(logical=False),
         "cpu_logical_cores": psutil.cpu_count(logical=True),
         "ram_total_gb": round(mem.total / (1024 ** 3), 2),
-        "disk_model": "MTFDKBA512QGN-1BN1AABGA (NVMe SSD)",
+        "disk_model": os.environ.get("BENCH_DISK_MODEL", "unknown"),
         "disk_free_gb": round(disk.free / (1024 ** 3), 2),
     }
 

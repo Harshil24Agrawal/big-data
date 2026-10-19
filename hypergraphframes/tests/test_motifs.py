@@ -55,6 +55,23 @@ def get_graphframes_jar() -> str:
     return "graphframes:graphframes:0.8.3-spark3.5-s_2.13"
 
 
+def graphframes_jar_conf():
+    """Return the (key, value) Spark config that loads GraphFrames.
+
+    Default: resolve the Maven coordinate via spark.jars.packages (unchanged behaviour).
+    If the GRAPHFRAMES_JAR environment variable points to a local JAR, load that file via
+    spark.jars instead (for offline or firewalled machines) and put the JAR on sys.path,
+    because the GraphFrames Python wrapper ships inside the JAR.
+    """
+    local_jar = os.environ.get("GRAPHFRAMES_JAR")
+    if local_jar:
+        jar = os.path.abspath(local_jar)
+        if jar not in sys.path:
+            sys.path.insert(0, jar)
+        return ("spark.jars", jar)
+    return ("spark.jars.packages", get_graphframes_jar())
+
+
 class TestHyperGraphFrames(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -62,7 +79,7 @@ class TestHyperGraphFrames(unittest.TestCase):
         cls.spark = (
             SparkSession.builder.appName("HyperGraphFramesTestSuite")
             .master("local[2]")
-            .config("spark.jars.packages", get_graphframes_jar())
+            .config(*graphframes_jar_conf())
             .config("spark.sql.shuffle.partitions", "4")
             .getOrCreate()
         )

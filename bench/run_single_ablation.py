@@ -218,7 +218,7 @@ def main():
         .config("spark.driver.extraJavaOptions", bench.JAVA_ADD_OPENS)
         .config("spark.executor.extraJavaOptions", bench.JAVA_ADD_OPENS)
         .config("spark.driver.memory", "6g")
-        .config("spark.jars.packages", gf_pkg)
+        .config(*bench.graphframes_jar_conf())
         .config("spark.sql.shuffle.partitions", str(DEFAULT_SHUFFLE_PARTITIONS))
         .config("spark.sql.autoBroadcastJoinThreshold", "-1")
         .config("spark.sql.adaptive.enabled", aqe_bool)

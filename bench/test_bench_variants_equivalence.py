@@ -24,7 +24,7 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DoubleType
 
 from salting_1d import Salted1DGraphFrame, EdgeJoinGraphFrame
-from test_equivalence import setup_test_env, get_graphframes_jar, generate_seeded_powerlaw_graph
+from test_equivalence import setup_test_env, graphframes_jar_conf, generate_seeded_powerlaw_graph
 
 
 class TestBenchVariantsEquivalence(unittest.TestCase):
@@ -36,7 +36,7 @@ class TestBenchVariantsEquivalence(unittest.TestCase):
         cls.spark = (
             SparkSession.builder.appName("BenchVariantsEquivalenceTest")
             .master("local[2]")
-            .config("spark.jars.packages", get_graphframes_jar())
+            .config(*graphframes_jar_conf())
             .config("spark.sql.shuffle.partitions", "4")
             .config("spark.ui.enabled", "false")
             .getOrCreate()
