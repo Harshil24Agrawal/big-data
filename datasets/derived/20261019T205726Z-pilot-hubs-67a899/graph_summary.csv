@@ -1,0 +1,9 @@
+campaign_id,graph_id,family,size_tier,seed,strategies_expected,strategies_with_results,min_measured_runs_per_strategy,required_runs,label_eligible,fastest_by_median_total_s,fastest_median_total_s,runner_up_by_median_total_s,margin_pct_total_s,fastest_by_median_query_s,fastest_median_query_s,runner_up_by_median_query_s,margin_pct_query_s
+20261019T205726Z-pilot-hubs-67a899,multi_hub-medium-s202-d9d3dd12,multi_hub,medium,202,7,7,5,5,True,edgejoin__aqe_on,16.051,edgejoin__aqe_off,28.53,edgejoin__aqe_on,16.051,edgejoin__aqe_off,28.53
+20261019T205726Z-pilot-hubs-67a899,multi_hub-medium-s303-e0a7f3cb,multi_hub,medium,303,7,7,5,5,True,edgejoin__aqe_on,16.5631,edgejoin__aqe_off,4.55,edgejoin__aqe_on,16.5631,edgejoin__aqe_off,4.55
+20261019T205726Z-pilot-hubs-67a899,multi_hub-medium-s404-bd2a0d37,multi_hub,medium,404,7,7,5,5,True,edgejoin__aqe_on,16.1989,edgejoin__aqe_off,13.21,edgejoin__aqe_on,16.1989,edgejoin__aqe_off,13.21
+20261019T205726Z-pilot-hubs-67a899,multi_hub-small-s202-96a94ea3,multi_hub,small,202,7,7,5,5,True,edgejoin__aqe_on,10.7784,edgejoin__aqe_off,25.17,edgejoin__aqe_on,10.7784,hypercube_unified__aqe_off,19.19
+20261019T205726Z-pilot-hubs-67a899,multi_hub-small-s303-7e581b99,multi_hub,small,303,7,7,5,5,True,edgejoin__aqe_on,8.7031,edgejoin__aqe_off,9.42,edgejoin__aqe_on,8.7031,edgejoin__aqe_off,9.42
+20261019T205726Z-pilot-hubs-67a899,multi_hub-small-s404-0cbb6a4d,multi_hub,small,404,7,7,5,5,True,edgejoin__aqe_off,10.4732,edgejoin__aqe_on,13.74,edgejoin__aqe_off,10.4732,edgejoin__aqe_on,13.74
+20261019T205726Z-pilot-hubs-67a899,powerlaw_balanced-small-s303-4a3cdfd7,powerlaw_balanced,small,303,7,7,5,5,True,edgejoin__aqe_off,9.9205,edgejoin__aqe_on,3.9,edgejoin__aqe_off,9.9205,edgejoin__aqe_on,3.9
+20261019T205726Z-pilot-hubs-67a899,powerlaw_balanced-small-s404-e8eecf7c,powerlaw_balanced,small,404,7,7,5,5,True,edgejoin__aqe_off,10.1225,edgejoin__aqe_on,23.56,edgejoin__aqe_off,10.1225,hypercube_unified__aqe_off,19.07

@@ -1,0 +1,5 @@
+derived_utc=2026-10-19T23:54:36.605863+00:00
+raw_file=datasets/raw_runs/20261019T205726Z-pilot-hubs-67a899/runs.jsonl
+raw_sha256=d7549f1150fdba9fc3124b29c34a72d62eaf20597bd21c8388e4795e30a75b49
+raw_records=392
+filter=run_kind==measured & status==ok & correctness_status==match

@@ -147,7 +147,7 @@ Counts from `bench/phase1_coverage.py` (raw records only):
 | `20261019T135854Z-pilot-8f41eb` | full protocol, 11 graphs | **aborted** after ~6 min (would take many hours) | 3 | 0/7 | 0 / 0 / 0 |
 | `20261019T140509Z-pilot-reduced-e1367c` | 7 graphs, 1 warm-up + ≤3 measured, 540 s per-graph cap | finished; **every graph hit the cap** | 64 | 5/49 | 0 / 0 / 0 |
 | `20261019T163326Z-pilot-full-5d1324` | 10 graphs (1 safety-skipped), 1 warm-up + 5 measured | **complete: 10/10 graphs done**; interrupted twice by sandbox restarts and resumed | **350** (= 10 × 7 × 5) | **70/77** (the 7 open cells are the safety-skipped graph) | 0 / 0 / 0 |
-| `20261019T205726Z-pilot-hubs-67a899` | 8 hub-heavy graphs (multi_hub small ×3, medium ×3; powerlaw small ×2), same config id `ab41b3ff27` as pilot-full | **running** at time of writing (see §6) | — | — | — |
+| `20261019T205726Z-pilot-hubs-67a899` | 8 hub-heavy graphs (multi_hub small ×3, medium ×3; powerlaw small ×2), same config id `ab41b3ff27` as pilot-full | **complete: 8/8 graphs done** (no restart) | **280** (= 8 × 7 × 5) | **56/56** | 0 / 0 / 0 |
 
 \*cell = (graph, strategy); complete = valid runs ≥ campaign target.
 
@@ -185,6 +185,15 @@ repeats for all 7 strategies" bar, but only for 10 graphs; it is still too small
   graphs where hypercube or salting could win are the ones not yet benchmarked at scale (large multi_hub, medium and
   large powerlaw). Do not conclude that the hypercube strategies are worse in general: here they pay a profiling cost
   and there is little skew to remove.
+**Hub-heavy campaign (`pilot-hubs`, 8 graphs, from `datasets/derived/20261019T205726Z-pilot-hubs-67a899/`):**
+edge-join again has the lowest median `total_s` on all 8 graphs (`edgejoin__aqe_on` on 5, `edgejoin__aqe_off` on 3), with
+margins over the runner-up of 25.2 %, 28.5 %, 13.2 %, 13.7 %, 23.6 %, 9.4 %, 4.6 % and 3.9 %. Across the 18 graphs measured so far
+(`pilot-full` + `pilot-hubs`), the best edge-join strategy is **1.25–2.11× faster than the best non-edge-join strategy on 17
+graphs and 1.01× on one** (`powerlaw_balanced-small-s101`), and 1.14–1.57× faster than native GraphFrames with AQE on. So far the salting and
+hypercube variants never win on `total_s`: they pay a profiling pass and, at this size on 2 cores with 200 shuffle partitions, shuffle volume does not
+dominate. No final adaptive plan in either campaign contains a skew split (`plan_skew_split_any_run = False` for every AQE-on strategy).
+Reading: hub-concentrated *work* alone did not make hypercube/salting pay off here. This does not show they are worse on larger graphs, other machines
+or truly byte-skewed partitions, which these graphs never produced.
 - **AQE (confirmed, narrow):** AQE only *coalesced* partitions in the AQE-on runs; the final adaptive plan never
   contained a skew split (`plan_skew_split = false`). No graph benchmarked so far produced a reduce partition near the
   256 MB threshold. Skew handling is therefore **untested**, not shown ineffective.
