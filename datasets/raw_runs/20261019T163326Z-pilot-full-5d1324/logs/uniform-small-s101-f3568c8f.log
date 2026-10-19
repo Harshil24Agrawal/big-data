@@ -7,3 +7,12 @@ Setting default log level to "WARN".
 To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
 [uniform-small-s101-f3568c8f] loaded 699,974 edges / 100,000 active vertices in 26.841s
 [uniform-small-s101-f3568c8f] gate native__aqe_off              ok       match n=4899644
+[uniform-small-s101-f3568c8f] gate native__aqe_on               ok       match n=4899644
+[uniform-small-s101-f3568c8f] gate edgejoin__aqe_off            ok       match n=4899644
+[uniform-small-s101-f3568c8f] gate salt1d__aqe_off              ok       match n=4899644
+[uniform-small-s101-f3568c8f] gate hypercube__aqe_off           ok       match n=4899644
+[uniform-small-s101-f3568c8f] gate hypercube_unified__aqe_off   ok       match n=4899644
+[uniform-small-s101-f3568c8f] gate edgejoin__aqe_on             ok       match n=4899644
+[uniform-small-s101-f3568c8f] warmup   r0 edgejoin__aqe_off            ok       q=17.525s total=17.525s paths=4899644 dom max/med=2.3056 cv=0.3691 skew=None
+[uniform-small-s101-f3568c8f] warmup   r0 salt1d__aqe_off              ok       q=12.5328s total=28.9797s paths=4899644 dom max/med=2.9167 cv=0.3787 skew=None
+[uniform-small-s101-f3568c8f] warmup   r0 native__aqe_off              ok       q=14.5178s total=14.5178s paths=4899644 dom max/med=2.68 cv=0.3049 skew=None
