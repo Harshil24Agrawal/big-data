@@ -1,0 +1,12 @@
+{
+  "graph_id": "multi_hub-small-s404-0cbb6a4d",
+  "source": "synthetic",
+  "family": "multi_hub",
+  "size_tier": "small",
+  "seed": 404,
+  "num_vertices": 100000,
+  "num_edges": 699999,
+  "work_sum": 44311428,
+  "work_max": 5495425,
+  "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/multi_hub/multi_hub-small-s404-0cbb6a4d/edges.parquet"
+}

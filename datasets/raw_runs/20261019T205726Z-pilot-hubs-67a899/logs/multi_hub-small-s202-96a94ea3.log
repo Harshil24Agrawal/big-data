@@ -53,3 +53,5 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [multi_hub-small-s202-96a94ea3] measured r5 salt1d__aqe_off              ok       q=38.7626s total=50.08s paths=43772355 dom max/med=2.04 cv=0.1888 skew=None
 [multi_hub-small-s202-96a94ea3] measured r5 native__aqe_off              ok       q=18.1982s total=18.1982s paths=43772355 dom max/med=1.7576 cv=0.1329 skew=None
 [multi_hub-small-s202-96a94ea3] measured r5 edgejoin__aqe_off            ok       q=13.7371s total=13.7371s paths=43772355 dom max/med=2.2653 cv=0.213 skew=None
+[multi_hub-small-s202-96a94ea3] measured r5 hypercube_unified__aqe_off   ok       q=12.8471s total=25.4682s paths=43772355 dom max/med=8.5227 cv=0.683 skew=None
+[multi_hub-small-s202-96a94ea3] measured r5 edgejoin__aqe_on             ok       q=8.1867s total=8.1867s paths=43772355 dom max/med=1.0 cv=0.0991 skew=0
