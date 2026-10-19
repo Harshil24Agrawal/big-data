@@ -1,0 +1,5 @@
+derived_utc=2026-10-19T13:58:49.103856+00:00
+raw_file=datasets/raw_runs/20261019T132121Z-smoke-8f4873/runs.jsonl
+raw_sha256=4fd3ddff0a20fff543c6da7dc328713dac7c1906e5779076bb8c775a7cf383d3
+raw_records=28
+filter=run_kind==measured & status==ok & correctness_status==match

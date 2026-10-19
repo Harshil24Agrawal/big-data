@@ -1,0 +1,8 @@
+campaign_id,graph_id,family,size_tier,seed,strategies_with_results,fastest_by_median_total_s,fastest_median_total_s,runner_up_by_median_total_s,margin_pct_total_s,fastest_by_median_query_s,fastest_median_query_s,runner_up_by_median_query_s,margin_pct_query_s
+20261019T140509Z-pilot-reduced-e1367c,in_heavy-medium-s101-9829e80e,in_heavy,medium,101,6,edgejoin__aqe_off,11.9559,edgejoin__aqe_on,3.15,salt1d__aqe_off,11.8028,edgejoin__aqe_off,1.3
+20261019T140509Z-pilot-reduced-e1367c,in_heavy-small-s101-addf9e1e,in_heavy,small,101,7,edgejoin__aqe_on,6.4224,native__aqe_on,44.89,edgejoin__aqe_on,6.4224,salt1d__aqe_off,29.4
+20261019T140509Z-pilot-reduced-e1367c,multi_hub-small-s101-cea55efc,multi_hub,small,101,7,edgejoin__aqe_off,8.9416,native__aqe_on,50.65,edgejoin__aqe_off,8.9416,native__aqe_on,50.65
+20261019T140509Z-pilot-reduced-e1367c,out_heavy-small-s101-88c36855,out_heavy,small,101,7,edgejoin__aqe_on,7.38685,edgejoin__aqe_off,10.49,salt1d__aqe_off,6.765,edgejoin__aqe_on,9.19
+20261019T140509Z-pilot-reduced-e1367c,powerlaw_balanced-small-s101-aa30b13b,powerlaw_balanced,small,101,7,edgejoin__aqe_on,10.9195,native__aqe_off,27.97,edgejoin__aqe_on,10.9195,native__aqe_off,27.97
+20261019T140509Z-pilot-reduced-e1367c,uniform-large-s101-57ef5eb7,uniform,large,101,1,hypercube__aqe_off,29.9923,,,hypercube__aqe_off,16.537,,
+20261019T140509Z-pilot-reduced-e1367c,uniform-small-s101-f3568c8f,uniform,small,101,7,edgejoin__aqe_off,8.12585,edgejoin__aqe_on,14.34,edgejoin__aqe_off,8.12585,hypercube__aqe_off,10.01

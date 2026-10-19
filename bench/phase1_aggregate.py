@@ -60,8 +60,23 @@ def main(campaign_ids):
         path = os.path.join(RAW_DIR, cid, "runs.jsonl")
         with open(path) as f:
             recs = [json.loads(line) for line in f]
+        # If a graph was re-run (e.g. after --resume), only its latest Spark application counts;
+        # earlier partial records stay in the raw file and are reported as superseded.
+        app_order = {}
+        for i, r in enumerate(recs):
+            if r.get("spark_app_id"):
+                app_order[(r["graph_id"], r["spark_app_id"])] = i
+        latest_app = {}
+        for (gid, app), i in app_order.items():
+            if gid not in latest_app or i > app_order[(gid, latest_app[gid])]:
+                latest_app[gid] = app
+        superseded = defaultdict(int)
         groups = defaultdict(list)
         for r in recs:
+            app = r.get("spark_app_id")
+            if app and app != latest_app.get(r["graph_id"]):
+                superseded[(r["graph_id"], r["strategy"])] += 1
+                continue
             groups[(r["graph_id"], r["strategy"])].append(r)
 
         rows = []
@@ -82,6 +97,7 @@ def main(campaign_ids):
                 "n_measured_timeout": sum(r["status"] == "timeout" and r["run_kind"] == "measured" for r in rs),
                 "n_skipped": sum(r["status"] == "skipped" for r in rs),
                 "skip_reason": next((r.get("skip_reason") for r in rs if r["status"] == "skipped"), ""),
+                "n_superseded_records": superseded[(gid, sid)],
                 "n_warmup_ok": sum(r["run_kind"] == "warmup" and r["status"] == "ok" for r in rs),
                 "hub_count": next((r.get("hub_count") for r in good if r.get("hub_count") is not None), ""),
                 "aqe_skew_split_any_run": any(bool(r.get("aqe_skew_split_applied")) for r in good) if good else "",

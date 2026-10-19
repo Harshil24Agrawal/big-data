@@ -44,6 +44,7 @@ from datagen.validate import degree_stats, spark_load_check, structural_checks  
 POKEC_DIR = os.path.join(REPO_ROOT, "datasets", "pokec")
 OUT_DIR = os.path.join(POKEC_DIR, "pokec_edges_parquet")
 META = os.path.join(POKEC_DIR, "pokec_graph.json")
+RECEIPT = os.path.join(POKEC_DIR, "pokec_prep_receipt.json")   # raw-scan report + cleaning for OUT_DIR
 SNAP_PUBLISHED = {"nodes": 1_632_803, "edges": 30_622_564,
                   "source_url": "https://snap.stanford.edu/data/soc-pokec-relationships.txt.gz",
                   "dataset_page": "https://snap.stanford.edu/data/soc-Pokec.html"}
@@ -118,84 +119,101 @@ def main():
 
     from pyspark.sql import functions as F
 
-    spark = make_spark("Phase1PokecPrep")
-    try:
-        # ---- 1. Raw input, read the same way as preprocessing.py (tab separated, no header).
-        raw = spark.read.csv(args.raw, sep="\t")
-        n_cols = len(raw.columns)
-        parsed = raw.select(F.col("_c0").alias("src_raw"), F.col("_c1").alias("dst_raw"),
-                            F.col("_c0").cast("int").alias("src"), F.col("_c1").cast("int").alias("dst")).cache()
-        r = parsed.agg(
-            F.count(F.lit(1)).alias("rows"),
-            F.sum(F.when(F.col("src_raw").isNull() | F.col("dst_raw").isNull(), 1).otherwise(0)).alias("null_fields"),
-            F.sum(F.when((F.col("src").isNull() & F.col("src_raw").isNotNull()) |
-                         (F.col("dst").isNull() & F.col("dst_raw").isNotNull()), 1).otherwise(0)).alias("unparseable"),
-            F.sum(F.when(F.col("src") == F.col("dst"), 1).otherwise(0)).alias("self_loops"),
-            F.min(F.least("src", "dst")).alias("min_id"),
-            F.max(F.greatest("src", "dst")).alias("max_id"),
-        ).collect()[0]
-        valid = parsed.where(F.col("src").isNotNull() & F.col("dst").isNotNull()).select("src", "dst")
-        valid_rows = valid.count()
-        distinct_pairs = valid.distinct().count()
-        distinct_vertices = valid.select(F.col("src").alias("id")).union(valid.select(F.col("dst").alias("id"))).distinct().count()
-        raw_report = {
-            "path": os.path.relpath(args.raw, REPO_ROOT).replace(os.sep, "/"),
-            "sha256": raw_sha, "bytes": os.path.getsize(args.raw), "columns_detected": n_cols,
-            "rows": int(r["rows"]), "null_fields": int(r["null_fields"] or 0),
-            "unparseable_ids": int(r["unparseable"] or 0), "self_loops": int(r["self_loops"] or 0),
-            "duplicate_edges": int(valid_rows - distinct_pairs), "min_id": r["min_id"], "max_id": r["max_id"],
-            "distinct_vertices": int(distinct_vertices),
-            "matches_snap_published": {"edges": int(r["rows"]) == SNAP_PUBLISHED["edges"],
-                                       "nodes": int(distinct_vertices) == SNAP_PUBLISHED["nodes"]},
-        }
-        print("raw:", json.dumps(raw_report))
+    receipt = None
+    if os.path.exists(RECEIPT) and os.path.isdir(OUT_DIR) and not args.force:
+        with open(RECEIPT) as f:
+            receipt = json.load(f)
+        if receipt["input"]["sha256"] != raw_sha:
+            receipt = None
 
-        # ---- 2. Same edge policy as synthetic graphs.
-        cleaned = (valid.where(F.col("src") != F.col("dst")).dropDuplicates(["src", "dst"])
-                   .orderBy("src", "dst"))
-        tmp = OUT_DIR + ".tmp"
-        if os.path.exists(tmp):
-            shutil.rmtree(tmp)
-        t0 = time.perf_counter()
-        cleaned.write.mode("error").parquet(tmp)
-        write_s = time.perf_counter() - t0
-        if os.path.exists(OUT_DIR):
-            stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-            os.rename(OUT_DIR, f"{OUT_DIR}.superseded-{stamp}")   # keep, never delete an earlier output
-        os.rename(tmp, OUT_DIR)
-        cleaning = {
-            "policy": "directed; drop rows with null/unparseable ids; drop self-loops; drop duplicate (src,dst)",
-            "rows_dropped_null_or_unparseable": int(r["rows"]) - int(valid_rows),
-            "rows_dropped_self_loops": raw_report["self_loops"],
-            "rows_dropped_duplicates": raw_report["duplicate_edges"],
-            "identical_to_preprocessing_py_output": (int(r["rows"]) == int(valid_rows)
-                                                    and raw_report["self_loops"] == 0
-                                                    and raw_report["duplicate_edges"] == 0),
-        }
+    spark = make_spark("Phase1PokecPrep")          # one session for the whole script
+    try:
+        if receipt is not None:
+            # A prepared output for this exact raw file exists: reuse it, do not preprocess again.
+            print(f"Reusing {os.path.relpath(OUT_DIR, REPO_ROOT)} (receipt for raw sha256 {raw_sha[:12]}...)")
+            raw_report, cleaning, write_s = receipt["input"], receipt["cleaning"], receipt.get("write_seconds")
+        else:
+            # ---- 1. Raw input, read the same way as preprocessing.py (tab separated, no header).
+            raw = spark.read.csv(args.raw, sep="\t")
+            n_cols = len(raw.columns)
+            parsed = raw.select(F.col("_c0").alias("src_raw"), F.col("_c1").alias("dst_raw"),
+                                F.col("_c0").cast("int").alias("src"), F.col("_c1").cast("int").alias("dst")).cache()
+            r = parsed.agg(
+                F.count(F.lit(1)).alias("rows"),
+                F.sum(F.when(F.col("src_raw").isNull() | F.col("dst_raw").isNull(), 1).otherwise(0)).alias("null_fields"),
+                F.sum(F.when((F.col("src").isNull() & F.col("src_raw").isNotNull()) |
+                             (F.col("dst").isNull() & F.col("dst_raw").isNotNull()), 1).otherwise(0)).alias("unparseable"),
+                F.sum(F.when(F.col("src") == F.col("dst"), 1).otherwise(0)).alias("self_loops"),
+                F.min(F.least("src", "dst")).alias("min_id"),
+                F.max(F.greatest("src", "dst")).alias("max_id"),
+            ).collect()[0]
+            valid = parsed.where(F.col("src").isNotNull() & F.col("dst").isNotNull()).select("src", "dst")
+            valid_rows = valid.count()
+            distinct_pairs = valid.distinct().count()
+            distinct_vertices = (valid.select(F.col("src").alias("id")).union(valid.select(F.col("dst").alias("id")))
+                                 .distinct().count())
+            raw_report = {
+                "path": os.path.relpath(args.raw, REPO_ROOT).replace(os.sep, "/"),
+                "sha256": raw_sha, "bytes": os.path.getsize(args.raw), "columns_detected": n_cols,
+                "rows": int(r["rows"]), "null_fields": int(r["null_fields"] or 0),
+                "unparseable_ids": int(r["unparseable"] or 0), "self_loops": int(r["self_loops"] or 0),
+                "duplicate_edges": int(valid_rows - distinct_pairs), "min_id": r["min_id"], "max_id": r["max_id"],
+                "distinct_vertices": int(distinct_vertices),
+                "matches_snap_published": {"edges": int(r["rows"]) == SNAP_PUBLISHED["edges"],
+                                           "nodes": int(distinct_vertices) == SNAP_PUBLISHED["nodes"]},
+            }
+            print("raw:", json.dumps(raw_report), flush=True)
+
+            # ---- 2. Same edge policy as synthetic graphs.
+            cleaned = (valid.where(F.col("src") != F.col("dst")).dropDuplicates(["src", "dst"])
+                       .orderBy("src", "dst"))
+            tmp = OUT_DIR + ".tmp"
+            if os.path.exists(tmp):
+                shutil.rmtree(tmp)
+            t0 = time.perf_counter()
+            cleaned.write.mode("error").parquet(tmp)
+            write_s = round(time.perf_counter() - t0, 2)
+            if os.path.exists(OUT_DIR):
+                stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+                os.rename(OUT_DIR, f"{OUT_DIR}.superseded-{stamp}")   # keep, never delete an earlier output
+            os.rename(tmp, OUT_DIR)
+            cleaning = {
+                "policy": "directed; drop rows with null/unparseable ids; drop self-loops; drop duplicate (src,dst)",
+                "rows_dropped_null_or_unparseable": int(r["rows"]) - int(valid_rows),
+                "rows_dropped_self_loops": raw_report["self_loops"],
+                "rows_dropped_duplicates": raw_report["duplicate_edges"],
+                "identical_to_preprocessing_py_output": (int(r["rows"]) == int(valid_rows)
+                                                        and raw_report["self_loops"] == 0
+                                                        and raw_report["duplicate_edges"] == 0),
+            }
+            parsed.unpersist()
+            with open(RECEIPT, "w") as f:
+                json.dump({"input": raw_report, "cleaning": cleaning, "write_seconds": write_s,
+                           "output_fingerprint": dir_fingerprint(OUT_DIR),
+                           "written_utc": datetime.datetime.now(datetime.timezone.utc).isoformat()}, f, indent=2)
+
+        # ---- 3. Same numpy validator as the synthetic graphs (on the written file).
+        import pyarrow.parquet as pq
+        t = pq.read_table(OUT_DIR, columns=["src", "dst"])
+        src = t.column("src").to_numpy().astype("int32")
+        dst = t.column("dst").to_numpy().astype("int32")
+        del t
+        n_universe = int(max(src.max(), dst.max())) + 1     # ids are used directly as array indices
+        stats = degree_stats(src, dst, n_universe)
+        structure = structural_checks(src, dst, n_universe)
+        del src, dst
+
+        # ---- Independent Spark re-read of the written file.
+        expected = dict(stats, self_loops=0, duplicate_edges=0)
+        reread = spark_load_check(spark, OUT_DIR, expected)
 
         # ---- 4. HDFS (real read or nothing).
         hdfs = hdfs_check(spark)
     finally:
         spark.stop()
 
-    # ---- 3. Same numpy validator as the synthetic graphs (on the written file).
-    import pyarrow.parquet as pq
-    t = pq.read_table(OUT_DIR, columns=["src", "dst"])
-    src = t.column("src").to_numpy().astype("int32")
-    dst = t.column("dst").to_numpy().astype("int32")
-    del t
-    n_universe = int(max(src.max(), dst.max())) + 1     # ids are used directly as array indices
-    stats = degree_stats(src, dst, n_universe)
-    structure = structural_checks(src, dst, n_universe)
-    del src, dst
-
-    spark = make_spark("Phase1PokecReread")
-    try:
-        expected = dict(stats, self_loops=0, duplicate_edges=0)
-        reread = spark_load_check(spark, OUT_DIR, expected)
-    finally:
-        spark.stop()
-
+    expected_rows = raw_report["rows"] - cleaning["rows_dropped_null_or_unparseable"] \
+        - cleaning["rows_dropped_self_loops"] - cleaning["rows_dropped_duplicates"]
     checks = [
         ("raw edges == SNAP published 30,622,564", raw_report["matches_snap_published"]["edges"]),
         ("distinct vertices == SNAP published 1,632,803", raw_report["matches_snap_published"]["nodes"]),
@@ -204,6 +222,8 @@ def main():
         ("output: no duplicate edges", structure["duplicate_edges"] == 0),
         ("output ids non-negative", structure["min_id"] >= 0),
         ("Spark re-read matches numpy validator", reread["status"] == "PASS"),
+        ("output rows == raw rows minus recorded drops", stats["num_edges"] == expected_rows),
+        ("active vertices == raw distinct vertices", stats["num_active_vertices"] == raw_report["distinct_vertices"]),
     ]
     status = "PASS" if all(ok for _, ok in checks) else "FAIL"
     record = {
@@ -215,7 +235,8 @@ def main():
         "output": {"path": os.path.relpath(OUT_DIR, REPO_ROOT).replace(os.sep, "/"), "format": "parquet (Spark directory)",
                    "schema": {"src": "int32", "dst": "int32"}, "fingerprint": dir_fingerprint(OUT_DIR),
                    "bytes": sum(os.path.getsize(f) for f in glob.glob(os.path.join(OUT_DIR, "*.parquet"))),
-                   "write_seconds": round(write_s, 2), "storage": "local filesystem"},
+                   "write_seconds": write_s, "storage": "local filesystem",
+                   "prep_receipt": os.path.relpath(RECEIPT, REPO_ROOT).replace(os.sep, "/")},
         "id_note": "SNAP ids are 1..1,632,803; id 0 is unused. num_vertices below is the id universe (max_id+1); "
                    "num_active_vertices is the real vertex count.",
         "measured": stats,

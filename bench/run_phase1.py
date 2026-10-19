@@ -206,6 +206,7 @@ def main():
             skipped.append((g, f"work_sum {g['work_sum']:,} exceeds safety limit {limit:,}"))
         else:
             plan.append(g)
+    plan.sort(key=lambda g: g["work_sum"])   # cheapest first: a heavy graph cannot block the rest
 
     print(f"Campaign {campaign['campaign_id']}  config={campaign['config_id']}  machine={campaign['machine']['cpu_model']} "
           f"({campaign['machine']['cpu_logical_cores']} threads, {campaign['machine']['ram_total_gb']} GB)")

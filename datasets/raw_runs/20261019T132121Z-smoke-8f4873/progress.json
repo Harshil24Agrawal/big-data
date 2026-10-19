@@ -1,0 +1,12 @@
+{
+  "powerlaw_balanced-small-s101-aa30b13b": {
+    "status": "done",
+    "seconds": 332.5,
+    "finished_utc": "2026-10-19T13:26:53.765366+00:00"
+  },
+  "uniform-small-s101-f3568c8f": {
+    "status": "done",
+    "seconds": 296.9,
+    "finished_utc": "2026-10-19T13:31:50.684433+00:00"
+  }
+}

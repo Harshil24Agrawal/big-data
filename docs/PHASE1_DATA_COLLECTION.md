@@ -1,5 +1,7 @@
 # Phase 1 — Data Collection and Loading
 
+> Pilot status and limitations: see [`PHASE1_REPORT.md`](PHASE1_REPORT.md).
+
 Reproducible graph inputs and raw benchmark runs for ML-guided selection of
 2-hop motif execution strategies, `(a)-[e1]->(b); (b)-[e2]->(c)`, in Spark.
 

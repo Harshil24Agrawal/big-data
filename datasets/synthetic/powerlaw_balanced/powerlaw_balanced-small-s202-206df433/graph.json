@@ -1,0 +1,213 @@
+{
+  "graph_id": "powerlaw_balanced-small-s202-206df433",
+  "spec": {
+    "family": "powerlaw_balanced",
+    "size_tier": "small",
+    "seed": 202,
+    "num_vertices": 100000,
+    "avg_degree": 7,
+    "m_target": 700000,
+    "params": {
+      "gamma": 2.5,
+      "max_share": 0.002
+    },
+    "generator_version": "phase1-gen-v1",
+    "edge_policy": {
+      "directed": true,
+      "self_loops": "removed",
+      "duplicate_edges": "removed (simple digraph: at most one src->dst edge)",
+      "id_type": "int32",
+      "id_range": "[0, num_vertices)",
+      "top_up": "when cleaning drops edges, extra edges are sampled from the same distribution until m_target unique edges exist, then a seeded random subset of exactly m_target is kept"
+    }
+  },
+  "created_utc": "2026-10-19T13:12:19.813490+00:00",
+  "generation_seconds": 1.214,
+  "validation_seconds": 0.325,
+  "edges_sha256": "2dc6330d3c03f1d5a209f14bb57fd8c3ff56f7468d71090bbfe0048d740aaf85",
+  "files": [
+    {
+      "path": "datasets/synthetic/powerlaw_balanced/powerlaw_balanced-small-s202-206df433/edges.parquet",
+      "format": "parquet",
+      "bytes": 2896786,
+      "sha256": "46e88e1ad9d27f7efa2574bd6215475bc22c982b6056af94819dbebfb195e7de"
+    }
+  ],
+  "schema": {
+    "src": "int32",
+    "dst": "int32"
+  },
+  "cleaning": {
+    "raw_edges_sampled": 721000,
+    "self_loops_removed": 84,
+    "duplicates_removed": 2596,
+    "sampling_rounds": 1,
+    "unique_edges_before_subsample": 718320
+  },
+  "family_meta": {
+    "top_weight_vertices": [
+      5019,
+      99694,
+      8344,
+      24896,
+      74790,
+      97401,
+      85052,
+      40269,
+      2741,
+      28240
+    ],
+    "expected_max_share": 0.002
+  },
+  "measured": {
+    "num_vertices": 100000,
+    "num_edges": 700000,
+    "num_active_vertices": 99843,
+    "hub_k": 10,
+    "work_threshold": 1000000,
+    "work_sum": 50437159,
+    "work_max": 1840824,
+    "work_max_vertex": 8344,
+    "work_max_share": 0.036497,
+    "num_work_hubs": 11,
+    "work_in_hubs_share": 0.342638,
+    "top_hubs_work_share": 0.321483,
+    "top_hubs_min_over_max_work": 0.625364,
+    "log_degree_corr": 0.656,
+    "max_in_over_max_out": 1.0177,
+    "in_mean": 7.0,
+    "in_std": 21.482,
+    "in_cv": 3.0689,
+    "in_max": 1382,
+    "in_p50": 4.0,
+    "in_p99": 52.0,
+    "in_p999": 235.00100000000384,
+    "in_max_over_mean": 197.4286,
+    "in_gini": 0.546,
+    "in_top1pct_edge_share": 0.1914,
+    "in_top_hub_edge_share": 0.0181,
+    "in_zero_degree_vertices": 3055,
+    "out_mean": 7.0,
+    "out_std": 21.5146,
+    "out_cv": 3.0735,
+    "out_max": 1358,
+    "out_p50": 4.0,
+    "out_p99": 52.0,
+    "out_p999": 233.0,
+    "out_max_over_mean": 194.0,
+    "out_gini": 0.5463,
+    "out_top1pct_edge_share": 0.1917,
+    "out_top_hub_edge_share": 0.0182,
+    "out_zero_degree_vertices": 2963
+  },
+  "structure": {
+    "min_id": 0,
+    "max_id": 99999,
+    "ids_in_range": true,
+    "self_loops": 0,
+    "duplicate_edges": 0
+  },
+  "validation_status": "PASS",
+  "family_checks": [
+    {
+      "metric": "in_max_over_mean",
+      "op": ">=",
+      "target": 50.0,
+      "measured": 197.4286,
+      "passed": true
+    },
+    {
+      "metric": "out_max_over_mean",
+      "op": ">=",
+      "target": 50.0,
+      "measured": 194.0,
+      "passed": true
+    },
+    {
+      "metric": "in_gini",
+      "op": ">=",
+      "target": 0.4,
+      "measured": 0.546,
+      "passed": true
+    },
+    {
+      "metric": "out_gini",
+      "op": ">=",
+      "target": 0.4,
+      "measured": 0.5463,
+      "passed": true
+    },
+    {
+      "metric": "log_degree_corr",
+      "op": ">=",
+      "target": 0.5,
+      "measured": 0.656,
+      "passed": true
+    },
+    {
+      "metric": "max_in_over_max_out",
+      "op": "between",
+      "target": [
+        0.3333333333333333,
+        3.0
+      ],
+      "measured": 1.0177,
+      "passed": true
+    },
+    {
+      "metric": "ids_in_range",
+      "op": "==",
+      "target": true,
+      "measured": true,
+      "passed": true
+    },
+    {
+      "metric": "self_loops==0",
+      "op": "==",
+      "target": true,
+      "measured": true,
+      "passed": true
+    },
+    {
+      "metric": "duplicate_edges==0",
+      "op": "==",
+      "target": true,
+      "measured": true,
+      "passed": true
+    }
+  ],
+  "spark_validation": {
+    "schema": {
+      "src": "int",
+      "dst": "int"
+    },
+    "rows": 700000,
+    "null_endpoints": 0,
+    "min_id": 0,
+    "max_id": 99999,
+    "self_loops": 0,
+    "duplicate_edges": 0,
+    "active_vertices": 99843,
+    "work_sum": 50437159,
+    "work_max": 1840824,
+    "mismatches": [],
+    "status": "PASS",
+    "seconds": 1.65,
+    "validated_utc": "2026-10-19T13:16:28.472207+00:00",
+    "spark_version": "3.5.5"
+  },
+  "environment": {
+    "python": "3.11.17",
+    "numpy": "2.4.6",
+    "pyarrow": "26.0.0",
+    "platform": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39"
+  },
+  "validation_history": [
+    {
+      "replaced_utc": "2026-10-19T13:14:00.691051+00:00",
+      "reason": "hub-share checks used fixed H=10; corrected to the family's planted hub count as declared in config.FAMILY_CHECKS",
+      "validation_status": "PASS",
+      "failed_checks": []
+    }
+  ]
+}

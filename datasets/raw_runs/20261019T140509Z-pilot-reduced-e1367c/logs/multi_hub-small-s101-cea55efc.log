@@ -1,0 +1,94 @@
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=44837 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=44837 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+26/10/19 20:11:12 WARN Utils: Your hostname, vm resolves to a loopback address: 127.0.0.1; using 192.0.2.2 instead (on interface eth0)
+26/10/19 20:11:12 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+26/10/19 20:11:12 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+[multi_hub-small-s101-cea55efc] loaded 699,995 edges / 100,000 active vertices in 27.386s
+[multi_hub-small-s101-cea55efc] gate native__aqe_off              ok       match n=47151493
+[multi_hub-small-s101-cea55efc] gate native__aqe_on               ok       match n=47151493
+[multi_hub-small-s101-cea55efc] gate edgejoin__aqe_off            ok       match n=47151493
+[multi_hub-small-s101-cea55efc] gate salt1d__aqe_off              ok       match n=47151493
+[multi_hub-small-s101-cea55efc] gate hypercube__aqe_off           ok       match n=47151493
+[multi_hub-small-s101-cea55efc] gate hypercube_unified__aqe_off   ok       match n=47151493
+[multi_hub-small-s101-cea55efc] gate edgejoin__aqe_on             ok       match n=47151493
+[multi_hub-small-s101-cea55efc] warmup   r0 hypercube_unified__aqe_off   ok       q=18.8347s total=34.5689s paths=47151493 dom max/med=12.2222 cv=0.9304 skew=None
+[multi_hub-small-s101-cea55efc] warmup   r0 native__aqe_off              ok       q=20.2056s total=20.2056s paths=47151493 dom max/med=64.6957 cv=2.757 skew=None
+[multi_hub-small-s101-cea55efc] warmup   r0 edgejoin__aqe_on             ok       q=15.7935s total=15.7935s paths=47151493 dom max/med=2.1887 cv=0.2975 skew=None
+[multi_hub-small-s101-cea55efc] warmup   r0 edgejoin__aqe_off            ok       q=12.7825s total=12.7825s paths=47151493 dom max/med=39.0 cv=2.4633 skew=None
+[multi_hub-small-s101-cea55efc] warmup   r0 hypercube__aqe_off           ok       q=17.9716s total=25.7573s paths=47151493 dom max/med=20.1481 cv=0.9943 skew=None
+[multi_hub-small-s101-cea55efc] warmup   r0 native__aqe_on               ok       q=12.0525s total=12.0525s paths=47151493 dom max/med=1.0 cv=0.1443 skew=None
+[multi_hub-small-s101-cea55efc] warmup   r0 salt1d__aqe_off              ok       q=19.0378s total=27.3661s paths=47151493 dom max/med=19.6207 cv=1.0656 skew=None
+[multi_hub-small-s101-cea55efc] measured r1 salt1d__aqe_off              ok       q=18.9823s total=28.716s paths=47151493 dom max/med=4.7407 cv=0.5537 skew=None
+[multi_hub-small-s101-cea55efc] measured r1 native__aqe_on               ok       q=13.4707s total=13.4707s paths=47151493 dom max/med=1.0 cv=0.1663 skew=None
+[multi_hub-small-s101-cea55efc] measured r1 hypercube__aqe_off           ok       q=22.4271s total=32.2299s paths=47151493 dom max/med=24.8571 cv=1.2116 skew=None
+[multi_hub-small-s101-cea55efc] measured r1 hypercube_unified__aqe_off   ok       q=21.5919s total=36.7563s paths=47151493 dom max/med=3.4459 cv=0.3161 skew=None
+[multi_hub-small-s101-cea55efc] measured r1 edgejoin__aqe_on             ok       q=14.2614s total=14.2614s paths=47151493 dom max/med=1.7308 cv=0.1625 skew=None
+[multi_hub-small-s101-cea55efc] measured r1 native__aqe_off              ok       q=13.8805s total=13.8805s paths=47151493 dom max/med=50.2727 cv=2.8308 skew=None
+[multi_hub-small-s101-cea55efc] measured r1 edgejoin__aqe_off            ok       q=8.9416s total=8.9416s paths=47151493 dom max/med=38.9474 cv=2.427 skew=None
+26/10/19 20:20:09 ERROR Inbox: Ignoring error
+java.util.concurrent.RejectedExecutionException: Task org.apache.spark.executor.Executor$TaskRunner@68d79ac2 rejected from java.util.concurrent.ThreadPoolExecutor@31a083d9[Shutting down, pool size = 2, active threads = 2, queued tasks = 0, completed tasks = 26275]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$AbortPolicy.rejectedExecution(ThreadPoolExecutor.java:2081)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.reject(ThreadPoolExecutor.java:841)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.execute(ThreadPoolExecutor.java:1376)
+	at org.apache.spark.executor.Executor.launchTask(Executor.scala:363)
+	at org.apache.spark.scheduler.local.LocalEndpoint.$anonfun$reviveOffers$1(LocalSchedulerBackend.scala:93)
+	at org.apache.spark.scheduler.local.LocalEndpoint.$anonfun$reviveOffers$1$adapted(LocalSchedulerBackend.scala:91)
+	at scala.collection.Iterator.foreach(Iterator.scala:943)
+	at scala.collection.Iterator.foreach$(Iterator.scala:943)
+	at scala.collection.AbstractIterator.foreach(Iterator.scala:1431)
+	at scala.collection.IterableLike.foreach(IterableLike.scala:74)
+	at scala.collection.IterableLike.foreach$(IterableLike.scala:73)
+	at scala.collection.AbstractIterable.foreach(Iterable.scala:56)
+	at org.apache.spark.scheduler.local.LocalEndpoint.reviveOffers(LocalSchedulerBackend.scala:91)
+	at org.apache.spark.scheduler.local.LocalEndpoint$$anonfun$receive$1.applyOrElse(LocalSchedulerBackend.scala:74)
+	at org.apache.spark.rpc.netty.Inbox.$anonfun$process$1(Inbox.scala:115)
+	at org.apache.spark.rpc.netty.Inbox.safelyCall(Inbox.scala:213)
+	at org.apache.spark.rpc.netty.Inbox.process(Inbox.scala:100)
+	at org.apache.spark.rpc.netty.MessageLoop.org$apache$spark$rpc$netty$MessageLoop$$receiveLoop(MessageLoop.scala:75)
+	at org.apache.spark.rpc.netty.MessageLoop$$anon$1.run(MessageLoop.scala:41)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+26/10/19 20:20:09 ERROR TaskSchedulerImpl: Exception in statusUpdate
+java.util.concurrent.RejectedExecutionException: Task org.apache.spark.scheduler.TaskResultGetter$$anon$3@20ba7a39 rejected from java.util.concurrent.ThreadPoolExecutor@b3e3016[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 26276]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$AbortPolicy.rejectedExecution(ThreadPoolExecutor.java:2081)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.reject(ThreadPoolExecutor.java:841)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.execute(ThreadPoolExecutor.java:1376)
+	at org.apache.spark.scheduler.TaskResultGetter.enqueueSuccessfulTask(TaskResultGetter.scala:61)
+	at org.apache.spark.scheduler.TaskSchedulerImpl.liftedTree2$1(TaskSchedulerImpl.scala:836)
+	at org.apache.spark.scheduler.TaskSchedulerImpl.statusUpdate(TaskSchedulerImpl.scala:811)
+	at org.apache.spark.scheduler.local.LocalEndpoint$$anonfun$receive$1.applyOrElse(LocalSchedulerBackend.scala:71)
+	at org.apache.spark.rpc.netty.Inbox.$anonfun$process$1(Inbox.scala:115)
+	at org.apache.spark.rpc.netty.Inbox.safelyCall(Inbox.scala:213)
+	at org.apache.spark.rpc.netty.Inbox.process(Inbox.scala:100)
+	at org.apache.spark.rpc.netty.MessageLoop.org$apache$spark$rpc$netty$MessageLoop$$receiveLoop(MessageLoop.scala:75)
+	at org.apache.spark.rpc.netty.MessageLoop$$anon$1.run(MessageLoop.scala:41)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+26/10/19 20:20:09 ERROR Inbox: Ignoring error
+java.util.concurrent.RejectedExecutionException: Task org.apache.spark.executor.Executor$TaskRunner@5b2d8e31 rejected from java.util.concurrent.ThreadPoolExecutor@31a083d9[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 26277]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$AbortPolicy.rejectedExecution(ThreadPoolExecutor.java:2081)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.reject(ThreadPoolExecutor.java:841)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.execute(ThreadPoolExecutor.java:1376)
+	at org.apache.spark.executor.Executor.launchTask(Executor.scala:363)
+	at org.apache.spark.scheduler.local.LocalEndpoint.$anonfun$reviveOffers$1(LocalSchedulerBackend.scala:93)
+	at org.apache.spark.scheduler.local.LocalEndpoint.$anonfun$reviveOffers$1$adapted(LocalSchedulerBackend.scala:91)
+	at scala.collection.Iterator.foreach(Iterator.scala:943)
+	at scala.collection.Iterator.foreach$(Iterator.scala:943)
+	at scala.collection.AbstractIterator.foreach(Iterator.scala:1431)
+	at scala.collection.IterableLike.foreach(IterableLike.scala:74)
+	at scala.collection.IterableLike.foreach$(IterableLike.scala:73)
+	at scala.collection.AbstractIterable.foreach(Iterable.scala:56)
+	at org.apache.spark.scheduler.local.LocalEndpoint.reviveOffers(LocalSchedulerBackend.scala:91)
+	at org.apache.spark.scheduler.local.LocalEndpoint$$anonfun$receive$1.applyOrElse(LocalSchedulerBackend.scala:74)
+	at org.apache.spark.rpc.netty.Inbox.$anonfun$process$1(Inbox.scala:115)
+	at org.apache.spark.rpc.netty.Inbox.safelyCall(Inbox.scala:213)
+	at org.apache.spark.rpc.netty.Inbox.process(Inbox.scala:100)
+	at org.apache.spark.rpc.netty.MessageLoop.org$apache$spark$rpc$netty$MessageLoop$$receiveLoop(MessageLoop.scala:75)
+	at org.apache.spark.rpc.netty.MessageLoop$$anon$1.run(MessageLoop.scala:41)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)

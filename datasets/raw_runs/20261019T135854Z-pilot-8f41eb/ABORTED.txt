@@ -1,0 +1,1 @@
+ABORTED by operator 2026-10-19T14:05:09Z: full protocol (1 warm-up + 5 runs, 11 graphs, 7 strategies) projected far beyond the project deadline on a 2 vCPU sandbox; a reduced-protocol campaign was launched instead. Records here are partial and kept immutable (not used in summaries).

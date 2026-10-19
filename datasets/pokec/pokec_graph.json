@@ -1,0 +1,168 @@
+{
+  "graph_id": "pokec-real-1a23e0ec",
+  "source": {
+    "nodes": 1632803,
+    "edges": 30622564,
+    "source_url": "https://snap.stanford.edu/data/soc-pokec-relationships.txt.gz",
+    "dataset_page": "https://snap.stanford.edu/data/soc-Pokec.html"
+  },
+  "created_utc": "2026-10-19T13:48:54.388434+00:00",
+  "input": {
+    "path": "datasets/pokec/raw/soc-pokec-relationships.txt.gz",
+    "sha256": "1a23e0ec8a4e497752125f6b3f01696fea7fcdb696fa61d1e822faf4d0d69b14",
+    "bytes": 132454730,
+    "columns_detected": 2,
+    "rows": 30622564,
+    "null_fields": 0,
+    "unparseable_ids": 0,
+    "self_loops": 0,
+    "duplicate_edges": 0,
+    "min_id": 1,
+    "max_id": 1632803,
+    "distinct_vertices": 1632803,
+    "matches_snap_published": {
+      "edges": true,
+      "nodes": true
+    }
+  },
+  "cleaning": {
+    "policy": "directed; drop rows with null/unparseable ids; drop self-loops; drop duplicate (src,dst)",
+    "rows_dropped_null_or_unparseable": 0,
+    "rows_dropped_self_loops": 0,
+    "rows_dropped_duplicates": 0,
+    "identical_to_preprocessing_py_output": true
+  },
+  "output": {
+    "path": "datasets/pokec/pokec_edges_parquet",
+    "format": "parquet (Spark directory)",
+    "schema": {
+      "src": "int32",
+      "dst": "int32"
+    },
+    "fingerprint": "fd065c1230543d51cf42b0e156ea65fac101d9843b728a8dc6887cca480dadb3",
+    "bytes": 135815558,
+    "write_seconds": null,
+    "storage": "local filesystem",
+    "prep_receipt": "datasets/pokec/pokec_prep_receipt.json"
+  },
+  "id_note": "SNAP ids are 1..1,632,803; id 0 is unused. num_vertices below is the id universe (max_id+1); num_active_vertices is the real vertex count.",
+  "measured": {
+    "num_vertices": 1632804,
+    "num_edges": 30622564,
+    "num_active_vertices": 1632803,
+    "hub_k": 10,
+    "work_threshold": 1000000,
+    "work_sum": 1780294899,
+    "work_max": 93178405,
+    "work_max_vertex": 5935,
+    "work_max_share": 0.052339,
+    "num_work_hubs": 8,
+    "work_in_hubs_share": 0.150077,
+    "top_hubs_work_share": 0.150923,
+    "top_hubs_min_over_max_work": 0.008066,
+    "log_degree_corr": 0.7789,
+    "max_in_over_max_out": 1.5672,
+    "in_mean": 18.7546,
+    "in_std": 32.1408,
+    "in_cv": 1.7138,
+    "in_max": 13733,
+    "in_p50": 8.0,
+    "in_p99": 133.0,
+    "in_p999": 239.0,
+    "in_max_over_mean": 732.2475,
+    "in_gini": 0.6443,
+    "in_top1pct_edge_share": 0.0975,
+    "in_top_hub_edge_share": 0.0015,
+    "in_zero_degree_vertices": 113352,
+    "out_mean": 18.7546,
+    "out_std": 32.1413,
+    "out_cv": 1.7138,
+    "out_max": 8763,
+    "out_p50": 8.0,
+    "out_p99": 130.0,
+    "out_p999": 266.0,
+    "out_max_over_mean": 467.2457,
+    "out_gini": 0.6433,
+    "out_top1pct_edge_share": 0.1028,
+    "out_top_hub_edge_share": 0.0015,
+    "out_zero_degree_vertices": 200111
+  },
+  "structure": {
+    "min_id": 1,
+    "max_id": 1632803,
+    "ids_in_range": true,
+    "self_loops": 0,
+    "duplicate_edges": 0
+  },
+  "spark_reread": {
+    "schema": {
+      "src": "int",
+      "dst": "int"
+    },
+    "rows": 30622564,
+    "null_endpoints": 0,
+    "min_id": 1,
+    "max_id": 1632803,
+    "self_loops": 0,
+    "duplicate_edges": 0,
+    "active_vertices": 1632803,
+    "work_sum": 1780294899,
+    "work_max": 93178405,
+    "mismatches": [],
+    "status": "PASS"
+  },
+  "workload": {
+    "work_sum": 1780294899,
+    "prior_reported_total_paths": 1780294899,
+    "matches_prior_report": true
+  },
+  "hdfs": {
+    "hadoop_home": null,
+    "hadoop_conf_dir": null,
+    "hdfs_cli": null,
+    "fs_default_fs": "file:///",
+    "real_hdfs_read": false,
+    "status": "NOT_CONFIGURED",
+    "note": "No hdfs:// default filesystem and no PHASE1_HDFS_URI set; Parquet is stored on the local filesystem. winutils/HADOOP_HOME on Windows only provide local-FS support."
+  },
+  "checks": [
+    {
+      "check": "raw edges == SNAP published 30,622,564",
+      "passed": true
+    },
+    {
+      "check": "distinct vertices == SNAP published 1,632,803",
+      "passed": true
+    },
+    {
+      "check": "no null or unparseable ids",
+      "passed": true
+    },
+    {
+      "check": "output: no self-loops",
+      "passed": true
+    },
+    {
+      "check": "output: no duplicate edges",
+      "passed": true
+    },
+    {
+      "check": "output ids non-negative",
+      "passed": true
+    },
+    {
+      "check": "Spark re-read matches numpy validator",
+      "passed": true
+    },
+    {
+      "check": "output rows == raw rows minus recorded drops",
+      "passed": true
+    },
+    {
+      "check": "active vertices == raw distinct vertices",
+      "passed": true
+    }
+  ],
+  "validation_status": "PASS",
+  "seconds_total": 97.2
+}

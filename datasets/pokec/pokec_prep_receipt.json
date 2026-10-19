@@ -1,0 +1,32 @@
+{
+  "input": {
+    "path": "datasets/pokec/raw/soc-pokec-relationships.txt.gz",
+    "sha256": "1a23e0ec8a4e497752125f6b3f01696fea7fcdb696fa61d1e822faf4d0d69b14",
+    "bytes": 132454730,
+    "columns_detected": 2,
+    "rows": 30622564,
+    "null_fields": 0,
+    "unparseable_ids": 0,
+    "self_loops": 0,
+    "duplicate_edges": 0,
+    "min_id": 1,
+    "max_id": 1632803,
+    "distinct_vertices": 1632803,
+    "matches_snap_published": {
+      "edges": true,
+      "nodes": true
+    }
+  },
+  "cleaning": {
+    "policy": "directed; drop rows with null/unparseable ids; drop self-loops; drop duplicate (src,dst)",
+    "rows_dropped_null_or_unparseable": 0,
+    "rows_dropped_self_loops": 0,
+    "rows_dropped_duplicates": 0,
+    "identical_to_preprocessing_py_output": true
+  },
+  "write_seconds": null,
+  "output_fingerprint": "fd065c1230543d51cf42b0e156ea65fac101d9843b728a8dc6887cca480dadb3",
+  "written_utc": null,
+  "recovered_utc": "2026-10-19T13:47:13.208012+00:00",
+  "note": "Recovered from the stdout of the first datagen.pokec run (2026-10-19), which completed the raw scan and the Parquet write, then crashed when opening a second Spark session. The rerun re-checks the written output against these counts (rows, active vertices) plus the numpy and Spark validators."
+}
