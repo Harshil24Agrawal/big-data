@@ -95,6 +95,8 @@ This section supersedes the earlier hand-off notes (2026-10-19) in this file; se
 Earlier campaigns (smoke, aborted pilot, reduced pilot) are kept as raw records but are not usable for labels.
 The sandbox restarted twice during `pilot-full` and once during `pilot-ext1`; each was resumed and documented (`INTERRUPTIONS.md`).
 
+**Decision (2026-10-20, project owner): Phase 1 is closed at 31 benchmarked graphs; the 29 below are a documented exclusion (compute time), not an oversight.**
+
 **Not done (needs a bigger machine or a design decision):** 29 graphs — 19 core graphs, 2 large multi_hub, 4 powerlaw_balanced medium (≈535M work) and
 4 powerlaw_balanced large (≈1.48B work, above the 600M gate); the AQE skew experiment; Pokec benchmarking; any HDFS test.
 

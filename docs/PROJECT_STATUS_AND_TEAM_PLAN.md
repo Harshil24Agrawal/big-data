@@ -250,7 +250,14 @@ these generators; it is not evidence about larger clusters or true byte skew.
 
 ## 8. Phase 1 status and exit criteria
 
-**Phase 1 is partially complete. It is not done.**
+**Decision (2026-10-20, project owner): Phase 1 is closed at 31 benchmarked graphs.** The other 29 graphs are generated and validated but **not benchmarked**;
+this is a documented exclusion, not an oversight. Reason: the remaining runs need roughly 8 h (21 graphs) to 12–14 h (including 4 powerlaw medium) on the
+2-core sandbox, and the 4 powerlaw large graphs (≈1.48B work) probably do not fit it at all; a second machine of a different hardware class cannot be mixed
+into the same labels. What was benchmarked: 31 graphs ≈ 93 M edges, ≈ 577 MB of Parquet, 1,085 valid timed runs. Consequences to state in any write-up: no
+benchmark evidence above ≈205M work, no powerlaw medium/large, no Pokec runtimes, and no skew-triggering cases; conclusions apply to what was measured.
+The 29 graphs can be run later with the commands in `docs/PHASE1_REPORT.md` §6 if a bigger machine becomes available.
+
+Earlier assessment, kept for the record: Phase 1 data collection is complete; the benchmark part is partial.
 
 | Exit criterion | Status |
 |---|---|
@@ -384,7 +391,7 @@ Key files: `datasets/manifest/dataset_manifest.csv`, `datasets/raw_runs/<campaig
 
 ## 14. Next actions (priority order)
 
-1. Member 1: obtain a larger machine (or a dedicated multi-hour slot) and run the remaining 29 graphs with the same measurement configuration
+1. *Optional, not planned (Phase 1 closed at 31 graphs):* obtain a larger machine (or a dedicated multi-hour slot) and run the remaining 29 graphs with the same measurement configuration
    (`--resume` per campaign; powerlaw medium/large with a raised `--max-work-sum`). Keep one machine id.
 2. Member 1: design the skew experiment: graphs whose hub reduce-partition exceeds 256 MB at 200 partitions (AQE skew splitting has never fired),
    alongside compute-skewed controls that do not trigger it. Only there can a non-edge-join strategy plausibly win.
