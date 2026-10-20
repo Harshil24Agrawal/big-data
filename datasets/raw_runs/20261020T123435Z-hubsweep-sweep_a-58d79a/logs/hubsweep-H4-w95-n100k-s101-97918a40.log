@@ -8,3 +8,7 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [hubsweep-H4-w95-n100k-s101-97918a40] loaded 738,591 edges / 100,000 active vertices in 41.059s
 [hubsweep-H4-w95-n100k-s101-97918a40] gate native__aqe_on               ok       match n=98524893
 [hubsweep-H4-w95-n100k-s101-97918a40] gate edgejoin__aqe_off            ok       match n=98524893
+[hubsweep-H4-w95-n100k-s101-97918a40] gate salt1d__aqe_off              ok       match n=98524893
+[hubsweep-H4-w95-n100k-s101-97918a40] gate hypercube_unified__aqe_off   ok       match n=98524893
+[hubsweep-H4-w95-n100k-s101-97918a40] warmup   r0 hypercube_unified__aqe_off   ok       q=26.0049s total=44.9329s paths=98524893 dom max/med=12.5882 cv=0.934 skew=None
+[hubsweep-H4-w95-n100k-s101-97918a40] warmup   r0 native__aqe_on               ok       q=28.7101s total=28.7101s paths=98524893 dom max/med=1.0 cv=0.0106 skew=0
