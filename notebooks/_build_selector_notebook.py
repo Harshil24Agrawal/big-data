@@ -38,6 +38,7 @@ import matplotlib.pyplot as plt
 from IPython.display import display, Markdown
 from scipy.stats import spearmanr
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.preprocessing import FunctionTransformer
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, ExtraTreesClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
@@ -65,10 +66,12 @@ md("## 1. Data\nOne row per graph. Inputs = pre-execution graph features; target
 code("""
 df = pd.read_csv(TABLE)
 df["group"] = np.where(df.family == "hub_sweep", "hub_sweep_H" + df.hub_count.fillna(0).astype(int).astype(str), df.family)
-# one derived input: absolute work sitting in hubs (hub strategies pay a ~fixed profiling cost, so absolute hub work matters).
+# two derived inputs (both computed from the pre-execution features only): absolute work sitting in hubs (hub strategies pay a ~fixed profiling cost, so absolute hub work matters).
 df["log_hub_work"] = np.log1p(df.raw_work_sum * df.work_in_hubs_share)
 BASE = list(FEATURE_COLUMNS)
-FEATS = BASE + ["log_hub_work"]
+# and the work of the single busiest vertex: that vertex's join task is the straggler, so it sets the edge-join runtime floor.
+df["log_max_work"] = np.log1p(df.raw_work_sum * df.work_max_share)
+FEATS = BASE + ["log_hub_work", "log_max_work"]
 T = np.column_stack([df[f"median_total_s__{s}"].values for s in STRATS])      # measured medians, seconds
 LOGT = np.log(T)
 y_class = df.best_class.values
@@ -120,22 +123,48 @@ if len(sw):
 """)
 
 md("""
+### 2b. The crossover: hub-splitting vs edge-join against the work through the busiest vertex
+The edge join's slowest task is the one holding the busiest vertex, so the work through that single vertex is the natural x-axis. y < 1 means the hub-aware hypercube is faster than the plain edge join (total time, profiling included).
+""")
+code("""
+ratio = df["median_total_s__hypercube_unified__aqe_off"] / df["median_total_s__edgejoin__aqe_off"]
+maxw = df.raw_work_sum * df.work_max_share
+fig, ax = plt.subplots(figsize=(7.5, 4.2))
+for fam, mk in [("hub_sweep", "o"), ("other", "s")]:
+    sel = (df.family == "hub_sweep") if fam == "hub_sweep" else (df.family != "hub_sweep")
+    ax.scatter(maxw[sel], ratio[sel], marker=mk, s=28, alpha=.75, label="hub-sweep graphs" if fam == "hub_sweep" else "original 31 graphs",
+               color="#E45756" if fam == "hub_sweep" else "#4C78A8")
+ax.axhline(1, color="k", lw=.8, ls="--"); ax.set_xscale("log"); ax.set_yscale("log")
+ax.set_xlabel("two-hop paths through the single busiest vertex"); ax.set_ylabel("hypercube time / edge-join time")
+ax.set_title("Hub-splitting wins only when one vertex carries >~1e8 paths"); ax.legend(); ax.grid(alpha=.3)
+plt.tight_layout(); plt.savefig(f"{OUT}/crossover_max_vertex_work.png", dpi=130); plt.show()
+first = df[ratio < 1].raw_work_sum.mul(df[ratio < 1].work_max_share).min()
+RES["crossover"] = dict(n_graphs_hubsplit_faster_than_edgejoin=int((ratio < 1).sum()), smallest_busiest_vertex_work_where_hypercube_faster=float(first),
+                        largest_busiest_vertex_work_where_edgejoin_faster=float(maxw[ratio >= 1].max()))
+print(RES["crossover"])
+""")
+
+md("""
 ## 3. Classifier — which class is fastest?
 Models: **majority** (always the most common training class), **rule** (fixed prior: graphs with work hubs → hubsplit, else native; not tuned),
-**logistic regression**, a **depth-2 decision tree** (readable, suits very few hub-splitting examples), **random forest**, **extra-trees**. Three held-out schemes:
+**logistic regression**, a **depth-2 decision tree** and a **one-threshold stump on the work of the busiest vertex** (readable, suit very few hub-splitting examples), **random forest**, **extra-trees**. Three held-out schemes:
 
 * **LOGO** – leave one *graph* out (train on all others).
 * **LOSG** – leave one *structural group* out (a whole generator family, or all hub-sweep graphs with the same number of hubs, is unseen) — the harshest test.
 * **SEED202** – train on everything except the hub-sweep graphs generated with seed 202, test on those (new random graphs, same recipes).
 """)
 code("""
-def make_models():
-    return {
+def make_models(feature_cols=None):
+    d = {
         "logreg": lambda: make_pipeline(StandardScaler(), LogisticRegression(C=1.0, max_iter=2000, class_weight="balanced")),
         "tree_depth2": lambda: DecisionTreeClassifier(max_depth=2, class_weight="balanced", random_state=SEED),
         "random_forest": lambda: RandomForestClassifier(n_estimators=NTREES, min_samples_leaf=1, class_weight="balanced_subsample", random_state=SEED, n_jobs=1),
         "extra_trees": lambda: ExtraTreesClassifier(n_estimators=NTREES, min_samples_leaf=1, class_weight="balanced_subsample", random_state=SEED, n_jobs=1),
     }
+    if feature_cols is not None and "log_max_work" in feature_cols:
+        j = list(feature_cols).index("log_max_work")   # a one-threshold rule learned on ONE input: work of the busiest vertex
+        d["stump_max_work"] = lambda: make_pipeline(FunctionTransformer(lambda A, j=j: A[:, [j]]), DecisionTreeClassifier(max_depth=1, random_state=SEED))
+    return d
 
 def splits(scheme):
     n = len(df); idx = np.arange(n)
@@ -158,13 +187,13 @@ def eval_classifiers(feature_cols, tag):
     for scheme in ["LOGO", "LOSG", "SEED202"]:
         sp = list(splits(scheme))
         if not sp: continue
-        preds = {m: np.empty(len(df), dtype=object) for m in ["majority", "rule", *make_models()]}
+        preds = {m: np.empty(len(df), dtype=object) for m in ["majority", "rule", *make_models(feature_cols)]}
         tested = np.zeros(len(df), bool)
         for tr, te in sp:
             vals, counts = np.unique(y_class[tr], return_counts=True)
             preds["majority"][te] = vals[counts.argmax()]
             preds["rule"][te] = rule_pred(df.iloc[te])
-            for name, mk in make_models().items():
+            for name, mk in make_models(feature_cols).items():
                 if len(vals) == 1: preds[name][te] = vals[0]; continue
                 mdl = mk().fit(Xf[tr], y_class[tr]); preds[name][te] = mdl.predict(Xf[te])
             tested[te] = True
@@ -183,13 +212,13 @@ for scheme, o in clf12.items():
     for m, s in o["scores"].items():
         rows.append(dict(scheme=scheme, n_test=o["n_test"], model=m, **{k: round(v, 3) for k, v in s.items()}))
 clf_table = pd.DataFrame(rows)
-display(clf_table.pivot(index="model", columns="scheme", values="accuracy").loc[["majority", "rule", "logreg", "tree_depth2", "random_forest", "extra_trees"]])
+display(clf_table.pivot(index="model", columns="scheme", values="accuracy").loc[["majority", "rule", "logreg", "tree_depth2", "stump_max_work", "random_forest", "extra_trees"]])
 RES["classifier"] = {sch: {"n_test": o["n_test"], "scores": o["scores"]} for sch, o in clf12.items()}
 """)
 code("""
-# Ablation: does the extra 'log_hub_work' input help?  (11 base features vs 12)
+# Ablation: do the two derived inputs (log_hub_work, log_max_work) help?  (11 base features vs 13)
 clf11 = eval_classifiers(BASE, "11 features")
-ab = pd.DataFrame({sch: {"11 features (RF)": clf11[sch]["scores"]["random_forest"]["accuracy"], "12 features (RF)": clf12[sch]["scores"]["random_forest"]["accuracy"],
+ab = pd.DataFrame({sch: {"11 base features (RF)": clf11[sch]["scores"]["random_forest"]["accuracy"], "13 features (RF)": clf12[sch]["scores"]["random_forest"]["accuracy"],
                          "majority": clf12[sch]["scores"]["majority"]["accuracy"]} for sch in clf12}).round(3)
 display(ab); RES["ablation_rf_accuracy"] = ab.to_dict()
 """)
@@ -210,7 +239,7 @@ RES["skewed_regime"] = dict(n=int(mask.sum()), class_counts=pd.Series(y_class[ma
 
 code("""
 # confusion matrix of the best classifier by LOGO accuracy (non-majority) + feature importance
-best_name = max(["logreg", "tree_depth2", "random_forest", "extra_trees"], key=lambda m: clf12["LOGO"]["scores"][m]["accuracy"])
+best_name = max(["logreg", "tree_depth2", "stump_max_work", "random_forest", "extra_trees"], key=lambda m: clf12["LOGO"]["scores"][m]["accuracy"])
 p = clf12["LOGO"]["preds"][best_name]
 cm = confusion_matrix(y_class, p, labels=CLASSES)
 fig, ax = plt.subplots(1, 2, figsize=(11, 3.8))
@@ -348,7 +377,7 @@ code("""
 lg = RES["classifier"]["LOGO"]["scores"]; pt = {r["policy"]: r for r in RES["policies"]["LOGO"]}
 lines = [
  f"- **Graphs:** {RES['n_graphs']} ({RES['protocols']}); class counts {RES['class_counts']}; majority-class accuracy {RES['majority_frac_global']:.1%}.",
- f"- **Classifier (LOGO accuracy):** majority {lg['majority']['accuracy']:.1%}, rule {lg['rule']['accuracy']:.1%}, depth-2 tree {lg['tree_depth2']['accuracy']:.1%}, logreg {lg['logreg']['accuracy']:.1%}, random forest {lg['random_forest']['accuracy']:.1%}, extra-trees {lg['extra_trees']['accuracy']:.1%}.",
+ f"- **Classifier (LOGO accuracy):** majority {lg['majority']['accuracy']:.1%}, rule {lg['rule']['accuracy']:.1%}, depth-2 tree {lg['tree_depth2']['accuracy']:.1%}, stump {lg['stump_max_work']['accuracy']:.1%}, logreg {lg['logreg']['accuracy']:.1%}, random forest {lg['random_forest']['accuracy']:.1%}, extra-trees {lg['extra_trees']['accuracy']:.1%}.",
  f"- **Selector (LOGO):** class accuracy {pt['ML selector']['class_accuracy']:.1%}; mean regret {pt['ML selector']['mean_regret_pct']:.1f}% vs {pt['always edgejoin__aqe_off']['mean_regret_pct']:.1f}% for always-edge-join and {pt['always native__aqe_on']['mean_regret_pct']:.1f}% for always-native; oracle 0%.",
  f"- **Speed-up vs native (geomean):** ML {pt['ML selector']['geomean_speedup_vs_native']:.2f}x, ML+fallback {pt['ML selector + native fallback']['geomean_speedup_vs_native']:.2f}x, always edge-join {pt['always edgejoin__aqe_off']['geomean_speedup_vs_native']:.2f}x, oracle {pt['oracle']['geomean_speedup_vs_native']:.2f}x.",
 ]

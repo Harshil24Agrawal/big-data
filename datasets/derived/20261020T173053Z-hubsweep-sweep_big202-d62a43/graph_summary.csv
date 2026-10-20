@@ -1,0 +1,2 @@
+campaign_id,graph_id,family,size_tier,seed,strategies_expected,strategies_with_results,min_measured_runs_per_strategy,required_runs,label_eligible,fastest_by_median_total_s,fastest_median_total_s,runner_up_by_median_total_s,margin_pct_total_s,fastest_by_median_query_s,fastest_median_query_s,runner_up_by_median_query_s,margin_pct_query_s
+20261020T173053Z-hubsweep-sweep_big202-d62a43,hubsweep-H1-w99-n100k-s202-5d26f271,hub_sweep,n100k,202,3,3,2,2,True,hypercube_unified__aqe_off,40.5721,edgejoin__aqe_off,96.44,hypercube_unified__aqe_off,33.7613,edgejoin__aqe_off,136.07
