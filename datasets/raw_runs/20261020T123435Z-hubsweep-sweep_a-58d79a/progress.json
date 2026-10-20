@@ -8,5 +8,15 @@
     "status": "done",
     "seconds": 464.1,
     "finished_utc": "2026-10-20T12:51:51.301889+00:00"
+  },
+  "hubsweep-H4-w80-n100k-s101-2d52aece": {
+    "status": "done",
+    "seconds": 566.8,
+    "finished_utc": "2026-10-20T13:01:18.137677+00:00"
+  },
+  "hubsweep-H8-w80-n100k-s101-5c899012": {
+    "status": "done",
+    "seconds": 508.8,
+    "finished_utc": "2026-10-20T13:09:46.934614+00:00"
   }
 }
