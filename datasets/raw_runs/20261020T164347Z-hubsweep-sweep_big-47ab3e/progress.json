@@ -3,5 +3,10 @@
     "status": "done",
     "seconds": 1055.2,
     "finished_utc": "2026-10-20T17:01:22.404393+00:00"
+  },
+  "hubsweep-H1-w99p5-n100k-s101-f4745efe": {
+    "status": "done",
+    "seconds": 1730.8,
+    "finished_utc": "2026-10-20T17:30:13.208470+00:00"
   }
 }
