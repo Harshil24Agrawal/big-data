@@ -48,7 +48,7 @@ warnings.filterwarnings("ignore")
 REPO = os.path.abspath(os.path.join(os.getcwd(), "..")) if os.path.basename(os.getcwd()) == "notebooks" else os.getcwd()
 sys.path.insert(0, REPO)
 from ml.build_feature_table import FEATURE_COLUMNS
-from ml.build_combined_table import S4, CLASS_OF
+from ml.build_combined_table import STRATS, CLASS_OF
 
 TABLE = os.path.join(REPO, "datasets", "derived", "training", "combined_table.csv")
 OUT = os.path.join(REPO, "datasets", "derived", "selector_v2")
@@ -60,7 +60,7 @@ CLASSES = ["edgejoin", "hubsplit", "native"]
 RES = {}                                              # everything reported is stored here and written to results.json
 """)
 
-md("## 1. Data\nOne row per graph. Inputs = pre-execution graph features; targets = measured median `total_s` (profiling + query) of 4 strategies.")
+md("## 1. Data\nOne row per graph. Inputs = pre-execution graph features; targets = measured median `total_s` (profiling + query) of 3 strategies.")
 code("""
 df = pd.read_csv(TABLE)
 df["group"] = np.where(df.family == "hub_sweep", "hub_sweep_H" + df.hub_count.fillna(0).astype(int).astype(str), df.family)
@@ -68,11 +68,11 @@ df["group"] = np.where(df.family == "hub_sweep", "hub_sweep_H" + df.hub_count.fi
 df["log_hub_work"] = np.log1p(df.raw_work_sum * df.work_in_hubs_share)
 BASE = list(FEATURE_COLUMNS)
 FEATS = BASE + ["log_hub_work"]
-T = np.column_stack([df[f"median_total_s__{s}"].values for s in S4])      # measured medians, seconds
+T = np.column_stack([df[f"median_total_s__{s}"].values for s in STRATS])      # measured medians, seconds
 LOGT = np.log(T)
 y_class = df.best_class.values
 y_strat = df.best_strategy.values
-print(f"{len(df)} graphs x {len(FEATS)} input features; strategies: {S4}")
+print(f"{len(df)} graphs x {len(FEATS)} input features; strategies: {STRATS}")
 print(df.protocol.value_counts().to_string()); print(); print(df.group.value_counts().to_string())
 RES["n_graphs"] = int(len(df)); RES["n_features"] = len(FEATS); RES["features"] = FEATS
 RES["protocols"] = df.protocol.value_counts().to_dict()
@@ -80,7 +80,7 @@ display(df[["graph_id", "group", "protocol", "work_max_share", "work_in_hubs_sha
 """)
 
 md("""
-**Classes.** `edgejoin` = plain edge join (AQE off). `hubsplit` = salting or the hub-aware unified hypercube (both split heavy-hub work).
+**Classes.** `edgejoin` = plain edge join (AQE off). `hubsplit` = the hub-aware unified hypercube (splits heavy-hub work; salting was dropped from the sweeps because it was never fastest, see `median_total_s__salt1d__aqe_off` column).
 `native` = GraphFrames `find` with AQE on. The class is the strategy family a user would actually choose between.
 The label is the strategy with the lowest *median total time*; `label_clear` marks labels whose lead over the runner-up exceeds both runs' IQR.
 """)
@@ -103,9 +103,9 @@ md("### 2. Runtime versus hub share — where (if anywhere) hub-splitting wins\n
 code("""
 sw = df[df.family == "hub_sweep"].copy()
 fig, axes = plt.subplots(1, 2, figsize=(12, 4))
-colors = {"edgejoin__aqe_off": "#4C78A8", "native__aqe_on": "#72B7B2", "salt1d__aqe_off": "#F58518", "hypercube_unified__aqe_off": "#E45756"}
+colors = {"edgejoin__aqe_off": "#4C78A8", "native__aqe_on": "#72B7B2", "hypercube_unified__aqe_off": "#E45756"}
 if len(sw):
-    for s in S4:
+    for s in STRATS:
         sub = sw.sort_values("work_in_hubs_share")
         axes[0].plot(sub.work_in_hubs_share, sub[f"median_total_s__{s}"], "o", label=s, color=colors[s], alpha=.75)
         axes[1].plot(sub.work_in_hubs_share, sub[f"median_query_s__{s}"], "o", label=s, color=colors[s], alpha=.75)
@@ -211,7 +211,7 @@ print("per-class recall (LOGO,", best_name, "):", {c: round(cm[i, i] / max(cm[i]
 
 md("""
 ## 4. Runtime regressor
-One multi-output random forest predicts `log(median total_s)` for all four strategies at once (this is the *Bao/Lero-style* "predict cost, then choose" idea).
+One multi-output random forest predicts `log(median total_s)` for all three strategies at once (this is the *Bao/Lero-style* "predict cost, then choose" idea).
 Held out by LOGO and LOSG.
 """)
 code("""
@@ -236,7 +236,7 @@ for sch, P in PRED.items():
 reg_tab = pd.DataFrame(reg_rows).T.round(3); display(reg_tab); RES["regressor"] = reg_tab.to_dict(orient="index")
 P = PRED["LOGO"]
 fig, ax = plt.subplots(figsize=(4.8, 4.4))
-for k, s in enumerate(S4): ax.scatter(np.exp(LOGT[:, k]), np.exp(P[:, k]), s=14, alpha=.7, label=s, color=colors[s])
+for k, s in enumerate(STRATS): ax.scatter(np.exp(LOGT[:, k]), np.exp(P[:, k]), s=14, alpha=.7, label=s, color=colors[s])
 lim = [T.min() * .8, T.max() * 1.2]; ax.plot(lim, lim, "k--", lw=.8); ax.set_xscale("log"); ax.set_yscale("log")
 ax.set_xlabel("measured median total_s"); ax.set_ylabel("predicted (held-out graph)"); ax.set_title("Regressor: predicted vs measured (LOGO)"); ax.legend(fontsize=6)
 plt.tight_layout(); plt.savefig(f"{OUT}/regressor_pred_vs_actual.png", dpi=130); plt.show()
@@ -252,7 +252,7 @@ FALLBACK = 0.05
 def choose(Pm, fallback=None):
     ch = Pm.argmin(1)
     if fallback is not None:
-        nat = S4.index(NATIVE)
+        nat = STRATS.index(NATIVE)
         gain = 1 - np.exp(Pm.min(1) - Pm[:, nat])
         ch = np.where(gain > fallback, ch, nat)
     return ch
@@ -260,14 +260,14 @@ def choose(Pm, fallback=None):
 def policy_table(scheme):
     P = PRED[scheme]; m = ~np.isnan(P[:, 0]); ix = np.where(m)[0]
     t_best = T[ix].min(1); pol = {}
-    for k, s in enumerate(S4): pol[f"always {s}"] = np.full(len(ix), k)
-    rule_class = rule_pred(df.iloc[ix]); pol["rule (hubs->unified, else native)"] = np.array([S4.index("hypercube_unified__aqe_off") if c == "hubsplit" else S4.index(NATIVE) for c in rule_class])
+    for k, s in enumerate(STRATS): pol[f"always {s}"] = np.full(len(ix), k)
+    rule_class = rule_pred(df.iloc[ix]); pol["rule (hubs->unified, else native)"] = np.array([STRATS.index("hypercube_unified__aqe_off") if c == "hubsplit" else STRATS.index(NATIVE) for c in rule_class])
     pol["ML selector"] = choose(P[ix]); pol["ML selector + native fallback"] = choose(P[ix], FALLBACK)
     pol["oracle"] = T[ix].argmin(1)
     out = []
     for name, ch in pol.items():
-        t = T[ix, ch]; nat = T[ix, S4.index(NATIVE)]
-        cls_ok = np.mean([CLASS_OF[S4[c]] == y_class[i] for c, i in zip(ch, ix)])
+        t = T[ix, ch]; nat = T[ix, STRATS.index(NATIVE)]
+        cls_ok = np.mean([CLASS_OF[STRATS[c]] == y_class[i] for c, i in zip(ch, ix)])
         out.append(dict(policy=name, class_accuracy=cls_ok, strategy_accuracy=float(np.mean(ch == T[ix].argmin(1))),
                         mean_regret_pct=float(np.mean(t / t_best - 1) * 100), median_regret_pct=float(np.median(t / t_best - 1) * 100),
                         worst_regret_pct=float(np.max(t / t_best - 1) * 100), geomean_speedup_vs_native=float(np.exp(np.mean(np.log(nat / t)))),
@@ -311,11 +311,11 @@ inf_ms = (time.perf_counter() - t0) / 50 * 1000
 prof = np.median([np.median(df[f"median_profiling_s__hypercube_unified__aqe_off"].dropna()), 0])
 prof = float(np.median(df["median_profiling_s__hypercube_unified__aqe_off"].dropna()))
 tab, ix, pol = POL["LOGO"]; t = T[ix, pol["ML selector + native fallback"]]
-nat = T[ix, S4.index(NATIVE)]; best_fixed = T[ix].sum(0).argmin()
+nat = T[ix, STRATS.index(NATIVE)]; best_fixed = T[ix].sum(0).argmin()
 oh = pd.Series({"inference_ms_per_graph": inf_ms, "profiling_s_proxy_for_feature_cost": prof,
                 "geomean_speedup_vs_native_ML_fallback": float(np.exp(np.mean(np.log(nat / t)))),
                 "geomean_speedup_vs_native_if_features_cost_proxy_added": float(np.exp(np.mean(np.log(nat / (t + prof))))),
-                "best_fixed_strategy": S4[best_fixed]})
+                "best_fixed_strategy": STRATS[best_fixed]})
 display(oh); RES["overhead"] = {k: (v if isinstance(v, str) else float(v)) for k, v in oh.items()}
 """)
 

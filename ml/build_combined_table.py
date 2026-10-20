@@ -3,7 +3,7 @@
 build_combined_table.py  (Phase 3, combined dataset)
 ====================================================
 Merges the 31 original benchmarked graphs (5 measured runs, 7 strategies) with the hub-sweep graphs
-(3 measured runs, 4 strategies) into ONE table restricted to the 4 strategies measured everywhere.
+(3 measured runs, 4 strategies) into ONE table restricted to the 3 strategies measured everywhere.
 
   python ml/build_combined_table.py
   -> datasets/derived/training/combined_table.csv   (+ combined_SOURCE.txt)
@@ -12,10 +12,11 @@ Comparability (checked, refused otherwise)
  * same machine_id for every row;
  * same measurement configuration EXCEPT the number of measured runs per strategy (5 vs 3) and the safety-only limits.
    The `protocol` column records which rows used which; evaluation code reports results overall and per protocol.
-Strategies (4): edgejoin__aqe_off, native__aqe_on, salt1d__aqe_off, hypercube_unified__aqe_off.
+Strategies (3): edgejoin__aqe_off, native__aqe_on, hypercube_unified__aqe_off (salt1d was dropped from sweeps B/C to save time: it
+   was never fastest on 31 original + 12 sweep-A graphs; its medians are kept as diagnostic columns where measured).
    (AQE-on edge-join is not re-measured on the sweep graphs: with the 256 MB skew threshold AQE skew splitting never
     fires at these data sizes, and on the 31 original graphs edge-join on/off are a statistical tie.)
-Classes: edgejoin = edgejoin__aqe_off; hubsplit = salt1d / hypercube_unified; native = native__aqe_on.
+Classes: edgejoin = edgejoin__aqe_off; hubsplit = hypercube_unified; native = native__aqe_on.
 Label = lowest median total_s (profiling + query). `label_clear` = gap to runner-up exceeds both IQRs.
 Only graph features known BEFORE running (FEATURE_COLUMNS) are model inputs; runtimes are targets/diagnostics.
 """
@@ -34,9 +35,10 @@ from ml.build_training_table import choose_label, SAFETY_ONLY_KEYS  # noqa: E402
 
 DERIVED = os.path.join(REPO_ROOT, "datasets", "derived")
 RAW = os.path.join(REPO_ROOT, "datasets", "raw_runs")
-S4 = ["edgejoin__aqe_off", "native__aqe_on", "salt1d__aqe_off", "hypercube_unified__aqe_off"]
+STRATS = ["edgejoin__aqe_off", "native__aqe_on", "hypercube_unified__aqe_off"]
+DIAG = "salt1d__aqe_off"   # measured on the 31 original graphs and sweep A only; diagnostic column, never a label or input
 CLASS_OF = {"edgejoin__aqe_off": "edgejoin", "native__aqe_on": "native",
-            "salt1d__aqe_off": "hubsplit", "hypercube_unified__aqe_off": "hubsplit"}
+            "hypercube_unified__aqe_off": "hubsplit"}
 OUT = os.path.join(DERIVED, "training", "combined_table.csv")
 
 
@@ -68,18 +70,20 @@ def original_rows():
         for c in FEATURE_COLUMNS:
             d[c] = r[c]
         d["raw_work_sum"] = r["raw_work_sum"]
-        for s in S4:
+        for s in STRATS:
             d[f"median_total_s__{s}"] = r[f"median_total_s__{s}"]
             d[f"total_s_iqr__{s}"] = r[f"total_s_iqr__{s}"]
             d[f"median_query_s__{s}"] = r[f"median_query_s__{s}"]
             d[f"median_profiling_s__{s}"] = r[f"median_profiling_s__{s}"]
             d[f"n_valid_runs__{s}"] = r[f"n_valid_runs__{s}"]
+        d[f"median_total_s__{DIAG}"] = r[f"median_total_s__{DIAG}"]
         rows.append(d)
     return rows
 
 
 def sweep_rows():
     chosen = {}
+    chosen_diag = {}
     for cid in sorted(os.listdir(DERIVED)):
         gp, sp = (os.path.join(DERIVED, cid, n) for n in ("graph_summary.csv", "strategy_summary.csv"))
         if "hubsweep-sweep" not in cid or not (os.path.exists(gp) and os.path.exists(sp)):
@@ -87,17 +91,19 @@ def sweep_rows():
         ok = {g["graph_id"] for g in _read(gp) if g["label_eligible"] == "True"}
         by = {}
         for r in _read(sp):
-            if r["graph_id"] in ok and r["strategy"] in S4 and int(r["n_measured_ok"] or 0) > 0:
+            if r["graph_id"] in ok and r["strategy"] in STRATS and int(r["n_measured_ok"] or 0) > 0:
                 by.setdefault(r["graph_id"], {})[r["strategy"]] = r
         for gid, rs in by.items():
-            if all(s in rs for s in S4):
+            if all(s in rs for s in STRATS):
                 chosen[gid] = (cid, rs)
+                chosen_diag[gid] = [r for r in _read(sp) if r["graph_id"] == gid and r["strategy"] == DIAG]
     out = []
     for gid, (cid, rs) in sorted(chosen.items()):
         with open(os.path.join(REPO_ROOT, "datasets", "hubsweep", gid, "graph.json")) as f:
             gj = json.load(f)
         spec = gj["spec"]
         feats = features_from_measured(gj["measured"])
+        sdiag = (chosen_diag.get(gid) or [None])[0]
         cfg, mach, runs = comparison_config(cid)
         d = {"graph_id": gid, "family": "hub_sweep", "size_tier": "n100k", "seed": spec["seed"],
              "protocol": f"{runs}runs_sweep", "source_campaign": cid, "cmp_config": cfg, "machine_id": mach}
@@ -106,13 +112,14 @@ def sweep_rows():
         d["raw_work_sum"] = feats["raw_work_sum"]
         d["hub_count"] = spec["params"]["hub_count"]
         d["hub_work_share_planned"] = spec["params"]["hub_work_share"]
-        for s in S4:
+        for s in STRATS:
             r = rs[s]
             d[f"median_total_s__{s}"] = r["total_s_median"]
             d[f"total_s_iqr__{s}"] = r["total_s_iqr"]
             d[f"median_query_s__{s}"] = r["query_s_median"]
             d[f"median_profiling_s__{s}"] = r["profiling_s_median"]
             d[f"n_valid_runs__{s}"] = r["n_measured_ok"]
+        d[f"median_total_s__{DIAG}"] = sdiag["total_s_median"] if sdiag else ""
         out.append(d)
     return out
 
@@ -123,8 +130,8 @@ def build():
     if len(cfgs) > 1:
         raise SystemExit(f"refusing to mix configurations/machines: {sorted(cfgs)}")
     for r in rows:
-        med = {s: float(r[f"median_total_s__{s}"]) for s in S4}
-        iqr = {s: _f(r[f"total_s_iqr__{s}"]) for s in S4}
+        med = {s: float(r[f"median_total_s__{s}"]) for s in STRATS}
+        iqr = {s: _f(r[f"total_s_iqr__{s}"]) for s in STRATS}
         best, second, margin, clear = choose_label(med, iqr)
         r.update(best_strategy=best, best_class=CLASS_OF[best], runner_up_strategy=second,
                  label_margin_pct=margin, label_clear=clear)
@@ -137,9 +144,10 @@ def main():
     rows = build()
     cols = ["graph_id", "family", "size_tier", "seed", "protocol", "source_campaign", "machine_id", "cmp_config",
             "hub_count", "hub_work_share_planned"] + FEATURE_COLUMNS + ["raw_work_sum"]
-    for s in S4:
+    for s in STRATS:
         cols += [f"median_total_s__{s}", f"total_s_iqr__{s}", f"median_query_s__{s}", f"median_profiling_s__{s}",
                  f"n_valid_runs__{s}"]
+    cols += [f"median_total_s__{DIAG}"]
     cols += ["best_strategy", "best_class", "runner_up_strategy", "label_margin_pct", "label_clear"]
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", newline="") as f:
