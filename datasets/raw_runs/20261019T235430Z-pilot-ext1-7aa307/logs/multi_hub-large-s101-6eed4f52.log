@@ -45,3 +45,13 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [multi_hub-large-s101-6eed4f52] measured r4 edgejoin__aqe_on             ok       q=25.2534s total=25.2534s paths=204199997 dom max/med=1.0408 cv=0.2763 skew=0
 [multi_hub-large-s101-6eed4f52] measured r4 hypercube__aqe_off           ok       q=39.6956s total=50.72s paths=204199997 dom max/med=7.7119 cv=0.5771 skew=None
 [multi_hub-large-s101-6eed4f52] measured r4 edgejoin__aqe_off            ok       q=19.9658s total=19.9658s paths=204199997 dom max/med=15.5179 cv=1.3034 skew=None
+[multi_hub-large-s101-6eed4f52] measured r4 native__aqe_off              ok       q=40.5458s total=40.5458s paths=204199997 dom max/med=17.5889 cv=1.3388 skew=None
+[multi_hub-large-s101-6eed4f52] measured r4 hypercube_unified__aqe_off   ok       q=38.7388s total=59.8455s paths=204199997 dom max/med=3.4286 cv=0.3329 skew=None
+[multi_hub-large-s101-6eed4f52] measured r4 salt1d__aqe_off              ok       q=35.1811s total=50.474s paths=204199997 dom max/med=13.5417 cv=0.785 skew=None
+[multi_hub-large-s101-6eed4f52] measured r5 hypercube__aqe_off           ok       q=28.0251s total=38.1586s paths=204199997 dom max/med=5.3231 cv=0.4093 skew=None
+[multi_hub-large-s101-6eed4f52] measured r5 native__aqe_on               ok       q=34.8458s total=34.8458s paths=204199997 dom max/med=1.3224 cv=0.3432 skew=0
+[multi_hub-large-s101-6eed4f52] measured r5 edgejoin__aqe_on             ok       q=26.6424s total=26.6424s paths=204199997 dom max/med=1.157 cv=0.3249 skew=0
+[multi_hub-large-s101-6eed4f52] measured r5 hypercube_unified__aqe_off   ok       q=34.3241s total=53.621s paths=204199997 dom max/med=2.6859 cv=0.2162 skew=None
+[multi_hub-large-s101-6eed4f52] measured r5 edgejoin__aqe_off            ok       q=25.5802s total=25.5802s paths=204199997 dom max/med=16.1509 cv=1.3204 skew=None
+[multi_hub-large-s101-6eed4f52] measured r5 native__aqe_off              ok       q=32.604s total=32.604s paths=204199997 dom max/med=15.8 cv=1.3377 skew=None
+[multi_hub-large-s101-6eed4f52] measured r5 salt1d__aqe_off              ok       q=27.6672s total=38.6953s paths=204199997 dom max/med=9.1268 cv=0.6148 skew=None
