@@ -488,14 +488,126 @@ lines = [
 display(Markdown("\\n".join(lines)))
 with open(f"{OUT}/results.json", "w") as f: json.dump(RES, f, indent=1, default=float)
 clf_table.to_csv(f"{OUT}/classifier_scores.csv", index=False)
-pd.concat({sch: POL[sch][0] for sch in POL}).to_csv(f"{OUT}/policy_scores.csv")
+pd.concat([POL[sch][0].assign(scheme=sch) for sch in POL])[["scheme"] + list(POL["LOGO"][0].columns)].to_csv(f"{OUT}/policy_scores.csv", index=False)
 pd.DataFrame({"graph_id": df.graph_id, "group": df.group, "true_class": y_class, "true_best": y_strat,
               **{f"pred_class_logo_{m}": clf12["LOGO"]["preds"][m] for m in clf12["LOGO"]["preds"]}}).to_csv(f"{OUT}/cv_predictions_logo.csv", index=False)
 print("saved to", OUT)
 """)
 
 md("""
-## 8. Reproducibility check
+## 8. Tableau (Phase 4): export the data, load it back, preview the dashboard
+Tableau does not train anything; it is the presentation layer. This section
+1. **exports** four Tableau-ready CSV files to `datasets/derived/tableau/` from the results computed above (and a single `.hyper` extract with all four tables if the free `tableauhyperapi` package is installed),
+2. **loads them back from disk** exactly as Tableau's *Text file* connector would, and
+3. draws a **preview of the Tableau dashboard** (the same six sheets described in `docs/TABLEAU_GUIDE.md`) so the notebook shows the final dashboard even without Tableau.
+
+In Tableau: *Connect → Text file → `graph_strategy_long.csv`*, then add the other three CSVs as separate data sources (different grains; do not join them). Or *Connect → More… → Hyper file → `selector_results.hyper`*.
+""")
+code("""
+TAB = os.path.join(REPO, "datasets", "derived", "tableau"); os.makedirs(TAB, exist_ok=True)
+# (1) graph x strategy (62 x 3 = 186 rows): the main Tableau source
+best_t = T.min(1); native_t = T[:, STRATS.index(NATIVE)]
+keep = ["graph_id", "family", "size_tier", "seed", "protocol", "hub_count", "hub_work_share_planned", "raw_work_sum",
+        "work_max_share", "work_in_hubs_share", "in_gini", "out_gini", "best_strategy", "best_class", "label_clear"]
+parts = []
+for k, s in enumerate(STRATS):
+    p_ = df[keep].copy()
+    p_["max_vertex_work"] = df.raw_work_sum * df.work_max_share          # paths through the busiest vertex
+    p_["strategy"] = s
+    for c in ["median_total_s", "median_query_s", "median_profiling_s"]: p_[c] = df[f"{c}__{s}"]
+    p_["total_s_iqr"] = df[f"total_s_iqr__{s}"]
+    p_["regret_pct_vs_best"] = (T[:, k] / best_t - 1) * 100
+    p_["speedup_vs_native"] = native_t / T[:, k]
+    parts.append(p_)
+tab_long = pd.concat(parts, ignore_index=True)
+# (2) policy scores per held-out scheme, (3) classifier scores per scheme, (4) per-graph LOGO predictions
+tab_pol = pd.concat([POL[sch][0].assign(scheme=sch) for sch in POL])[["scheme"] + list(POL["LOGO"][0].columns)]
+tab_clf = clf_table.copy()
+tab_cv = pd.DataFrame({"graph_id": df.graph_id, "group": df.group, "true_class": y_class, "true_best": y_strat,
+                       **{f"pred_class_logo_{m}": clf12["LOGO"]["preds"][m] for m in clf12["LOGO"]["preds"]}})
+TABLES = {"graph_strategy_long": tab_long, "policy_scores": tab_pol, "classifier_scores": tab_clf, "cv_predictions_logo": tab_cv}
+for name, t in TABLES.items():
+    t.to_csv(os.path.join(TAB, f"{name}.csv"), index=False); print(f"wrote {name}.csv  {t.shape[0]} rows x {t.shape[1]} cols")
+try:                                    # optional: one Tableau extract with all four tables
+    from tableauhyperapi import HyperProcess, Telemetry, Connection, CreateMode, TableDefinition, SqlType, Inserter, TableName
+    hyper_path = os.path.join(TAB, "selector_results.hyper")
+    def _sqltype(dt): return SqlType.double() if dt.kind == "f" else SqlType.big_int() if dt.kind in "iu" else SqlType.bool() if dt.kind == "b" else SqlType.text()
+    with HyperProcess(Telemetry.DO_NOT_SEND_USAGE_DATA_TO_TABLEAU) as hp, Connection(hp.endpoint, hyper_path, CreateMode.CREATE_AND_REPLACE) as con:
+        con.catalog.create_schema("Extract")
+        for name, t in TABLES.items():
+            td = TableDefinition(TableName("Extract", name), [TableDefinition.Column(c, _sqltype(t[c].dtype)) for c in t.columns])
+            con.catalog.create_table(td)
+            rows_ = [[None if (isinstance(v, float) and np.isnan(v)) else (v.item() if hasattr(v, "item") else v) for v in r] for r in t.itertuples(index=False)]
+            with Inserter(con, td) as ins: ins.add_rows(rows_); ins.execute()
+    print("wrote selector_results.hyper (4 tables, open directly in Tableau)")
+except ImportError:
+    print("tableauhyperapi not installed -> CSVs only (pip install tableauhyperapi for a .hyper extract)")
+""")
+code("""
+# Load the Tableau sources back from disk (what Tableau reads) and check they reproduce the notebook's numbers
+L = {name: pd.read_csv(os.path.join(TAB, f"{name}.csv")) for name in TABLES}
+for name, t in L.items(): print(f"{name:22s} {t.shape}")
+g_ = L["graph_strategy_long"]
+assert len(g_) == 3 * len(df) and g_.graph_id.nunique() == len(df)
+assert np.allclose(g_[g_.strategy == STRATS[0]].median_total_s.values, T[:, 0])
+pl_ = L["policy_scores"]; ml_ = pl_[(pl_.scheme == "LOGO") & (pl_.policy == "ML selector")].iloc[0]
+assert abs(ml_.mean_regret_pct - POL["LOGO"][0].set_index("policy").loc["ML selector", "mean_regret_pct"]) < 1e-9
+print("Tableau sources load and match the notebook results.")
+wide = g_.pivot_table(index="graph_id", columns="strategy", values="median_total_s")
+kpi = dict(graphs=len(wide), ej_faster=int((wide["edgejoin__aqe_off"] < wide["native__aqe_on"]).sum()),
+           hub_wins=int((g_.drop_duplicates("graph_id").best_class == "hubsplit").sum()),
+           ml_regret=ml_.mean_regret_pct,
+           ej_regret=pl_[(pl_.scheme == "LOGO") & (pl_.policy == "always edgejoin__aqe_off")].mean_regret_pct.iloc[0])
+RES["tableau_kpis"] = {k: (round(float(v), 4) if isinstance(v, float) else v) for k, v in kpi.items()}
+print(RES["tableau_kpis"])
+""")
+md("""
+### Dashboard preview (the Tableau dashboard, drawn from the loaded Tableau sources)
+KPI row → **Sheet 1 Crossover** (hypercube ÷ edge-join time vs paths through the busiest vertex, log–log, reference line at 1) → **Sheet 2 Runtime vs hub share** (single hub, seed 101) → **Sheet 3 Policy regret** → **Sheet 4 Classifier vs majority** → **Sheet 5 Label balance by family** → **Sheet 6 graph table**. Change `SCHEME` to `"LOSG"` or `"SEED202"` to see the same view as Tableau's scheme parameter.
+""")
+code("""
+SCHEME = "LOGO"                       # Tableau parameter: LOGO / LOSG / SEED202
+g1 = g_.drop_duplicates("graph_id").set_index("graph_id")
+ratio = (wide["hypercube_unified__aqe_off"] / wide["edgejoin__aqe_off"]).reindex(g1.index)
+CC = {"edgejoin": "#4C78A8", "hubsplit": "#E45756", "native": "#72B7B2"}
+SC = {"edgejoin__aqe_off": "#4C78A8", "native__aqe_on": "#72B7B2", "hypercube_unified__aqe_off": "#E45756"}
+fig = plt.figure(figsize=(17, 13)); gs = fig.add_gridspec(3, 12, height_ratios=[0.28, 1, 1], hspace=.42, wspace=1.2)
+tiles = [("Graphs benchmarked", f"{kpi['graphs']}"), ("Edge-join faster than native", f"{kpi['ej_faster']} / {kpi['graphs']}"),
+         ("Hub-splitting wins", f"{kpi['hub_wins']} graphs"), ("Selector mean regret (LOGO)", f"{kpi['ml_regret']:.1f}%  vs {kpi['ej_regret']:.1f}%")]
+for i, (lab, val) in enumerate(tiles):
+    a = fig.add_subplot(gs[0, i * 3:(i + 1) * 3]); a.axis("off")
+    a.add_patch(plt.Rectangle((0, 0), 1, 1, transform=a.transAxes, color="#F2F4F7"))
+    a.text(.5, .62, val, ha="center", va="center", fontsize=19, weight="bold", transform=a.transAxes); a.text(.5, .2, lab, ha="center", fontsize=10, color="#555", transform=a.transAxes)
+a1 = fig.add_subplot(gs[1, :6])
+for c in CLASSES:
+    m_ = g1.best_class == c; a1.scatter(g1.max_vertex_work[m_], ratio[m_], s=40, color=CC[c], edgecolor="k", lw=.3, label=f"best = {c}")
+a1.axhline(1, ls="--", c="k", lw=1); a1.set_xscale("log"); a1.set_yscale("log"); a1.grid(alpha=.3); a1.legend(fontsize=8)
+a1.set_xlabel("paths through the busiest vertex"); a1.set_ylabel("hypercube time / edge-join time"); a1.set_title("Sheet 1 - Crossover (below 1 = hub-splitting faster)")
+a2 = fig.add_subplot(gs[1, 6:])
+sw1 = g_[(g_.family == "hub_sweep") & (g_.hub_count == 1) & (g_.seed == 101)]
+for s in STRATS:
+    q_ = sw1[sw1.strategy == s].sort_values("hub_work_share_planned"); a2.plot(q_.hub_work_share_planned * 100, q_.median_total_s, "o-", color=SC[s], label=s)
+a2.set_yscale("log"); a2.set_xlabel("planned hub share of two-hop work (%)"); a2.set_ylabel("median total time (s)"); a2.grid(alpha=.3); a2.legend(fontsize=8)
+a2.set_title("Sheet 2 - Runtime vs hub share (1 hub, seed 101)")
+a3 = fig.add_subplot(gs[2, 1:4])
+pp = pl_[pl_.scheme == SCHEME].sort_values("mean_regret_pct", ascending=False)
+a3.barh(pp.policy, pp.mean_regret_pct, color=["#E45756" if "ML" in x else "#9AA5B1" for x in pp.policy]); a3.set_xlabel("mean regret vs best (%)"); a3.set_title(f"Sheet 3 - Policy regret ({SCHEME})"); a3.tick_params(axis="y", labelsize=8)
+a4 = fig.add_subplot(gs[2, 5:8])
+cs = L["classifier_scores"]; cs = cs[cs.scheme == SCHEME].sort_values("accuracy")
+a4.barh(cs.model, cs.accuracy, color=["#555" if m == "majority" else "#4C78A8" for m in cs.model])
+a4.axvline(cs.set_index("model").loc["majority", "accuracy"], ls="--", c="k", lw=1); a4.set_xlim(0, 1); a4.set_xlabel("accuracy (dashed = majority)"); a4.set_title(f"Sheet 4 - Classifier vs majority ({SCHEME})")
+a5 = fig.add_subplot(gs[2, 9:])
+pd.crosstab(g1.family, g1.best_class).reindex(columns=CLASSES, fill_value=0).plot.barh(stacked=True, ax=a5, color=[CC[c] for c in CLASSES], legend=True)
+a5.set_xlabel("graphs"); a5.set_ylabel(""); a5.tick_params(axis="y", labelsize=8); a5.set_title("Sheet 5 - Label balance by family"); a5.legend(fontsize=8)
+fig.suptitle("Spark strategy selector - dashboard (Tableau sources)", fontsize=15, y=.97)
+plt.savefig(os.path.join(TAB, "dashboard_preview.png"), dpi=110, bbox_inches="tight"); plt.show()
+# Sheet 6 - the graph table
+sheet6 = wide.join(g1[["family", "hub_count", "max_vertex_work", "best_class"]]).sort_values("max_vertex_work", ascending=False)
+display(sheet6.round(2).head(15))
+""")
+
+md("""
+## 9. Reproducibility check
 Everything above is deterministic: fixed random seeds, `n_jobs=1`, no sampling. Re-running the notebook top to bottom (300 trees, the committed `combined_table.csv`, the library versions printed at the top) must give the same numbers. The cell below compares the key results with `expected_results.json`, committed next to the notebook. To refresh the file after you deliberately change the data or code, run with `NB_UPDATE_EXPECTED=1`.
 """)
 code("""
@@ -510,6 +622,8 @@ def key_numbers():
     for sch, r in RES["regressor"].items():
         k[f"reg_r2|{sch}"] = r["r2_log"]; k[f"reg_top2|{sch}"] = r["top2"]
     k["n_graphs"] = RES["n_graphs"]; k["majority_frac"] = RES["majority_frac_global"]
+    for name, t in TABLES.items(): k[f"tableau_rows|{name}"] = len(t)
+    for kk, vv in RES["tableau_kpis"].items(): k[f"tableau_kpi|{kk}"] = vv
     return k
 KEYS = key_numbers()
 EXP = os.path.join(REPO, "notebooks", "expected_results.json")

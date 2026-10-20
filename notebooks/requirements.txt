@@ -7,3 +7,4 @@ matplotlib==3.11.2
 nbformat
 nbconvert
 ipykernel
+tableauhyperapi      # optional: writes the Tableau .hyper extract

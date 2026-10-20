@@ -320,3 +320,5 @@ With 2, 4 or 8 hubs (work split between them) edge-join wins at every share, eve
 - *Correlations and regressor error* (`correlations_and_errors.png`): heavily correlated size/work features (why trees are used and importances are shared); regressor error is centred on 0.
 
 Numbers in the report are unchanged by this upgrade (verified by the reproducibility cell).
+
+**Update (v2.2):** the notebook now has a **Tableau section (8)**. It exports the four Tableau CSVs plus a `selector_results.hyper` extract, loads them back, and draws the dashboard preview (`datasets/derived/tableau/dashboard_preview.png`). The reproducibility check (section 9) now covers 101 numbers. For the full step-by-step flow and a file-by-file map, read **`docs/PROJECT_WALKTHROUGH.md`**.

@@ -92,6 +92,15 @@
   "reg_r2|SEED202": 0.937,
   "reg_top2|LOGO": 1.0,
   "reg_top2|LOSG": 0.984,
-  "reg_top2|SEED202": 1.0
+  "reg_top2|SEED202": 1.0,
+  "tableau_kpi|ej_faster": 56,
+  "tableau_kpi|ej_regret": 8.3192,
+  "tableau_kpi|graphs": 62,
+  "tableau_kpi|hub_wins": 6,
+  "tableau_kpi|ml_regret": 4.634,
+  "tableau_rows|classifier_scores": 21,
+  "tableau_rows|cv_predictions_logo": 62,
+  "tableau_rows|graph_strategy_long": 186,
+  "tableau_rows|policy_scores": 21
  }
 }

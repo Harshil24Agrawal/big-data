@@ -575,7 +575,7 @@
   "SEED202": 0.5555555555555556
  },
  "overhead": {
-  "inference_ms_per_graph": 15.243081260000508,
+  "inference_ms_per_graph": 15.1728616399987,
   "profiling_s_proxy_for_feature_cost": 9.1304,
   "geomean_speedup_vs_native_ML_fallback": 1.3628280113941404,
   "geomean_speedup_vs_native_if_features_cost_proxy_added": 0.8379274379033866,
