@@ -19,3 +19,6 @@ datasets/pokec/raw/
 datasets/pokec/pokec_edges_parquet*/
 jars/*.jar
 .pytest_cache/
+
+# Tableau Hyper process logs
+hyperd*.log
