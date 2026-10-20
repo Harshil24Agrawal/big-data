@@ -16,3 +16,13 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [hubsweep-H8-w90-n100k-s101-37b7ce40] warmup   r0 hypercube_unified__aqe_off   ok       q=9.5868s total=15.9699s paths=49542188 dom max/med=8.2683 cv=0.6384 skew=None
 [hubsweep-H8-w90-n100k-s101-37b7ce40] measured r1 edgejoin__aqe_off            ok       q=9.0251s total=9.0251s paths=49542188 dom max/med=42.1875 cv=2.9065 skew=None
 [hubsweep-H8-w90-n100k-s101-37b7ce40] measured r1 native__aqe_on               ok       q=12.4418s total=12.4418s paths=49542188 dom max/med=1.0 cv=0.4921 skew=0
+[hubsweep-H8-w90-n100k-s101-37b7ce40] measured r1 salt1d__aqe_off              ok       q=16.2695s total=24.1908s paths=49542188 dom max/med=3.7857 cv=0.4963 skew=None
+[hubsweep-H8-w90-n100k-s101-37b7ce40] measured r1 hypercube_unified__aqe_off   ok       q=10.7983s total=18.6218s paths=49542188 dom max/med=6.9767 cv=0.6666 skew=None
+[hubsweep-H8-w90-n100k-s101-37b7ce40] measured r2 salt1d__aqe_off              ok       q=20.7116s total=28.0691s paths=49542188 dom max/med=4.52 cv=0.5559 skew=None
+[hubsweep-H8-w90-n100k-s101-37b7ce40] measured r2 hypercube_unified__aqe_off   ok       q=11.117s total=18.5245s paths=49542188 dom max/med=2.2381 cv=0.3378 skew=None
+[hubsweep-H8-w90-n100k-s101-37b7ce40] measured r2 edgejoin__aqe_off            ok       q=11.1659s total=11.1659s paths=49542188 dom max/med=45.0588 cv=2.7579 skew=None
+[hubsweep-H8-w90-n100k-s101-37b7ce40] measured r2 native__aqe_on               ok       q=16.3213s total=16.3213s paths=49542188 dom max/med=1.0 cv=0.5212 skew=0
+[hubsweep-H8-w90-n100k-s101-37b7ce40] measured r3 salt1d__aqe_off              ok       q=22.9061s total=39.4977s paths=49542188 dom max/med=19.0938 cv=1.063 skew=None
+[hubsweep-H8-w90-n100k-s101-37b7ce40] measured r3 hypercube_unified__aqe_off   ok       q=13.8362s total=21.7934s paths=49542188 dom max/med=8.7647 cv=0.8138 skew=None
+[hubsweep-H8-w90-n100k-s101-37b7ce40] measured r3 native__aqe_on               ok       q=15.3691s total=15.3691s paths=49542188 dom max/med=1.0 cv=0.6264 skew=0
+[hubsweep-H8-w90-n100k-s101-37b7ce40] measured r3 edgejoin__aqe_off            ok       q=10.2189s total=10.2189s paths=49542188 dom max/med=57.2222 cv=2.8929 skew=None
