@@ -56,6 +56,10 @@ PLANS = {
     "sweep_b": [(100_000, h, w, 101) for w in (0.50, 0.98) for h in (1, 2, 4, 8)],
     # sweep C: second seed for replication, same grid points as A and B where time allows
     "sweep_c": [(100_000, h, w, 202) for w in (0.90, 0.95, 0.98, 0.50) for h in (1, 4)],
+    # sweep big: ONE hub holding 99 % / 99.5 % of the work (hub work ~0.5 B / ~1 B paths) -- the regime where a straggler task
+    # could outweigh the hub-splitting profiling cost on 2 cores (sweeps A/B showed edge-join winning up to ~240M).
+    "sweep_big": [(100_000, 1, 0.99, 101), (100_000, 1, 0.995, 101)],
+    "sweep_big202": [(100_000, 1, 0.99, 202)],
 }
 
 
@@ -69,7 +73,9 @@ def spec_for(n, hubs, share, seed):
 def graph_id_for(spec):
     h = hashlib.sha256(json.dumps(spec, sort_keys=True).encode()).hexdigest()[:8]
     p = spec["params"]
-    return f"hubsweep-H{p['hub_count']}-w{int(round(p['hub_work_share'] * 100)):02d}-{spec['size_tier']}-s{spec['seed']}-{h}"
+    pct = p["hub_work_share"] * 100
+    tag = f"{int(round(pct)):02d}" if abs(pct - round(pct)) < 1e-9 else f"{pct:g}".replace(".", "p")
+    return f"hubsweep-H{p['hub_count']}-w{tag}-{spec['size_tier']}-s{spec['seed']}-{h}"
 
 
 def hub_degree(n, hubs, share):
