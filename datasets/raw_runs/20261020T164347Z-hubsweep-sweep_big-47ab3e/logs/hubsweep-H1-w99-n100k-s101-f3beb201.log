@@ -9,3 +9,12 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [hubsweep-H1-w99-n100k-s101-f3beb201] gate native__aqe_on               ok       match n=490529637
 [hubsweep-H1-w99-n100k-s101-f3beb201] gate edgejoin__aqe_off            ok       match n=490529637
 [hubsweep-H1-w99-n100k-s101-f3beb201] gate hypercube_unified__aqe_off   ok       match n=490529637
+[hubsweep-H1-w99-n100k-s101-f3beb201] warmup   r0 hypercube_unified__aqe_off   ok       q=58.38s total=83.4195s paths=490529637 dom max/med=87.4 cv=1.4553 skew=None
+[hubsweep-H1-w99-n100k-s101-f3beb201] warmup   r0 edgejoin__aqe_off            ok       q=92.5058s total=92.5058s paths=490529637 dom max/med=3685.25 cv=13.1858 skew=None
+[hubsweep-H1-w99-n100k-s101-f3beb201] warmup   r0 native__aqe_on               ok       q=130.0198s total=130.0198s paths=490529637 dom max/med=1.0 cv=0.9761 skew=0
+[hubsweep-H1-w99-n100k-s101-f3beb201] measured r1 edgejoin__aqe_off            ok       q=84.4354s total=84.4354s paths=490529637 dom max/med=3947.7368 cv=13.3529 skew=None
+[hubsweep-H1-w99-n100k-s101-f3beb201] measured r1 hypercube_unified__aqe_off   ok       q=34.2651s total=41.386s paths=490529637 dom max/med=116.12 cv=1.4206 skew=None
+[hubsweep-H1-w99-n100k-s101-f3beb201] measured r1 native__aqe_on               ok       q=136.0221s total=136.0221s paths=490529637 dom max/med=1.0 cv=0.9833 skew=0
+[hubsweep-H1-w99-n100k-s101-f3beb201] measured r2 hypercube_unified__aqe_off   ok       q=39.6374s total=53.0816s paths=490529637 dom max/med=80.4231 cv=1.3463 skew=None
+[hubsweep-H1-w99-n100k-s101-f3beb201] measured r2 edgejoin__aqe_off            ok       q=80.8057s total=80.8057s paths=490529637 dom max/med=4352.9412 cv=13.4193 skew=None
+[hubsweep-H1-w99-n100k-s101-f3beb201] measured r2 native__aqe_on               ok       q=129.0788s total=129.0788s paths=490529637 dom max/med=1.0 cv=0.9776 skew=0

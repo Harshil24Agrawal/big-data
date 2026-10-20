@@ -1,0 +1,12 @@
+{
+  "graph_id": "hubsweep-H1-w99p5-n100k-s101-f4745efe",
+  "source": "synthetic",
+  "family": "hub_sweep",
+  "size_tier": "n100k",
+  "seed": 101,
+  "num_vertices": 100000,
+  "num_edges": 762451,
+  "work_sum": 980812864,
+  "work_max": 975469054,
+  "edges_path": "/home/claude/rayirth556/hypergraph/datasets/hubsweep/hubsweep-H1-w99p5-n100k-s101-f4745efe/edges.parquet"
+}
