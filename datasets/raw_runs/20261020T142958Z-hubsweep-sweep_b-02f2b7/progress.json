@@ -23,5 +23,20 @@
     "status": "done",
     "seconds": 830.8,
     "finished_utc": "2026-10-20T15:08:03.155519+00:00"
+  },
+  "hubsweep-H2-w98-n100k-s101-cc0c0e8f": {
+    "status": "done",
+    "seconds": 581.7,
+    "finished_utc": "2026-10-20T15:17:44.845647+00:00"
+  },
+  "hubsweep-H4-w98-n100k-s101-d8fc7976": {
+    "status": "done",
+    "seconds": 572.1,
+    "finished_utc": "2026-10-20T15:27:16.944642+00:00"
+  },
+  "hubsweep-H8-w98-n100k-s101-f865b705": {
+    "status": "done",
+    "seconds": 660.0,
+    "finished_utc": "2026-10-20T15:38:16.969590+00:00"
   }
 }

@@ -1,0 +1,5 @@
+derived_utc=2026-10-20T15:39:29.891297+00:00
+raw_file=datasets/raw_runs/20261020T142958Z-hubsweep-sweep_b-02f2b7/runs.jsonl
+raw_sha256=949249c0454a6136d3ee2e53b14f39fe487843df718a451bb47100297dde3571
+raw_records=120
+filter=run_kind==measured & status==ok & correctness_status==match

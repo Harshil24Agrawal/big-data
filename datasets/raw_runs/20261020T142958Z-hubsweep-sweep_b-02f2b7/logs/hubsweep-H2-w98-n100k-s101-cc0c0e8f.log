@@ -12,3 +12,12 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [hubsweep-H2-w98-n100k-s101-cc0c0e8f] warmup   r0 hypercube_unified__aqe_off   ok       q=23.3111s total=37.4151s paths=245603137 dom max/med=8.3285 cv=1.0208 skew=None
 [hubsweep-H2-w98-n100k-s101-cc0c0e8f] warmup   r0 native__aqe_on               ok       q=47.6078s total=47.6078s paths=245603137 dom max/med=1.0 cv=0.0134 skew=0
 [hubsweep-H2-w98-n100k-s101-cc0c0e8f] warmup   r0 edgejoin__aqe_off            ok       q=39.2246s total=39.2246s paths=245603137 dom max/med=675.0286 cv=8.2629 skew=None
+[hubsweep-H2-w98-n100k-s101-cc0c0e8f] measured r1 edgejoin__aqe_off            ok       q=27.2816s total=27.2816s paths=245603137 dom max/med=927.55 cv=8.9271 skew=None
+[hubsweep-H2-w98-n100k-s101-cc0c0e8f] measured r1 native__aqe_on               ok       q=41.3673s total=41.3673s paths=245603137 dom max/med=1.0 cv=0.001 skew=0
+[hubsweep-H2-w98-n100k-s101-cc0c0e8f] measured r1 hypercube_unified__aqe_off   ok       q=19.8232s total=27.743s paths=245603137 dom max/med=5.2908 cv=0.9344 skew=None
+[hubsweep-H2-w98-n100k-s101-cc0c0e8f] measured r2 hypercube_unified__aqe_off   ok       q=19.3937s total=26.5161s paths=245603137 dom max/med=6.0 cv=0.9106 skew=None
+[hubsweep-H2-w98-n100k-s101-cc0c0e8f] measured r2 edgejoin__aqe_off            ok       q=24.9141s total=24.9141s paths=245603137 dom max/med=1117.5625 cv=9.0788 skew=None
+[hubsweep-H2-w98-n100k-s101-cc0c0e8f] measured r2 native__aqe_on               ok       q=39.3521s total=39.3521s paths=245603137 dom max/med=1.0 cv=0.0026 skew=0
+[hubsweep-H2-w98-n100k-s101-cc0c0e8f] measured r3 hypercube_unified__aqe_off   ok       q=25.3474s total=37.0814s paths=245603137 dom max/med=5.4653 cv=0.8917 skew=None
+[hubsweep-H2-w98-n100k-s101-cc0c0e8f] measured r3 edgejoin__aqe_off            ok       q=28.169s total=28.169s paths=245603137 dom max/med=1128.0588 cv=9.0789 skew=None
+[hubsweep-H2-w98-n100k-s101-cc0c0e8f] measured r3 native__aqe_on               ok       q=40.9209s total=40.9209s paths=245603137 dom max/med=1.0 cv=0.0133 skew=0
