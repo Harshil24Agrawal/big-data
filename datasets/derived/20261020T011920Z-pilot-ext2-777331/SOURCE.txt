@@ -1,0 +1,5 @@
+derived_utc=2026-10-20T05:01:29.942362+00:00
+raw_file=datasets/raw_runs/20261020T011920Z-pilot-ext2-777331/runs.jsonl
+raw_sha256=f4849e44f5cc6b2e69fbe3b009d194751379ccd3ff99f5105f97bc9f9994044a
+raw_records=539
+filter=run_kind==measured & status==ok & correctness_status==match

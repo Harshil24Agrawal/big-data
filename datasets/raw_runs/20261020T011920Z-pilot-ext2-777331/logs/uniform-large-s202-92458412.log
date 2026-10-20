@@ -47,3 +47,11 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [uniform-large-s202-92458412] measured r4 edgejoin__aqe_off            ok       q=19.7431s total=19.7431s paths=48999655 dom max/med=2.1758 cv=0.2706 skew=None
 [uniform-large-s202-92458412] measured r4 hypercube__aqe_off           ok       q=20.3112s total=42.9426s paths=48999655 dom max/med=2.6 cv=0.2006 skew=None
 [uniform-large-s202-92458412] measured r4 edgejoin__aqe_on             ok       q=20.1973s total=20.1973s paths=48999655 dom max/med=2.4328 cv=0.1808 skew=0
+[uniform-large-s202-92458412] measured r4 salt1d__aqe_off              ok       q=14.1718s total=29.9497s paths=48999655 dom max/med=1.6792 cv=0.1468 skew=None
+[uniform-large-s202-92458412] measured r5 edgejoin__aqe_on             ok       q=13.1483s total=13.1483s paths=48999655 dom max/med=1.0219 cv=0.242 skew=0
+[uniform-large-s202-92458412] measured r5 hypercube_unified__aqe_off   ok       q=16.0205s total=25.8609s paths=48999655 dom max/med=1.5375 cv=0.1118 skew=None
+[uniform-large-s202-92458412] measured r5 edgejoin__aqe_off            ok       q=13.3126s total=13.3126s paths=48999655 dom max/med=1.9815 cv=0.146 skew=None
+[uniform-large-s202-92458412] measured r5 native__aqe_on               ok       q=25.9093s total=25.9093s paths=48999655 dom max/med=1.6964 cv=0.2226 skew=0
+[uniform-large-s202-92458412] measured r5 native__aqe_off              ok       q=30.5525s total=30.5525s paths=48999655 dom max/med=2.2952 cv=0.1365 skew=None
+[uniform-large-s202-92458412] measured r5 hypercube__aqe_off           ok       q=18.0557s total=37.2216s paths=48999655 dom max/med=2.3443 cv=0.2006 skew=None
+[uniform-large-s202-92458412] measured r5 salt1d__aqe_off              ok       q=15.371s total=30.3848s paths=48999655 dom max/med=2.4545 cv=0.2544 skew=None
