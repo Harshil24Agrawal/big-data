@@ -12,3 +12,17 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [hubsweep-H4-w95-n100k-s101-97918a40] gate hypercube_unified__aqe_off   ok       match n=98524893
 [hubsweep-H4-w95-n100k-s101-97918a40] warmup   r0 hypercube_unified__aqe_off   ok       q=26.0049s total=44.9329s paths=98524893 dom max/med=12.5882 cv=0.934 skew=None
 [hubsweep-H4-w95-n100k-s101-97918a40] warmup   r0 native__aqe_on               ok       q=28.7101s total=28.7101s paths=98524893 dom max/med=1.0 cv=0.0106 skew=0
+[hubsweep-H4-w95-n100k-s101-97918a40] warmup   r0 edgejoin__aqe_off            ok       q=24.1402s total=24.1402s paths=98524893 dom max/med=211.7895 cv=5.2707 skew=None
+[hubsweep-H4-w95-n100k-s101-97918a40] warmup   r0 salt1d__aqe_off              ok       q=26.9505s total=44.9576s paths=98524893 dom max/med=29.9286 cv=1.1813 skew=None
+[hubsweep-H4-w95-n100k-s101-97918a40] measured r1 hypercube_unified__aqe_off   ok       q=11.7233s total=18.1858s paths=98524893 dom max/med=6.0952 cv=0.7116 skew=None
+[hubsweep-H4-w95-n100k-s101-97918a40] measured r1 edgejoin__aqe_off            ok       q=12.5078s total=12.5078s paths=98524893 dom max/med=201.375 cv=5.4531 skew=None
+[hubsweep-H4-w95-n100k-s101-97918a40] measured r1 salt1d__aqe_off              ok       q=18.7416s total=26.0922s paths=98524893 dom max/med=9.6522 cv=0.9483 skew=None
+[hubsweep-H4-w95-n100k-s101-97918a40] measured r1 native__aqe_on               ok       q=20.0936s total=20.0936s paths=98524893 dom max/med=1.0 cv=0.0022 skew=0
+[hubsweep-H4-w95-n100k-s101-97918a40] measured r2 native__aqe_on               ok       q=20.7313s total=20.7313s paths=98524893 dom max/med=1.0 cv=0.0046 skew=0
+[hubsweep-H4-w95-n100k-s101-97918a40] measured r2 salt1d__aqe_off              ok       q=21.8486s total=29.0232s paths=98524893 dom max/med=13.4333 cv=1.0801 skew=None
+[hubsweep-H4-w95-n100k-s101-97918a40] measured r2 edgejoin__aqe_off            ok       q=24.0047s total=24.0047s paths=98524893 dom max/med=1.8981 cv=0.1971 skew=None
+[hubsweep-H4-w95-n100k-s101-97918a40] measured r2 hypercube_unified__aqe_off   ok       q=21.0132s total=40.5707s paths=98524893 dom max/med=1.5753 cv=0.1548 skew=None
+[hubsweep-H4-w95-n100k-s101-97918a40] measured r3 salt1d__aqe_off              ok       q=21.0532s total=33.4066s paths=98524893 dom max/med=9.0417 cv=0.9392 skew=None
+[hubsweep-H4-w95-n100k-s101-97918a40] measured r3 edgejoin__aqe_off            ok       q=13.7592s total=13.7592s paths=98524893 dom max/med=201.75 cv=5.5357 skew=None
+[hubsweep-H4-w95-n100k-s101-97918a40] measured r3 hypercube_unified__aqe_off   ok       q=13.7233s total=21.3697s paths=98524893 dom max/med=3.3231 cv=0.5352 skew=None
+[hubsweep-H4-w95-n100k-s101-97918a40] measured r3 native__aqe_on               ok       q=20.4879s total=20.4879s paths=98524893 dom max/med=1.0 cv=0.0034 skew=0
