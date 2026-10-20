@@ -7,3 +7,10 @@ Setting default log level to "WARN".
 To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
 [hubsweep-H1-w50-n100k-s202-58e46ccc] loaded 704,427 edges / 100,000 active vertices in 41.627s
 [hubsweep-H1-w50-n100k-s202-58e46ccc] gate native__aqe_on               ok       match n=9879517
+[hubsweep-H1-w50-n100k-s202-58e46ccc] gate edgejoin__aqe_off            ok       match n=9879517
+[hubsweep-H1-w50-n100k-s202-58e46ccc] gate hypercube_unified__aqe_off   ok       match n=9879517
+[hubsweep-H1-w50-n100k-s202-58e46ccc] warmup   r0 edgejoin__aqe_off            ok       q=25.9513s total=25.9513s paths=9879517 dom max/med=2.1858 cv=0.3114 skew=None
+[hubsweep-H1-w50-n100k-s202-58e46ccc] warmup   r0 hypercube_unified__aqe_off   ok       q=19.8844s total=42.7214s paths=9879517 dom max/med=3.1039 cv=0.2767 skew=None
+[hubsweep-H1-w50-n100k-s202-58e46ccc] warmup   r0 native__aqe_on               ok       q=15.5739s total=15.5739s paths=9879517 dom max/med=2.7018 cv=0.2885 skew=0
+[hubsweep-H1-w50-n100k-s202-58e46ccc] measured r1 native__aqe_on               ok       q=21.3394s total=21.3394s paths=9879517 dom max/med=2.1765 cv=0.264 skew=0
+[hubsweep-H1-w50-n100k-s202-58e46ccc] measured r1 edgejoin__aqe_off            ok       q=19.0893s total=19.0893s paths=9879517 dom max/med=2.3 cv=0.2563 skew=None
