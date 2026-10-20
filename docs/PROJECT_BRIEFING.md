@@ -1,6 +1,6 @@
 # Project briefing — how to explain every part of this project
 
-*A living document. Each section says whether it is **DONE**, **IN PROGRESS** or **PENDING**. Numbers marked ✔ were read from files in the repo; anything else is labelled as a plan or an estimate. Last updated: 2026-10-20, ~18:10 IST (stage 3 of 5 started: sweep collection running).*
+*A living document. Each section says whether it is **DONE**, **IN PROGRESS** or **PENDING**. Numbers marked ✔ were read from files in the repo; anything else is labelled as a plan or an estimate. Last updated: 2026-10-20, ~18:10 IST (stage 3 of 5: sweep collection running; notebook ready).*
 
 ---
 
@@ -78,7 +78,17 @@ Each graph has a check that its shape really is what the family name says (e.g. 
 - **Why.** In all 31 benchmarked graphs the biggest single vertex holds at most **12 %** of the work. The strategies built for skew had no real skew to fix, so edge-join always won.
 - **What.** Graphs with a uniform background plus 1–8 planted hubs, with the hub share of total work swept from about 5 % to about 95 %. The graph builder sets the hub size so the planned share is hit; the **measured** share is stored in each graph file.
 - **Probe (3 graphs, one hub holding 50 / 80 / 95 % of the work):** results in section 8 below.
-- **Planned size / rows / columns:** *to be filled when collection finishes.*
+- **What was built ✔ (`datasets/hubsweep/`, `datagen/hub_sweep.py`):** **28 graphs**, all 100 k vertices and about 0.7 M edges (a uniform background of 7 random edges per vertex, then 1–8 planted hubs). Each hub gets `d` distinct in-neighbours and `d` out-neighbours with `d = round(sqrt(share/(1−share) · n·7·7 / hubs))`, so it holds the planned share of the total work. Same cleaning rules as the 60 graphs (no self-loops, no duplicates). Every graph passed the structure check and a re-read by Spark.
+
+| Set | Hubs H | Planned hub share of work | Seed | Graphs |
+|---|---|---|---|---:|
+| sweep A | 1, 2, 4, 8 | 80 %, 90 %, 95 % | 101 | 12 |
+| sweep B | 1, 2, 4, 8 | 50 %, 98 % | 101 | 8 |
+| sweep C (held-out seed) | 1, 4 | 50 %, 90 %, 95 %, 98 % | 202 | 8 |
+
+  Total two-hop work per graph: 50 % ≈ 9.9 M · 80 % ≈ 24.6 M · 90 % ≈ 49 M · 95 % ≈ 98 M · 98 % ≈ 245 M (more hub share ⇒ more total paths, because the hub's product d² grows). The measured share through the biggest vertex ≈ planned share ÷ H.
+- **Measurement protocol for the sweep (cheaper than the original, and recorded as such):** 4 strategies (edge-join AQE off, native AQE on, salt1d, unified hypercube), **1 warm-up + 3 timed runs**, same machine and same Spark settings; about 8 minutes per graph. The column `protocol` in the combined table says which rows used 5 runs (original 31) and which used 3 (sweep). A simulation on the existing data showed 3 runs per strategy gives about 7.6 % median error of the runtime estimate and 2.9 % regret versus 6.4 % / 1.7 % for 4 runs (reused-run caveat: optimistic).
+- **Planned size / rows / columns:** 31 original + 28 sweep = **59 graphs**, if all sweep graphs finish. Final counts are in section 6 / 8c.
 
 ## 4. Features and preprocessing  *(DONE for the 11 features; sweep rows PENDING)*
 
@@ -111,7 +121,7 @@ Each graph has a check that its shape really is what the family name says (e.g. 
 5. Raw records are append-only; summaries are regenerated from them. Every campaign records its config and machine. Mixing machines or configs is refused by the table builder.
 6. **Noise is large:** within one graph/strategy the slowest of 5 runs is a median 1.7× the fastest (up to 3×). That is why we use medians and why close calls are treated as ties.
 
-## 6. The training table  *(DONE for the 31 graphs; sweep rows PENDING)*
+## 6. The training tables  *(31-graph table DONE; combined table builder DONE, filled when the sweep ends)*
 
 `datasets/derived/training/training_table_eligible.csv` ✔ — **31 rows × 69 columns, 21 KB** (one row per graph).
 
@@ -123,14 +133,27 @@ Each graph has a check that its shape really is what the family name says (e.g. 
 | outcomes | per strategy (×7): `median_total_s`, `total_s_iqr`, `n_valid_runs`, `median_query_s`, `median_profiling_s` (35 columns) | what the model learns to predict |
 | answer & tracking | `best_strategy, runner_up_strategy, label_margin_pct, label_clear, label_eligible, campaign_id, config_id, measurement_config_id, machine_id` | label and provenance |
 
-## 7. The models  *(prototype DONE; final notebook PENDING)*
+**Combined table (new) `datasets/derived/training/combined_table.csv`** — built by `ml/build_combined_table.py`: the 31 original graphs plus every sweep graph that finished, **only the 4 strategies measured on both**, 47 columns:
+
+| Group | Columns |
+|---|---|
+| ids / provenance | `graph_id, family, size_tier, seed, protocol, source_campaign, machine_id, cmp_config, hub_count, hub_work_share_planned` |
+| inputs | the same 11 features + `raw_work_sum` (the notebook adds a 12th input, `log_hub_work` = log of the work sitting in hubs) |
+| outcomes (×4 strategies) | `median_total_s, total_s_iqr, median_query_s, median_profiling_s, n_valid_runs` |
+| answer | `best_strategy`, **`best_class`** (edgejoin / hubsplit / native), `runner_up_strategy, label_margin_pct, label_clear` |
+
+The builder refuses to combine rows from different machines or different Spark settings; the only allowed difference is the number of timed runs.
+
+## 7. The models  *(prototype DONE; Jupyter notebook written and tested; final run PENDING sweep)*
 
 - **Selector (regression).** One Random Forest (300 trees) takes the 11 features and predicts **log(runtime) for every strategy at once**. The selector picks the lowest. If the predicted gain over native is under 5 % it falls back to native (the safe default).
 - **Why regression, not classification.** The labels are nearly one class, and the two edge-join variants (AQE on/off) tie within noise. A classifier on `best_strategy` scores **29 %** (RF) / 36 % (logistic regression), *below* the 52 % you get by always guessing the most common class. Regression keeps the *size* of the gaps, so it can say "tied → pick the safe one".
 - **How it is tested.** Always on graphs it has **not** seen: leave-one-graph-out and leave-one-family-out. Never split by run, because runs of the same graph are not independent.
 - **Baselines every result is compared with:** native (AQE on), native (AQE off), best fixed strategy, a hub rule, and the **oracle** (the best strategy per graph, known only after running everything).
 - **Metrics:** *regret* = chosen runtime ÷ best runtime − 1; *speedup* = native ÷ chosen; top-k hit rate; R² of predicted runtime.
-- **Classifier (new, planned).** Three classes — edge-join / hub-splitting (salt, hypercube) / native — with edge-join AQE on and off merged, because they tie. *Results: PENDING (stage 4).*
+- **Classifier (new).** Predicts one of three classes — **edge-join** / **hub-splitting** (salting or unified hypercube) / **native** — with the two edge-join AQE settings merged because they tie. **Input:** 12 numbers per graph (the 11 features + `log_hub_work`). **Output:** the class that is fastest by median total time. **Models compared:** majority guess, a fixed hub rule, logistic regression, random forest (300 trees), extra-trees. *Results: PENDING (filled at the end of the sweep).*
+- **Notebook:** `notebooks/selector.ipynb` (generated by `notebooks/_build_selector_notebook.py`). Sections: data → label balance → runtime-vs-hub-share chart → classifier (3 held-out schemes) → feature ablation → confusion matrix & importance → runtime regressor → selector (+ native fallback) → policy comparison → overheads → summary. It writes tables and charts to `datasets/derived/selector_v2/`.
+- **The three held-out schemes:** *LOGO* = leave one graph out. *LOSG* = leave one structural group out (a whole family or a whole hub-count is unseen — the harshest test). *SEED202* = train on all but the sweep graphs of seed 202 and test on those (new random graphs, same recipes).
 
 ## 8. Results so far  *(31 graphs DONE; probe IN PROGRESS; sweep PENDING)*
 
@@ -206,10 +229,10 @@ Single-hub graphs, 100 k vertices, 1 hub holding a planned 50 / 80 / 95 % of the
 | 60 graphs + validation | DONE |
 | 31-graph benchmark, features, training table | DONE |
 | Prototype selector + metrics | DONE |
-| Hub-sweep probe (3 graphs) | IN PROGRESS (2 of 3 graphs timed) |
+| Hub-sweep probe (3 graphs) | DONE |
 | Hub-sweep generator | DONE (`datagen/hub_sweep.py`) |
-| Hub-sweep collection (~50 graphs) | PENDING |
-| Classifier + notebook | PENDING |
+| Hub-sweep collection (28 graphs, sweeps A → B → C, stops 23:15 IST) | IN PROGRESS (started 18:04 IST) |
+| Combined table builder + notebook (tested on the 31 graphs) | DONE; final run PENDING |
 | Evaluation, charts, report | PENDING |
 
 ## 12. Glossary

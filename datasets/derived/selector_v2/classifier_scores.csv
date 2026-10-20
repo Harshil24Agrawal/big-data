@@ -1,0 +1,11 @@
+scheme,n_test,model,accuracy,balanced_accuracy,macro_f1,acc_clear_only
+LOGO,31,majority,0.871,0.5,0.31,1.0
+LOGO,31,rule,0.097,0.375,0.111,0.0
+LOGO,31,logreg,0.742,0.639,0.391,0.812
+LOGO,31,random_forest,0.903,0.731,0.506,1.0
+LOGO,31,extra_trees,0.903,0.731,0.506,1.0
+LOSG,31,majority,0.871,0.5,0.31,1.0
+LOSG,31,rule,0.097,0.375,0.111,0.0
+LOSG,31,logreg,0.742,0.426,0.284,0.938
+LOSG,31,random_forest,0.871,0.5,0.31,1.0
+LOSG,31,extra_trees,0.871,0.5,0.31,1.0
