@@ -35,3 +35,44 @@ Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cace
 26/10/20 06:14:54 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
 Setting default log level to "WARN".
 To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+[multi_hub-large-s202-301552c4] loaded 6,999,998 edges / 999,996 active vertices in 40.09s
+[multi_hub-large-s202-301552c4] gate native__aqe_off              ok       match n=204531040
+[multi_hub-large-s202-301552c4] gate native__aqe_on               ok       match n=204531040
+[multi_hub-large-s202-301552c4] gate edgejoin__aqe_off            ok       match n=204531040
+[multi_hub-large-s202-301552c4] gate salt1d__aqe_off              ok       match n=204531040
+[multi_hub-large-s202-301552c4] gate hypercube__aqe_off           ok       match n=204531040
+[multi_hub-large-s202-301552c4] gate hypercube_unified__aqe_off   ok       match n=204531040
+[multi_hub-large-s202-301552c4] gate edgejoin__aqe_on             ok       match n=204531040
+[multi_hub-large-s202-301552c4] warmup   r0 native__aqe_off              ok       q=45.7232s total=45.7232s paths=204531040 dom max/med=15.2846 cv=1.2354 skew=None
+[multi_hub-large-s202-301552c4] warmup   r0 native__aqe_on               ok       q=43.4713s total=43.4713s paths=204531040 dom max/med=1.1774 cv=0.4429 skew=0
+[multi_hub-large-s202-301552c4] warmup   r0 hypercube_unified__aqe_off   ok       q=36.2739s total=55.0144s paths=204531040 dom max/med=2.7466 cv=0.2926 skew=None
+[multi_hub-large-s202-301552c4] warmup   r0 hypercube__aqe_off           ok       q=31.3241s total=46.9493s paths=204531040 dom max/med=9.9459 cv=0.5971 skew=None
+[multi_hub-large-s202-301552c4] warmup   r0 edgejoin__aqe_off            ok       q=19.5891s total=19.5891s paths=204531040 dom max/med=18.3214 cv=1.2694 skew=None
+[multi_hub-large-s202-301552c4] warmup   r0 edgejoin__aqe_on             ok       q=23.1674s total=23.1674s paths=204531040 dom max/med=1.3464 cv=0.2874 skew=0
+[multi_hub-large-s202-301552c4] warmup   r0 salt1d__aqe_off              ok       q=34.6782s total=45.4481s paths=204531040 dom max/med=14.9178 cv=0.7787 skew=None
+[multi_hub-large-s202-301552c4] measured r1 edgejoin__aqe_off            ok       q=20.388s total=20.388s paths=204531040 dom max/med=15.4643 cv=1.2431 skew=None
+[multi_hub-large-s202-301552c4] measured r1 native__aqe_on               ok       q=40.917s total=40.917s paths=204531040 dom max/med=1.1817 cv=0.4445 skew=0
+[multi_hub-large-s202-301552c4] measured r1 edgejoin__aqe_on             ok       q=37.3929s total=37.3929s paths=204531040 dom max/med=1.2966 cv=0.2857 skew=0
+[multi_hub-large-s202-301552c4] measured r1 hypercube__aqe_off           ok       q=39.7606s total=59.3231s paths=204531040 dom max/med=2.3194 cv=0.3148 skew=None
+[multi_hub-large-s202-301552c4] measured r1 native__aqe_off              ok       q=32.796s total=32.796s paths=204531040 dom max/med=15.9444 cv=1.2666 skew=None
+[multi_hub-large-s202-301552c4] measured r1 hypercube_unified__aqe_off   ok       q=27.2907s total=37.5078s paths=204531040 dom max/med=2.6826 cv=0.2309 skew=None
+[multi_hub-large-s202-301552c4] measured r1 salt1d__aqe_off              ok       q=31.9069s total=43.4152s paths=204531040 dom max/med=8.9067 cv=0.6116 skew=None
+[multi_hub-large-s202-301552c4] measured r2 edgejoin__aqe_on             ok       q=23.8879s total=23.8879s paths=204531040 dom max/med=1.3193 cv=0.3011 skew=0
+[multi_hub-large-s202-301552c4] measured r2 hypercube_unified__aqe_off   ok       q=25.5217s total=35.2757s paths=204531040 dom max/med=1.6235 cv=0.1407 skew=None
+[multi_hub-large-s202-301552c4] measured r2 salt1d__aqe_off              ok       q=35.529s total=45.9328s paths=204531040 dom max/med=3.5354 cv=0.5172 skew=None
+[multi_hub-large-s202-301552c4] measured r2 native__aqe_off              ok       q=37.9731s total=37.9731s paths=204531040 dom max/med=17.0227 cv=1.2598 skew=None
+[multi_hub-large-s202-301552c4] measured r2 edgejoin__aqe_off            ok       q=26.0473s total=26.0473s paths=204531040 dom max/med=15.7719 cv=1.2588 skew=None
+[multi_hub-large-s202-301552c4] measured r2 native__aqe_on               ok       q=47.2484s total=47.2484s paths=204531040 dom max/med=1.1423 cv=0.4424 skew=0
+[multi_hub-large-s202-301552c4] measured r2 hypercube__aqe_off           ok       q=45.0411s total=64.6202s paths=204531040 dom max/med=3.2832 cv=0.4156 skew=None
+[multi_hub-large-s202-301552c4] measured r3 native__aqe_on               ok       q=34.5468s total=34.5468s paths=204531040 dom max/med=1.1135 cv=0.4338 skew=0
+[multi_hub-large-s202-301552c4] measured r3 edgejoin__aqe_off            ok       q=25.3264s total=25.3264s paths=204531040 dom max/med=16.5658 cv=1.2433 skew=None
+[multi_hub-large-s202-301552c4] measured r3 native__aqe_off              ok       q=34.1101s total=34.1101s paths=204531040 dom max/med=18.0761 cv=1.2875 skew=None
+[multi_hub-large-s202-301552c4] measured r3 hypercube__aqe_off           ok       q=36.4122s total=48.2381s paths=204531040 dom max/med=2.9038 cv=0.3616 skew=None
+[multi_hub-large-s202-301552c4] measured r3 edgejoin__aqe_on             ok       q=24.6898s total=24.6898s paths=204531040 dom max/med=1.2916 cv=0.3059 skew=0
+[multi_hub-large-s202-301552c4] measured r3 salt1d__aqe_off              ok       q=51.77s total=65.2479s paths=204531040 dom max/med=8.0506 cv=0.61 skew=None
+[multi_hub-large-s202-301552c4] measured r3 hypercube_unified__aqe_off   ok       q=29.198s total=44.6353s paths=204531040 dom max/med=2.8614 cv=0.2182 skew=None
+[multi_hub-large-s202-301552c4] measured r4 salt1d__aqe_off              ok       q=29.3727s total=39.7875s paths=204531040 dom max/med=2.7027 cv=0.3929 skew=None
+[multi_hub-large-s202-301552c4] measured r4 hypercube_unified__aqe_off   ok       q=25.163s total=35.6092s paths=204531040 dom max/med=1.6049 cv=0.1431 skew=None
+[multi_hub-large-s202-301552c4] measured r4 hypercube__aqe_off           ok       q=30.69s total=42.4374s paths=204531040 dom max/med=2.5811 cv=0.3094 skew=None
+[multi_hub-large-s202-301552c4] measured r4 native__aqe_on               ok       q=35.1811s total=35.1811s paths=204531040 dom max/med=1.1795 cv=0.4403 skew=0
+[multi_hub-large-s202-301552c4] measured r4 edgejoin__aqe_off            ok       q=24.9755s total=24.9755s paths=204531040 dom max/med=16.2419 cv=1.2465 skew=None
