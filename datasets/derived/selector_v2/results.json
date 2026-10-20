@@ -177,6 +177,43 @@
    }
   }
  },
+ "recall_logo": {
+  "majority": {
+   "edgejoin": 1.0,
+   "hubsplit": 0.0,
+   "native": 0.0
+  },
+  "rule": {
+   "edgejoin": 0.0,
+   "hubsplit": 1.0,
+   "native": 0.5
+  },
+  "logreg": {
+   "edgejoin": 0.76,
+   "hubsplit": 1.0,
+   "native": 0.5
+  },
+  "tree_depth2": {
+   "edgejoin": 0.5,
+   "hubsplit": 0.833,
+   "native": 0.333
+  },
+  "stump_max_work": {
+   "edgejoin": 0.96,
+   "hubsplit": 0.833,
+   "native": 0.0
+  },
+  "random_forest": {
+   "edgejoin": 0.9,
+   "hubsplit": 0.833,
+   "native": 0.333
+  },
+  "extra_trees": {
+   "edgejoin": 0.92,
+   "hubsplit": 0.833,
+   "native": 0.333
+  }
+ },
  "ablation_rf_accuracy": {
   "LOGO": {
    "11 base features (RF)": 0.855,
@@ -538,7 +575,7 @@
   "SEED202": 0.5555555555555556
  },
  "overhead": {
-  "inference_ms_per_graph": 17.62838674003433,
+  "inference_ms_per_graph": 15.243081260000508,
   "profiling_s_proxy_for_feature_cost": 9.1304,
   "geomean_speedup_vs_native_ML_fallback": 1.3628280113941404,
   "geomean_speedup_vs_native_if_features_cost_proxy_added": 0.8379274379033866,

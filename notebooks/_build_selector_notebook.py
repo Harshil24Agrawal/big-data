@@ -32,8 +32,8 @@ table look-ups of measured medians (no new executions); the model is never tuned
 code("""
 import os, sys, json, time, math, warnings
 import numpy as np, pandas as pd
+%matplotlib inline
 import matplotlib
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from IPython.display import display, Markdown
 from scipy.stats import spearmanr
@@ -47,7 +47,15 @@ from sklearn.model_selection import LeaveOneGroupOut
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, confusion_matrix, r2_score
 warnings.filterwarnings("ignore")
 
-REPO = os.path.abspath(os.path.join(os.getcwd(), "..")) if os.path.basename(os.getcwd()) == "notebooks" else os.getcwd()
+def find_repo(start):
+    d = os.path.abspath(start)
+    while True:
+        if os.path.exists(os.path.join(d, "datasets", "derived", "training", "combined_table.csv")):
+            return d
+        if os.path.dirname(d) == d:
+            raise SystemExit("run this notebook inside the repository (datasets/derived/training/combined_table.csv not found)")
+        d = os.path.dirname(d)
+REPO = find_repo(os.getcwd())
 sys.path.insert(0, REPO)
 from ml.build_feature_table import FEATURE_COLUMNS
 from ml.build_combined_table import STRATS, CLASS_OF
@@ -57,6 +65,9 @@ OUT = os.path.join(REPO, "datasets", "derived", "selector_v2")
 os.makedirs(OUT, exist_ok=True)
 NTREES = int(os.environ.get("NB_TREES", "300"))      # 300 for the final run; small for quick tests
 SEED = 0
+np.random.seed(SEED)
+import sklearn, scipy, platform
+print("python", platform.python_version(), "| numpy", np.__version__, "| pandas", pd.__version__, "| scikit-learn", sklearn.__version__, "| scipy", scipy.__version__, "| matplotlib", matplotlib.__version__, "| trees", NTREES)
 NATIVE = "native__aqe_on"
 CLASSES = ["edgejoin", "hubsplit", "native"]
 RES = {}                                              # everything reported is stored here and written to results.json
@@ -215,6 +226,35 @@ clf_table = pd.DataFrame(rows)
 display(clf_table.pivot(index="model", columns="scheme", values="accuracy").loc[["majority", "rule", "logreg", "tree_depth2", "stump_max_work", "random_forest", "extra_trees"]])
 RES["classifier"] = {sch: {"n_test": o["n_test"], "scores": o["scores"]} for sch, o in clf12.items()}
 """)
+md("""
+### 3b. How the classifiers compare (all three held-out schemes)
+Bars: accuracy, balanced accuracy (average recall per class, so a model that only says "edge-join" scores low) and macro-F1. The dashed line is the majority-class accuracy of that scheme: a model whose accuracy bar does not pass it adds nothing over the default.
+""")
+code("""
+MODELS = ["majority", "rule", "logreg", "tree_depth2", "stump_max_work", "random_forest", "extra_trees"]
+fig, axes = plt.subplots(1, 3, figsize=(16, 4.6), sharey=True)
+for ax, sch in zip(axes, ["LOGO", "LOSG", "SEED202"]):
+    sc = clf12[sch]["scores"]; xs = np.arange(len(MODELS)); w = 0.27
+    for j, (met, lab, col) in enumerate([("accuracy", "accuracy", "#4C78A8"), ("balanced_accuracy", "balanced accuracy", "#F58518"), ("macro_f1", "macro-F1", "#72B7B2")]):
+        ax.bar(xs + (j - 1) * w, [sc[m][met] for m in MODELS], w, label=lab, color=col)
+    ax.axhline(sc["majority"]["accuracy"], ls="--", c="k", lw=1, label="majority accuracy")
+    ax.set_xticks(xs); ax.set_xticklabels(MODELS, rotation=40, ha="right"); ax.set_ylim(0, 1.15)
+    ax.set_title(f"{sch}  (n = {clf12[sch]['n_test']} held-out graphs)"); ax.grid(axis="y", alpha=.3)
+axes[0].set_ylabel("score"); axes[2].legend(fontsize=7, loc="upper right", ncol=2)
+plt.suptitle("Classifier comparison on held-out graphs", y=1.02); plt.tight_layout(); plt.savefig(f"{OUT}/classifier_comparison.png", dpi=130, bbox_inches="tight"); plt.show()
+""")
+code("""
+# Per-class recall (leave-one-graph-out): which classes can each model actually find?
+rec = pd.DataFrame({m: {c: float(np.mean(clf12["LOGO"]["preds"][m][y_class == c] == c)) for c in CLASSES} for m in MODELS}).T
+fig, ax = plt.subplots(figsize=(5.8, 4.2))
+im = ax.imshow(rec.values, cmap="Blues", vmin=0, vmax=1, aspect="auto")
+ax.set_xticks(range(3)); ax.set_xticklabels([f"{c}\\n(n={int((y_class == c).sum())})" for c in CLASSES]); ax.set_yticks(range(len(MODELS))); ax.set_yticklabels(MODELS)
+for i in range(len(MODELS)):
+    for j in range(3): ax.text(j, i, f"{rec.values[i, j]:.2f}", ha="center", va="center", color="black" if rec.values[i, j] < .6 else "white")
+ax.set_title("Recall per true class (LOGO)"); plt.colorbar(im, ax=ax, fraction=.046); plt.tight_layout()
+plt.savefig(f"{OUT}/classifier_recall_heatmap.png", dpi=130); plt.show(); RES["recall_logo"] = rec.round(3).to_dict(orient="index")
+""")
+
 code("""
 # Ablation: do the two derived inputs (log_hub_work, log_max_work) help?  (11 base features vs 13)
 clf11 = eval_classifiers(BASE, "11 features")
@@ -371,6 +411,70 @@ display(oh); RES["overhead"] = {k: (v if isinstance(v, str) else float(v)) for k
 """)
 
 md("""
+## 6b. More charts
+Data shape, label noise, the full regret distribution and where the models err.
+""")
+code("""
+# (1) Where the classes live in feature space
+fig, ax = plt.subplots(1, 2, figsize=(13, 4.3))
+cc = {"edgejoin": "#4C78A8", "hubsplit": "#E45756", "native": "#72B7B2"}
+for c in CLASSES:
+    s_ = df.best_class == c
+    ax[0].scatter(df.log_max_work[s_], df.work_max_share[s_], s=36, alpha=.8, label=f"{c} (n={int(s_.sum())})", color=cc[c], edgecolor="k", linewidth=.3)
+ax[0].set_xlabel("log(1 + paths through the busiest vertex)"); ax[0].set_ylabel("share of all work in the busiest vertex"); ax[0].set_title("Best class in feature space"); ax[0].legend(fontsize=8); ax[0].grid(alpha=.3)
+for c in CLASSES:
+    s_ = df.best_class == c
+    ax[1].scatter(df.log_work_sum[s_], df.work_in_hubs_share[s_], s=36, alpha=.8, color=cc[c], edgecolor="k", linewidth=.3)
+ax[1].set_xlabel("log(1 + total two-hop paths)"); ax[1].set_ylabel("share of work in hubs"); ax[1].set_title("...and by total work vs hub share"); ax[1].grid(alpha=.3)
+plt.tight_layout(); plt.savefig(f"{OUT}/feature_space.png", dpi=130); plt.show()
+""")
+code("""
+# (2) Speed-up of edge-join and hypercube over native, by structural group
+g = df.assign(ej_vs_native=T[:, 1] / T[:, 0], hc_vs_native=T[:, 1] / T[:, 2])
+order = g.groupby("group").ej_vs_native.median().sort_values().index
+fig, ax = plt.subplots(1, 2, figsize=(13, 4.3), sharey=True)
+for a, col, ttl in [(ax[0], "ej_vs_native", "edge-join"), (ax[1], "hc_vs_native", "hub-aware hypercube")]:
+    a.boxplot([g[g.group == k][col].values for k in order], tick_labels=list(order), vert=True, showfliers=True)
+    a.axhline(1, ls="--", c="k", lw=1); a.set_yscale("log"); a.set_title(f"native time / {ttl} time (>1 = {ttl} faster)"); a.tick_params(axis="x", rotation=40); a.grid(axis="y", alpha=.3)
+plt.tight_layout(); plt.savefig(f"{OUT}/speedup_by_group.png", dpi=130); plt.show()
+""")
+code("""
+# (3) Regret distribution of every policy (leave-one-graph-out): share of graphs within x % of the best choice
+tab, ix, pol = POL["LOGO"]
+fig, ax = plt.subplots(1, 2, figsize=(13, 4.3))
+for name in ["always native__aqe_on", "always edgejoin__aqe_off", "always hypercube_unified__aqe_off", "rule (hubs->unified, else native)", "ML selector", "oracle"]:
+    r = np.sort((T[ix, pol[name]] / T[ix].min(1) - 1) * 100)
+    ax[0].step(r, np.arange(1, len(r) + 1) / len(r), where="post", label=name, lw=2 if name == "ML selector" else 1.2)
+ax[0].set_xscale("symlog", linthresh=1); ax[0].set_xlabel("regret vs best strategy (%)"); ax[0].set_ylabel("share of graphs at or below"); ax[0].set_title("Cumulative regret (leave-one-graph-out)"); ax[0].legend(fontsize=7); ax[0].grid(alpha=.3)
+sp = tab.set_index("policy").geomean_speedup_vs_native.drop("always native__aqe_on").sort_values()
+sp.plot.barh(ax=ax[1], color="#4C78A8"); ax[1].axvline(1, c="k", lw=1); ax[1].set_xlabel("geometric-mean speed-up over native"); ax[1].set_title("Speed-up over native by policy (LOGO)")
+plt.tight_layout(); plt.savefig(f"{OUT}/regret_cdf_speedup.png", dpi=130); plt.show()
+""")
+code("""
+# (4) How noisy are the labels?  gap between best and runner-up vs the spread of the runs
+ranked = np.sort(T, axis=1); gap = (ranked[:, 1] / ranked[:, 0] - 1) * 100
+fig, ax = plt.subplots(1, 2, figsize=(13, 4))
+ax[0].hist(gap, bins=np.logspace(np.log10(max(gap.min(), .1)), np.log10(gap.max()), 22), color="#4C78A8", edgecolor="w"); ax[0].set_xscale("log")
+ax[0].set_xlabel("lead of the best strategy over the runner-up (%)"); ax[0].set_ylabel("graphs"); ax[0].set_title("Label margins: many winners lead by only a few %")
+for flag, col, lab in [(True, "#4C78A8", "clear label (lead > both IQRs)"), (False, "#E45756", "noise-level label")]:
+    s_ = df.label_clear.values == flag
+    ax[1].scatter(df.label_margin_pct[s_], df.raw_work_sum[s_], s=30, color=col, alpha=.8, label=f"{lab} (n={int(s_.sum())})")
+ax[1].set_xscale("log"); ax[1].set_yscale("log"); ax[1].set_xlabel("label margin (%)"); ax[1].set_ylabel("total two-hop work"); ax[1].legend(fontsize=7); ax[1].grid(alpha=.3); ax[1].set_title("Clear vs noisy labels")
+plt.tight_layout(); plt.savefig(f"{OUT}/label_noise.png", dpi=130); plt.show()
+""")
+code("""
+# (5) Feature correlations and regressor error
+fig, ax = plt.subplots(1, 2, figsize=(14, 5.2), gridspec_kw={"width_ratios": [1.25, 1]})
+C = df[FEATS].corr().values
+im = ax[0].imshow(C, cmap="RdBu_r", vmin=-1, vmax=1); ax[0].set_xticks(range(len(FEATS))); ax[0].set_xticklabels(FEATS, rotation=75, ha="right", fontsize=7)
+ax[0].set_yticks(range(len(FEATS))); ax[0].set_yticklabels(FEATS, fontsize=7); ax[0].set_title("Input feature correlations"); plt.colorbar(im, ax=ax[0], fraction=.046)
+err = (PRED["LOGO"] - LOGT).ravel() * 100
+ax[1].hist(np.expm1(np.clip(err / 100, -3, 3)) * 100, bins=40, color="#72B7B2", edgecolor="w"); ax[1].axvline(0, c="k", lw=1)
+ax[1].set_xlabel("prediction error of runtime (%), held-out graphs"); ax[1].set_ylabel("graph x strategy pairs"); ax[1].set_title("Regressor error distribution (LOGO)")
+plt.tight_layout(); plt.savefig(f"{OUT}/correlations_and_errors.png", dpi=130); plt.show()
+""")
+
+md("""
 ## 7. Honest summary (auto-generated from the numbers above)
 """)
 code("""
@@ -388,6 +492,36 @@ pd.concat({sch: POL[sch][0] for sch in POL}).to_csv(f"{OUT}/policy_scores.csv")
 pd.DataFrame({"graph_id": df.graph_id, "group": df.group, "true_class": y_class, "true_best": y_strat,
               **{f"pred_class_logo_{m}": clf12["LOGO"]["preds"][m] for m in clf12["LOGO"]["preds"]}}).to_csv(f"{OUT}/cv_predictions_logo.csv", index=False)
 print("saved to", OUT)
+""")
+
+md("""
+## 8. Reproducibility check
+Everything above is deterministic: fixed random seeds, `n_jobs=1`, no sampling. Re-running the notebook top to bottom (300 trees, the committed `combined_table.csv`, the library versions printed at the top) must give the same numbers. The cell below compares the key results with `expected_results.json`, committed next to the notebook. To refresh the file after you deliberately change the data or code, run with `NB_UPDATE_EXPECTED=1`.
+""")
+code("""
+def key_numbers():
+    k = {}
+    for sch, o in RES["classifier"].items():
+        for m, sc in o["scores"].items():
+            k[f"clf_acc|{sch}|{m}"] = sc["accuracy"]; k[f"clf_bal|{sch}|{m}"] = sc["balanced_accuracy"]
+    for sch, rows in RES["policies"].items():
+        for r in rows:
+            k[f"pol_regret|{sch}|{r['policy']}"] = r["mean_regret_pct"]; k[f"pol_speedup|{sch}|{r['policy']}"] = r["geomean_speedup_vs_native"]
+    for sch, r in RES["regressor"].items():
+        k[f"reg_r2|{sch}"] = r["r2_log"]; k[f"reg_top2|{sch}"] = r["top2"]
+    k["n_graphs"] = RES["n_graphs"]; k["majority_frac"] = RES["majority_frac_global"]
+    return k
+KEYS = key_numbers()
+EXP = os.path.join(REPO, "notebooks", "expected_results.json")
+if os.environ.get("NB_UPDATE_EXPECTED") == "1":
+    json.dump({"trees": NTREES, "values": KEYS}, open(EXP, "w"), indent=1, sort_keys=True); print("expected results written:", len(KEYS), "numbers")
+elif NTREES == 300 and os.path.exists(EXP):
+    exp = json.load(open(EXP))["values"]
+    bad = {k: (exp[k], KEYS.get(k)) for k in exp if k not in KEYS or abs(exp[k] - KEYS[k]) > 1e-6}
+    print(f"REPRODUCED: all {len(exp)} key numbers match expected_results.json" if not bad else f"MISMATCH in {len(bad)} numbers, e.g. {list(bad.items())[:3]}")
+    RES["reproduced"] = not bad
+else:
+    print("check skipped (needs NB_TREES=300 and notebooks/expected_results.json)")
 """)
 
 nb["cells"] = cells

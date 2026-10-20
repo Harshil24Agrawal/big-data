@@ -301,3 +301,22 @@ With 2, 4 or 8 hubs (work split between them) edge-join wins at every share, eve
 ## 12. Glossary
 
 **Skew** — uneven work across tasks. **Hub** — a vertex with a very large `d_in × d_out`. **AQE** — Spark's adaptive query execution. **Median / IQR** — middle value / spread of the middle half of runs. **Oracle** — the best strategy per graph, known only after running all. **Regret** — how much slower the pick was than the best pick. **Leave-one-graph-out** — train on all graphs but one, test on that one, repeat. **Majority baseline** — accuracy of always guessing the most common answer. **Hub-splitting** — strategies that spread a hub's work (here: the unified hypercube). **Straggler** — the one task that finishes last and sets the runtime. **LOGO / LOSG / SEED202** — leave-one-graph-out / leave-one-structural-group-out / held-out generator seed. **Stump** — a decision tree with a single yes/no threshold.
+
+---
+
+## 13. Notebook charts added (v2.1) and how to re-run it
+
+`notebooks/selector.ipynb` now embeds every chart inline and re-runs to identical numbers.
+
+**Re-run:** `pip install -r notebooks/requirements.txt`, then open the notebook (or `cd notebooks; python -m nbconvert --to notebook --execute --inplace selector.ipynb`) and run all cells. It needs only `datasets/derived/training/combined_table.csv` (committed). Seeds are fixed, `n_jobs=1`, no sampling. The last cell compares 92 key numbers (accuracies, balanced accuracies, regrets, speed-ups, R², top-2) to `notebooks/expected_results.json` and prints `REPRODUCED`. Only wall-clock figures (inference ms) differ between runs. `NB_TREES=20` gives a quick run (the check is then skipped). `NB_UPDATE_EXPECTED=1` rewrites the expected file after deliberate changes.
+
+**New charts and how to explain them**
+- *Classifier comparison* (`classifier_comparison.png`): accuracy, balanced accuracy and macro-F1 for 7 models under LOGO, LOSG and SEED202, with the majority line. Message: on LOGO the stump (85.5%) and extra-trees (85.5%) beat the 80.6% majority, random forest 83.9%, logreg is lower on accuracy (75.8%) but best on balanced accuracy (0.753) because it finds the rare classes. Under LOSG (unseen families) nothing beats majority. Accuracy alone flatters "always edge-join", so quote balanced accuracy too.
+- *Per-class recall heatmap* (`classifier_recall_heatmap.png`): hubsplit is found 83% of the time by the forest/stump (logreg 100%), native only 33% (stump 0%). Native wins are the hard class.
+- *Feature-space map* (`feature_space.png`): hub-split wins sit at high busiest-vertex share / work; edge-join fills the rest; native wins overlap with edge-join (the noise-level labels).
+- *Speed-up by group* (`speedup_by_group.png`): native/edge-join and native/hypercube ratio per structural group on a log axis. Edge-join beats native almost everywhere; hypercube wins only in the single-hub groups.
+- *Regret CDF and speed-up over native* (`regret_cdf_speedup.png`): share of graphs within x% of the best choice per policy. The ML selector tracks the oracle on about 82% of graphs and its worst case is far below always-native/hypercube.
+- *Label noise* (`label_noise.png`): many winners lead the runner-up by only a few percent; 32 of 62 labels are clear. This bounds attainable accuracy.
+- *Correlations and regressor error* (`correlations_and_errors.png`): heavily correlated size/work features (why trees are used and importances are shared); regressor error is centred on 0.
+
+Numbers in the report are unchanged by this upgrade (verified by the reproducibility cell).
