@@ -76,3 +76,12 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [multi_hub-large-s202-301552c4] measured r4 hypercube__aqe_off           ok       q=30.69s total=42.4374s paths=204531040 dom max/med=2.5811 cv=0.3094 skew=None
 [multi_hub-large-s202-301552c4] measured r4 native__aqe_on               ok       q=35.1811s total=35.1811s paths=204531040 dom max/med=1.1795 cv=0.4403 skew=0
 [multi_hub-large-s202-301552c4] measured r4 edgejoin__aqe_off            ok       q=24.9755s total=24.9755s paths=204531040 dom max/med=16.2419 cv=1.2465 skew=None
+[multi_hub-large-s202-301552c4] measured r4 native__aqe_off              ok       q=48.3055s total=48.3055s paths=204531040 dom max/med=15.8839 cv=1.2557 skew=None
+[multi_hub-large-s202-301552c4] measured r4 edgejoin__aqe_on             ok       q=32.5754s total=32.5754s paths=204531040 dom max/med=1.2786 cv=0.2896 skew=0
+[multi_hub-large-s202-301552c4] measured r5 salt1d__aqe_off              ok       q=35.6724s total=53.6916s paths=204531040 dom max/med=13.3125 cv=0.8324 skew=None
+[multi_hub-large-s202-301552c4] measured r5 hypercube_unified__aqe_off   ok       q=34.5934s total=45.0129s paths=204531040 dom max/med=2.5806 cv=0.261 skew=None
+[multi_hub-large-s202-301552c4] measured r5 edgejoin__aqe_on             ok       q=24.2462s total=24.2462s paths=204531040 dom max/med=1.3152 cv=0.2983 skew=0
+[multi_hub-large-s202-301552c4] measured r5 native__aqe_off              ok       q=40.4445s total=40.4445s paths=204531040 dom max/med=17.8523 cv=1.3003 skew=None
+[multi_hub-large-s202-301552c4] measured r5 edgejoin__aqe_off            ok       q=31.965s total=31.965s paths=204531040 dom max/med=15.6491 cv=1.2248 skew=None
+[multi_hub-large-s202-301552c4] measured r5 native__aqe_on               ok       q=42.4765s total=42.4765s paths=204531040 dom max/med=1.1365 cv=0.4452 skew=0
+[multi_hub-large-s202-301552c4] measured r5 hypercube__aqe_off           ok       q=39.1961s total=56.2026s paths=204531040 dom max/med=4.0446 cv=0.4652 skew=None
