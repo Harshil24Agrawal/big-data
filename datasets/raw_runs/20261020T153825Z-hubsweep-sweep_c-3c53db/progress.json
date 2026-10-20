@@ -1,0 +1,27 @@
+{
+  "hubsweep-H1-w50-n100k-s202-58e46ccc": {
+    "status": "done",
+    "seconds": 400.8,
+    "finished_utc": "2026-10-20T15:45:06.437489+00:00"
+  },
+  "hubsweep-H4-w50-n100k-s202-8ce61dba": {
+    "status": "done",
+    "seconds": 297.7,
+    "finished_utc": "2026-10-20T15:50:04.180528+00:00"
+  },
+  "hubsweep-H1-w90-n100k-s202-65a2baed": {
+    "status": "done",
+    "seconds": 414.5,
+    "finished_utc": "2026-10-20T15:56:58.654614+00:00"
+  },
+  "hubsweep-H4-w90-n100k-s202-16059a2e": {
+    "status": "done",
+    "seconds": 394.7,
+    "finished_utc": "2026-10-20T16:03:33.334628+00:00"
+  },
+  "hubsweep-H1-w95-n100k-s202-921f70ae": {
+    "status": "done",
+    "seconds": 520.3,
+    "finished_utc": "2026-10-20T16:12:13.672361+00:00"
+  }
+}
