@@ -1,0 +1,45 @@
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=46419 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=46419 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+26/10/20 07:20:55 WARN Utils: Your hostname, vm resolves to a loopback address: 127.0.0.1; using 192.0.2.2 instead (on interface eth0)
+26/10/20 07:20:55 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+26/10/20 07:20:56 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+[uniform-small-s202-e681d7c2] loaded 699,965 edges / 100,000 active vertices in 35.092s
+[uniform-small-s202-e681d7c2] gate native__aqe_off              ok       match n=4899517
+[uniform-small-s202-e681d7c2] gate native__aqe_on               ok       match n=4899517
+[uniform-small-s202-e681d7c2] gate edgejoin__aqe_off            ok       match n=4899517
+[uniform-small-s202-e681d7c2] gate salt1d__aqe_off              ok       match n=4899517
+[uniform-small-s202-e681d7c2] gate hypercube__aqe_off           ok       match n=4899517
+[uniform-small-s202-e681d7c2] gate hypercube_unified__aqe_off   ok       match n=4899517
+[uniform-small-s202-e681d7c2] gate edgejoin__aqe_on             ok       match n=4899517
+[uniform-small-s202-e681d7c2] warmup   r0 native__aqe_on               ok       q=21.9263s total=21.9263s paths=4899517 dom max/med=2.1573 cv=0.2485 skew=0
+[uniform-small-s202-e681d7c2] warmup   r0 native__aqe_off              ok       q=17.9856s total=17.9856s paths=4899517 dom max/med=1.9359 cv=0.1403 skew=None
+[uniform-small-s202-e681d7c2] warmup   r0 salt1d__aqe_off              ok       q=10.2027s total=24.4266s paths=4899517 dom max/med=2.1463 cv=0.2428 skew=None
+[uniform-small-s202-e681d7c2] warmup   r0 edgejoin__aqe_off            ok       q=9.7589s total=9.7589s paths=4899517 dom max/med=1.9 cv=0.1443 skew=None
+[uniform-small-s202-e681d7c2] warmup   r0 edgejoin__aqe_on             ok       q=8.446s total=8.446s paths=4899517 dom max/med=1.675 cv=0.1429 skew=0
+[uniform-small-s202-e681d7c2] warmup   r0 hypercube__aqe_off           ok       q=5.62s total=13.9473s paths=4899517 dom max/med=2.05 cv=0.2202 skew=None
+[uniform-small-s202-e681d7c2] warmup   r0 hypercube_unified__aqe_off   ok       q=7.495s total=13.491s paths=4899517 dom max/med=2.12 cv=0.1931 skew=None
+[uniform-small-s202-e681d7c2] measured r1 edgejoin__aqe_off            ok       q=6.4799s total=6.4799s paths=4899517 dom max/med=1.75 cv=0.1943 skew=None
+[uniform-small-s202-e681d7c2] measured r1 native__aqe_on               ok       q=7.9529s total=7.9529s paths=4899517 dom max/med=2.0968 cv=0.1846 skew=0
+[uniform-small-s202-e681d7c2] measured r1 hypercube_unified__aqe_off   ok       q=8.404s total=16.2048s paths=4899517 dom max/med=2.2667 cv=0.1862 skew=None
+[uniform-small-s202-e681d7c2] measured r1 salt1d__aqe_off              ok       q=8.652s total=17.087s paths=4899517 dom max/med=2.2121 cv=0.1759 skew=None
+[uniform-small-s202-e681d7c2] measured r1 native__aqe_off              ok       q=9.8187s total=9.8187s paths=4899517 dom max/med=1.8919 cv=0.1641 skew=None
+[uniform-small-s202-e681d7c2] measured r1 hypercube__aqe_off           ok       q=8.1109s total=16.0698s paths=4899517 dom max/med=1.5588 cv=0.1892 skew=None
+[uniform-small-s202-e681d7c2] measured r1 edgejoin__aqe_on             ok       q=6.7504s total=6.7504s paths=4899517 dom max/med=1.7667 cv=0.1481 skew=0
+[uniform-small-s202-e681d7c2] measured r2 hypercube_unified__aqe_off   ok       q=9.0726s total=18.6879s paths=4899517 dom max/med=1.7 cv=0.1417 skew=None
+[uniform-small-s202-e681d7c2] measured r2 edgejoin__aqe_on             ok       q=9.3682s total=9.3682s paths=4899517 dom max/med=1.6667 cv=0.1117 skew=0
+[uniform-small-s202-e681d7c2] measured r2 hypercube__aqe_off           ok       q=9.2763s total=20.3354s paths=4899517 dom max/med=1.5227 cv=0.1083 skew=None
+[uniform-small-s202-e681d7c2] measured r2 native__aqe_off              ok       q=11.8366s total=11.8366s paths=4899517 dom max/med=2.0213 cv=0.137 skew=None
+[uniform-small-s202-e681d7c2] measured r2 salt1d__aqe_off              ok       q=9.8224s total=19.2052s paths=4899517 dom max/med=1.5 cv=0.1236 skew=None
+[uniform-small-s202-e681d7c2] measured r2 edgejoin__aqe_off            ok       q=11.0065s total=11.0065s paths=4899517 dom max/med=1.48 cv=0.1077 skew=None
+[uniform-small-s202-e681d7c2] measured r2 native__aqe_on               ok       q=9.2836s total=9.2836s paths=4899517 dom max/med=2.5122 cv=0.4156 skew=0
+[uniform-small-s202-e681d7c2] measured r3 salt1d__aqe_off              ok       q=14.8535s total=35.3071s paths=4899517 dom max/med=1.3623 cv=0.0941 skew=None
+[uniform-small-s202-e681d7c2] measured r3 native__aqe_on               ok       q=17.2744s total=17.2744s paths=4899517 dom max/med=2.3784 cv=0.2617 skew=0
+[uniform-small-s202-e681d7c2] measured r3 hypercube_unified__aqe_off   ok       q=13.6179s total=32.8421s paths=4899517 dom max/med=2.3585 cv=0.3393 skew=None
+[uniform-small-s202-e681d7c2] measured r3 edgejoin__aqe_off            ok       q=10.5066s total=10.5066s paths=4899517 dom max/med=3.1795 cv=0.3779 skew=None
+[uniform-small-s202-e681d7c2] measured r3 hypercube__aqe_off           ok       q=9.048s total=17.7204s paths=4899517 dom max/med=2.5333 cv=0.4023 skew=None
+[uniform-small-s202-e681d7c2] measured r3 native__aqe_off              ok       q=11.8637s total=11.8637s paths=4899517 dom max/med=2.625 cv=0.3771 skew=None
+[uniform-small-s202-e681d7c2] measured r3 edgejoin__aqe_on             ok       q=13.6284s total=13.6284s paths=4899517 dom max/med=2.3091 cv=0.3282 skew=0
+[uniform-small-s202-e681d7c2] measured r4 hypercube__aqe_off           ok       q=9.9299s total=19.6589s paths=4899517 dom max/med=2.878 cv=0.3308 skew=None
+[uniform-small-s202-e681d7c2] measured r4 native__aqe_off              ok       q=12.3129s total=12.3129s paths=4899517 dom max/med=2.1364 cv=0.3356 skew=None
