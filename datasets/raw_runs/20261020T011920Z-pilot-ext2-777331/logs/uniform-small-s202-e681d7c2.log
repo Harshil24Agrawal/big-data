@@ -43,3 +43,15 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [uniform-small-s202-e681d7c2] measured r3 edgejoin__aqe_on             ok       q=13.6284s total=13.6284s paths=4899517 dom max/med=2.3091 cv=0.3282 skew=0
 [uniform-small-s202-e681d7c2] measured r4 hypercube__aqe_off           ok       q=9.9299s total=19.6589s paths=4899517 dom max/med=2.878 cv=0.3308 skew=None
 [uniform-small-s202-e681d7c2] measured r4 native__aqe_off              ok       q=12.3129s total=12.3129s paths=4899517 dom max/med=2.1364 cv=0.3356 skew=None
+[uniform-small-s202-e681d7c2] measured r4 salt1d__aqe_off              ok       q=19.2672s total=36.2474s paths=4899517 dom max/med=2.0 cv=0.2159 skew=None
+[uniform-small-s202-e681d7c2] measured r4 edgejoin__aqe_off            ok       q=18.3713s total=18.3713s paths=4899517 dom max/med=1.9868 cv=0.2091 skew=None
+[uniform-small-s202-e681d7c2] measured r4 edgejoin__aqe_on             ok       q=14.6578s total=14.6578s paths=4899517 dom max/med=2.1935 cv=0.2502 skew=0
+[uniform-small-s202-e681d7c2] measured r4 hypercube_unified__aqe_off   ok       q=10.5571s total=23.042s paths=4899517 dom max/med=2.7297 cv=0.2854 skew=None
+[uniform-small-s202-e681d7c2] measured r4 native__aqe_on               ok       q=8.4998s total=8.4998s paths=4899517 dom max/med=3.1071 cv=0.4157 skew=0
+[uniform-small-s202-e681d7c2] measured r5 hypercube_unified__aqe_off   ok       q=9.6226s total=19.568s paths=4899517 dom max/med=2.3333 cv=0.3236 skew=None
+[uniform-small-s202-e681d7c2] measured r5 salt1d__aqe_off              ok       q=12.7614s total=24.8216s paths=4899517 dom max/med=2.8085 cv=0.3645 skew=None
+[uniform-small-s202-e681d7c2] measured r5 edgejoin__aqe_off            ok       q=17.5912s total=17.5912s paths=4899517 dom max/med=1.9444 cv=0.1812 skew=None
+[uniform-small-s202-e681d7c2] measured r5 edgejoin__aqe_on             ok       q=17.8659s total=17.8659s paths=4899517 dom max/med=1.8554 cv=0.1303 skew=0
+[uniform-small-s202-e681d7c2] measured r5 hypercube__aqe_off           ok       q=12.6797s total=29.4734s paths=4899517 dom max/med=2.3125 cv=0.2497 skew=None
+[uniform-small-s202-e681d7c2] measured r5 native__aqe_on               ok       q=15.1627s total=15.1627s paths=4899517 dom max/med=2.5714 cv=0.3116 skew=0
+[uniform-small-s202-e681d7c2] measured r5 native__aqe_off              ok       q=11.5498s total=11.5498s paths=4899517 dom max/med=2.75 cv=0.2644 skew=None
