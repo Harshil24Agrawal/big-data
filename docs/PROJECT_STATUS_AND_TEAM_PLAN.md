@@ -3,6 +3,16 @@
 **ML-Guided Selection of Graph-Query Execution Strategies in Apache Spark**
 
 Status as of 2026-10-20, ~11:00 IST. Final update of the overnight run: 60/60 graphs generated; **31 of 60 graphs benchmarked** (1,085 valid runs, 4 campaigns, 1 machine); Phase 2 feature table delivered; first selector prototype run (preliminary). Branch `phase1-data-collection` in `Harshil24Agrawal/big-data`.
+
+> ## UPDATE 2026-10-20, ~23:45 IST — all phases complete (supersedes the status line and phase tables below where they differ)
+>
+> * **Phase 1 (data) finished at 62 benchmarked graphs:** 31 original + 31 hub-sweep graphs (one machine, same Spark settings; 5/3/2 timed runs per strategy, recorded in a `protocol` column). 306 timed sweep runs, 0 failures, 0 timeouts, 0 wrong results. 29 of the 60 original graphs remain un-benchmarked (documented exclusion).
+> * **Key finding:** edge-join is the best default on this 2-core machine (faster than native on 56/62 graphs, median 1.38×). Hub-splitting (unified hypercube) wins only when **one** vertex carries ≳ 1e8 two-hop paths (6 graphs, up to 2× faster than edge-join, 3.3× faster than native). With several equal hubs it never wins.
+> * **Phase 3 (models) done in `notebooks/selector.ipynb`** (executed, 300 trees): best classifier 85.5 % leave-one-graph-out vs 80.6 % majority baseline; runtime-regression selector mean regret 4.6 % vs 8.3 % (best fixed) vs 0 % (oracle); no gain over the fixed policy on unseen graph families (leave-one-group-out). Feature-extraction cost is not measured.
+> * **Phases 4–5 done:** charts in `datasets/derived/selector_v2/`; paper-style report `docs/FINAL_REPORT.md` (method, data, results, limitations, related work, references); explanation guide `docs/PROJECT_BRIEFING.md`.
+> * Nothing is left for other team members except review/presentation; do not re-run benchmarks on another machine into the same table (the builder refuses mixed machines).
+> * Git: everything is on `mine` (Harshil24Agrawal/big-data, branch `phase1-data-collection`); nothing was pushed to `origin` (Rayirth556/hypergraph).
+
 Every number below was read from files in the repository at the time of writing; anything that could not
 be verified is marked **unknown** or **pending**. Labels used throughout:
 
