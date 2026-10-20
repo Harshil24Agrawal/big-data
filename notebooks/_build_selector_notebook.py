@@ -37,6 +37,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from IPython.display import display, Markdown
 from scipy.stats import spearmanr
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, ExtraTreesClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
@@ -121,7 +122,7 @@ if len(sw):
 md("""
 ## 3. Classifier — which class is fastest?
 Models: **majority** (always the most common training class), **rule** (fixed prior: graphs with work hubs → hubsplit, else native; not tuned),
-**logistic regression**, **random forest**, **extra-trees**. Three held-out schemes:
+**logistic regression**, a **depth-2 decision tree** (readable, suits very few hub-splitting examples), **random forest**, **extra-trees**. Three held-out schemes:
 
 * **LOGO** – leave one *graph* out (train on all others).
 * **LOSG** – leave one *structural group* out (a whole generator family, or all hub-sweep graphs with the same number of hubs, is unseen) — the harshest test.
@@ -131,6 +132,7 @@ code("""
 def make_models():
     return {
         "logreg": lambda: make_pipeline(StandardScaler(), LogisticRegression(C=1.0, max_iter=2000, class_weight="balanced")),
+        "tree_depth2": lambda: DecisionTreeClassifier(max_depth=2, class_weight="balanced", random_state=SEED),
         "random_forest": lambda: RandomForestClassifier(n_estimators=NTREES, min_samples_leaf=1, class_weight="balanced_subsample", random_state=SEED, n_jobs=1),
         "extra_trees": lambda: ExtraTreesClassifier(n_estimators=NTREES, min_samples_leaf=1, class_weight="balanced_subsample", random_state=SEED, n_jobs=1),
     }
@@ -181,7 +183,7 @@ for scheme, o in clf12.items():
     for m, s in o["scores"].items():
         rows.append(dict(scheme=scheme, n_test=o["n_test"], model=m, **{k: round(v, 3) for k, v in s.items()}))
 clf_table = pd.DataFrame(rows)
-display(clf_table.pivot(index="model", columns="scheme", values="accuracy").loc[["majority", "rule", "logreg", "random_forest", "extra_trees"]])
+display(clf_table.pivot(index="model", columns="scheme", values="accuracy").loc[["majority", "rule", "logreg", "tree_depth2", "random_forest", "extra_trees"]])
 RES["classifier"] = {sch: {"n_test": o["n_test"], "scores": o["scores"]} for sch, o in clf12.items()}
 """)
 code("""
@@ -191,9 +193,24 @@ ab = pd.DataFrame({sch: {"11 features (RF)": clf11[sch]["scores"]["random_forest
                          "majority": clf12[sch]["scores"]["majority"]["accuracy"]} for sch in clf12}).round(3)
 display(ab); RES["ablation_rf_accuracy"] = ab.to_dict()
 """)
+md("""
+### Where the choice actually matters: the skewed regime
+Most graphs have no dominant hub, so "edge-join" is trivially right there. The informative test is the subset where one vertex holds most of the work
+(`work_max_share >= 0.9`). Below, accuracy of each held-out (LOGO) prediction on that subset only, with the majority baseline *of that subset*.
+""")
+code("""
+mask = (df.work_max_share >= 0.9).values
+print(f"skewed-regime graphs: {mask.sum()}  class counts: {pd.Series(y_class[mask]).value_counts().to_dict()}")
+sub = {}
+for m_, p_ in clf12["LOGO"]["preds"].items():
+    sub[m_] = dict(accuracy=float(accuracy_score(y_class[mask], p_[mask])), macro_f1=float(f1_score(y_class[mask], p_[mask], average="macro", labels=CLASSES)))
+sub_tab = pd.DataFrame(sub).T.round(3); display(sub_tab)
+RES["skewed_regime"] = dict(n=int(mask.sum()), class_counts=pd.Series(y_class[mask]).value_counts().to_dict(), classifier_logo=sub_tab.to_dict(orient="index"))
+""")
+
 code("""
 # confusion matrix of the best classifier by LOGO accuracy (non-majority) + feature importance
-best_name = max(["logreg", "random_forest", "extra_trees"], key=lambda m: clf12["LOGO"]["scores"][m]["accuracy"])
+best_name = max(["logreg", "tree_depth2", "random_forest", "extra_trees"], key=lambda m: clf12["LOGO"]["scores"][m]["accuracy"])
 p = clf12["LOGO"]["preds"][best_name]
 cm = confusion_matrix(y_class, p, labels=CLASSES)
 fig, ax = plt.subplots(1, 2, figsize=(11, 3.8))
@@ -279,6 +296,11 @@ for sch in PRED:
     tab, ix, pol = policy_table(sch); POL[sch] = (tab, ix, pol)
     display(Markdown(f"**{sch}** — {len(ix)} held-out graphs; majority-class baseline for class accuracy = {max(np.mean(y_class[ix] == c) for c in CLASSES):.3f}"))
     display(tab.round(3))
+_ch = choose(PRED["LOGO"])[mask]
+RES["skewed_regime"]["selector_class_accuracy"] = float(np.mean([CLASS_OF[STRATS[c]] == t for c, t in zip(_ch, y_class[mask])]))
+RES["skewed_regime"]["selector_regret_pct"] = float(np.mean(T[mask][np.arange(mask.sum()), _ch] / T[mask].min(1) - 1) * 100)
+RES["skewed_regime"]["always_edgejoin_regret_pct"] = float(np.mean(T[mask][:, 0] / T[mask].min(1) - 1) * 100)
+print("skewed regime: selector class accuracy", round(RES["skewed_regime"]["selector_class_accuracy"], 3), "| mean regret selector", round(RES["skewed_regime"]["selector_regret_pct"], 1), "% vs always-edgejoin", round(RES["skewed_regime"]["always_edgejoin_regret_pct"], 1), "%")
 RES["policies"] = {sch: POL[sch][0].round(4).to_dict(orient="records") for sch in POL}
 RES["majority_class_accuracy_in_scheme"] = {sch: float(max(np.mean(y_class[POL[sch][1]] == c) for c in CLASSES)) for sch in POL}
 """)
@@ -326,7 +348,7 @@ code("""
 lg = RES["classifier"]["LOGO"]["scores"]; pt = {r["policy"]: r for r in RES["policies"]["LOGO"]}
 lines = [
  f"- **Graphs:** {RES['n_graphs']} ({RES['protocols']}); class counts {RES['class_counts']}; majority-class accuracy {RES['majority_frac_global']:.1%}.",
- f"- **Classifier (LOGO accuracy):** majority {lg['majority']['accuracy']:.1%}, rule {lg['rule']['accuracy']:.1%}, logreg {lg['logreg']['accuracy']:.1%}, random forest {lg['random_forest']['accuracy']:.1%}, extra-trees {lg['extra_trees']['accuracy']:.1%}.",
+ f"- **Classifier (LOGO accuracy):** majority {lg['majority']['accuracy']:.1%}, rule {lg['rule']['accuracy']:.1%}, depth-2 tree {lg['tree_depth2']['accuracy']:.1%}, logreg {lg['logreg']['accuracy']:.1%}, random forest {lg['random_forest']['accuracy']:.1%}, extra-trees {lg['extra_trees']['accuracy']:.1%}.",
  f"- **Selector (LOGO):** class accuracy {pt['ML selector']['class_accuracy']:.1%}; mean regret {pt['ML selector']['mean_regret_pct']:.1f}% vs {pt['always edgejoin__aqe_off']['mean_regret_pct']:.1f}% for always-edge-join and {pt['always native__aqe_on']['mean_regret_pct']:.1f}% for always-native; oracle 0%.",
  f"- **Speed-up vs native (geomean):** ML {pt['ML selector']['geomean_speedup_vs_native']:.2f}x, ML+fallback {pt['ML selector + native fallback']['geomean_speedup_vs_native']:.2f}x, always edge-join {pt['always edgejoin__aqe_off']['geomean_speedup_vs_native']:.2f}x, oracle {pt['oracle']['geomean_speedup_vs_native']:.2f}x.",
 ]

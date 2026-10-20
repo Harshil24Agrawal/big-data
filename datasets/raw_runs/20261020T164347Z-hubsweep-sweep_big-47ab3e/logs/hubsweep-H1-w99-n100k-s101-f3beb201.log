@@ -6,3 +6,6 @@ Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cace
 Setting default log level to "WARN".
 To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
 [hubsweep-H1-w99-n100k-s101-f3beb201] loaded 744,046 edges / 100,000 active vertices in 39.082s
+[hubsweep-H1-w99-n100k-s101-f3beb201] gate native__aqe_on               ok       match n=490529637
+[hubsweep-H1-w99-n100k-s101-f3beb201] gate edgejoin__aqe_off            ok       match n=490529637
+[hubsweep-H1-w99-n100k-s101-f3beb201] gate hypercube_unified__aqe_off   ok       match n=490529637
