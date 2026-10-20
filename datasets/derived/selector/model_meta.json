@@ -1,0 +1,75 @@
+{
+  "status": "PRELIMINARY",
+  "features": [
+    "log_num_vertices",
+    "log_num_edges",
+    "active_fraction",
+    "in_gini",
+    "out_gini",
+    "log_in_p999",
+    "log_out_p999",
+    "log_work_sum",
+    "work_max_share",
+    "log_num_work_hubs",
+    "work_in_hubs_share"
+  ],
+  "strategies": [
+    "edgejoin__aqe_off",
+    "edgejoin__aqe_on",
+    "hypercube__aqe_off",
+    "hypercube_unified__aqe_off",
+    "native__aqe_off",
+    "native__aqe_on",
+    "salt1d__aqe_off"
+  ],
+  "target": "log(median_total_s)",
+  "rf_params": {
+    "n_estimators": 300,
+    "min_samples_leaf": 1,
+    "max_features": 1.0,
+    "random_state": 0,
+    "n_jobs": 1
+  },
+  "training_graphs": [
+    "in_heavy-large-s202-1ab20d7b",
+    "in_heavy-medium-s101-9829e80e",
+    "in_heavy-medium-s202-f7f0cd9e",
+    "in_heavy-small-s101-addf9e1e",
+    "in_heavy-small-s202-5a646685",
+    "multi_hub-large-s101-6eed4f52",
+    "multi_hub-large-s202-301552c4",
+    "multi_hub-medium-s101-7241a078",
+    "multi_hub-medium-s202-d9d3dd12",
+    "multi_hub-medium-s303-e0a7f3cb",
+    "multi_hub-medium-s404-bd2a0d37",
+    "multi_hub-small-s101-cea55efc",
+    "multi_hub-small-s202-96a94ea3",
+    "multi_hub-small-s303-7e581b99",
+    "multi_hub-small-s404-0cbb6a4d",
+    "out_heavy-large-s101-2c9ecb7d",
+    "out_heavy-large-s202-4303b68b",
+    "out_heavy-medium-s101-17803390",
+    "out_heavy-medium-s202-95d61ad5",
+    "out_heavy-small-s101-88c36855",
+    "out_heavy-small-s202-dedbc0d7",
+    "powerlaw_balanced-small-s101-aa30b13b",
+    "powerlaw_balanced-small-s202-206df433",
+    "powerlaw_balanced-small-s303-4a3cdfd7",
+    "powerlaw_balanced-small-s404-e8eecf7c",
+    "uniform-large-s101-57ef5eb7",
+    "uniform-large-s202-92458412",
+    "uniform-medium-s101-5b7704b2",
+    "uniform-medium-s202-98ee4d97",
+    "uniform-small-s101-f3568c8f",
+    "uniform-small-s202-e681d7c2"
+  ],
+  "config_ids": [
+    "5e57fecdd6",
+    "ab41b3ff27"
+  ],
+  "machine_ids": [
+    "6c5d1cb517a4"
+  ],
+  "fallback_margin": 0.05,
+  "native_fallback": "native__aqe_on"
+}

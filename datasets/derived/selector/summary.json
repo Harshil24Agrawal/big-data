@@ -1,0 +1,181 @@
+{
+  "status": "PRELIMINARY",
+  "graphs": 31,
+  "label_counts": {
+    "edgejoin__aqe_off": 14,
+    "edgejoin__aqe_on": 16,
+    "native__aqe_on": 1
+  },
+  "protocols": {
+    "leave-one-graph-out": {
+      "best_fixed_train": {
+        "graphs": 31,
+        "mean_regret": 0.10148329511842268,
+        "median_regret": 0.0,
+        "max_regret": 0.5370776001115118,
+        "geomean_speedup_vs_native_aqe_on": 1.3168679555496614,
+        "selections": {
+          "edgejoin__aqe_on": 31
+        },
+        "graphs_where_oracle_chosen": 16
+      },
+      "ml": {
+        "graphs": 31,
+        "mean_regret": 0.1482618792258734,
+        "median_regret": 0.03593060831743533,
+        "max_regret": 1.0343116217138202,
+        "geomean_speedup_vs_native_aqe_on": 1.2718647848960951,
+        "selections": {
+          "edgejoin__aqe_off": 13,
+          "edgejoin__aqe_on": 17,
+          "native__aqe_on": 1
+        },
+        "graphs_where_oracle_chosen": 12
+      },
+      "ml_native_fallback": {
+        "graphs": 31,
+        "mean_regret": 0.1482618792258734,
+        "median_regret": 0.03593060831743533,
+        "max_regret": 1.0343116217138202,
+        "geomean_speedup_vs_native_aqe_on": 1.2718647848960951,
+        "selections": {
+          "edgejoin__aqe_off": 13,
+          "edgejoin__aqe_on": 17,
+          "native__aqe_on": 1
+        },
+        "graphs_where_oracle_chosen": 12
+      },
+      "native_aqe_off": {
+        "graphs": 31,
+        "mean_regret": 0.5596305139683746,
+        "median_regret": 0.511083110730306,
+        "max_regret": 1.6041999449187552,
+        "geomean_speedup_vs_native_aqe_on": 0.9374020347205472,
+        "selections": {
+          "native__aqe_off": 31
+        },
+        "graphs_where_oracle_chosen": 0
+      },
+      "native_aqe_on": {
+        "graphs": 31,
+        "mean_regret": 0.45316740952277895,
+        "median_regret": 0.446498541939613,
+        "max_regret": 1.1135224456072708,
+        "geomean_speedup_vs_native_aqe_on": 1.0,
+        "selections": {
+          "native__aqe_on": 31
+        },
+        "graphs_where_oracle_chosen": 1
+      },
+      "oracle": {
+        "graphs": 31,
+        "mean_regret": 0.0,
+        "median_regret": 0.0,
+        "max_regret": 0.0,
+        "geomean_speedup_vs_native_aqe_on": 1.4379285110733862,
+        "selections": {
+          "edgejoin__aqe_off": 14,
+          "edgejoin__aqe_on": 16,
+          "native__aqe_on": 1
+        },
+        "graphs_where_oracle_chosen": 31
+      },
+      "rule_hub": {
+        "graphs": 31,
+        "mean_regret": 0.8469985112451325,
+        "median_regret": 0.9534483832783007,
+        "max_regret": 1.5994783687874499,
+        "geomean_speedup_vs_native_aqe_on": 0.8021037010149279,
+        "selections": {
+          "hypercube_unified__aqe_off": 17,
+          "native__aqe_on": 14
+        },
+        "graphs_where_oracle_chosen": 1
+      }
+    },
+    "leave-one-family-out": {
+      "best_fixed_train": {
+        "graphs": 31,
+        "mean_regret": 0.10148329511842268,
+        "median_regret": 0.0,
+        "max_regret": 0.5370776001115118,
+        "geomean_speedup_vs_native_aqe_on": 1.3168679555496614,
+        "selections": {
+          "edgejoin__aqe_on": 31
+        },
+        "graphs_where_oracle_chosen": 16
+      },
+      "ml": {
+        "graphs": 31,
+        "mean_regret": 0.1523278575524412,
+        "median_regret": 0.02578392696579135,
+        "max_regret": 1.0343116217138202,
+        "geomean_speedup_vs_native_aqe_on": 1.2714270275457977,
+        "selections": {
+          "edgejoin__aqe_off": 19,
+          "edgejoin__aqe_on": 12
+        },
+        "graphs_where_oracle_chosen": 14
+      },
+      "ml_native_fallback": {
+        "graphs": 31,
+        "mean_regret": 0.1523278575524412,
+        "median_regret": 0.02578392696579135,
+        "max_regret": 1.0343116217138202,
+        "geomean_speedup_vs_native_aqe_on": 1.2714270275457977,
+        "selections": {
+          "edgejoin__aqe_off": 19,
+          "edgejoin__aqe_on": 12
+        },
+        "graphs_where_oracle_chosen": 14
+      },
+      "native_aqe_off": {
+        "graphs": 31,
+        "mean_regret": 0.5596305139683746,
+        "median_regret": 0.511083110730306,
+        "max_regret": 1.6041999449187552,
+        "geomean_speedup_vs_native_aqe_on": 0.9374020347205472,
+        "selections": {
+          "native__aqe_off": 31
+        },
+        "graphs_where_oracle_chosen": 0
+      },
+      "native_aqe_on": {
+        "graphs": 31,
+        "mean_regret": 0.45316740952277895,
+        "median_regret": 0.446498541939613,
+        "max_regret": 1.1135224456072708,
+        "geomean_speedup_vs_native_aqe_on": 1.0,
+        "selections": {
+          "native__aqe_on": 31
+        },
+        "graphs_where_oracle_chosen": 1
+      },
+      "oracle": {
+        "graphs": 31,
+        "mean_regret": 0.0,
+        "median_regret": 0.0,
+        "max_regret": 0.0,
+        "geomean_speedup_vs_native_aqe_on": 1.4379285110733862,
+        "selections": {
+          "edgejoin__aqe_off": 14,
+          "edgejoin__aqe_on": 16,
+          "native__aqe_on": 1
+        },
+        "graphs_where_oracle_chosen": 31
+      },
+      "rule_hub": {
+        "graphs": 31,
+        "mean_regret": 0.8469985112451325,
+        "median_regret": 0.9534483832783007,
+        "max_regret": 1.5994783687874499,
+        "geomean_speedup_vs_native_aqe_on": 0.8021037010149279,
+        "selections": {
+          "hypercube_unified__aqe_off": 17,
+          "native__aqe_on": 14
+        },
+        "graphs_where_oracle_chosen": 1
+      }
+    }
+  }
+}

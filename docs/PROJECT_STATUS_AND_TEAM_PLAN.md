@@ -2,7 +2,7 @@
 
 **ML-Guided Selection of Graph-Query Execution Strategies in Apache Spark**
 
-Status as of 2026-10-20 (early morning, IST). Last full update after the `pilot-full` campaign finished and all 60 graphs were generated; a second campaign (`pilot-hubs`) was still running when this was written (see §5). Branch `phase1-data-collection` in `Harshil24Agrawal/big-data`.
+Status as of 2026-10-20, ~11:00 IST. Final update of the overnight run: 60/60 graphs generated; **31 of 60 graphs benchmarked** (1,085 valid runs, 4 campaigns, 1 machine); Phase 2 feature table delivered; first selector prototype run (preliminary). Branch `phase1-data-collection` in `Harshil24Agrawal/big-data`.
 Every number below was read from files in the repository at the time of writing; anything that could not
 be verified is marked **unknown** or **pending**. Labels used throughout:
 
@@ -148,15 +148,25 @@ Counts from `bench/phase1_coverage.py` (raw records only):
 | `20261019T140509Z-pilot-reduced-e1367c` | 7 graphs, 1 warm-up + ≤3 measured, 540 s per-graph cap | finished; **every graph hit the cap** | 64 | 5/49 | 0 / 0 / 0 |
 | `20261019T163326Z-pilot-full-5d1324` | 10 graphs (1 safety-skipped), 1 warm-up + 5 measured | **complete: 10/10 graphs done**; interrupted twice by sandbox restarts and resumed | **350** (= 10 × 7 × 5) | **70/77** (the 7 open cells are the safety-skipped graph) | 0 / 0 / 0 |
 | `20261019T205726Z-pilot-hubs-67a899` | 8 hub-heavy graphs (multi_hub small ×3, medium ×3; powerlaw small ×2), same config id `ab41b3ff27` as pilot-full | **complete: 8/8 graphs done** (no restart) | **280** (= 8 × 7 × 5) | **56/56** | 0 / 0 / 0 |
+| `20261019T235430Z-pilot-ext1-7aa307` | 2 large multi_hub graphs (work_sum ≈205M), `max_work_sum` 250M, per-run limit 900 s | **complete: 2/2**; sandbox restarted once during the second graph, resumed (`INTERRUPTIONS.md`) | **70** (= 2 × 7 × 5) | **14/14** | 0 / 0 / 0 |
+| `20261020T011920Z-pilot-ext2-777331` | 12 planned core graphs (small/medium/large of in_heavy, out_heavy, uniform) | **11/12 done**; stopped deliberately during the 12th (`in_heavy-large-s101`) at the hand-over deadline (`NOTES.md`) | **385** (= 11 × 7 × 5) | **77/77** done graphs | 0 / 0 / 0 |
+| **Total used for labels** | 31 graphs from `pilot-full`, `pilot-hubs`, `pilot-ext1`, `pilot-ext2` | — | **1,085** (= 31 × 7 × 5) | — | 0 / 0 / 0 |
 
 \*cell = (graph, strategy); complete = valid runs ≥ campaign target.
 
+**Configuration identity.** `pilot-full`, `pilot-hubs` and `pilot-ext2` carry `config_id ab41b3ff27`. `pilot-ext1` carries `5e57fecdd6`
+only because its per-run safety limit was 900 s instead of 600 s (the larger graphs needed it); no run in any campaign timed out. The measurement
+settings (master, driver memory, 200 shuffle/input partitions, broadcast off, warm-up 1, measured 5, work threshold, P cells, AQE settings, strategies,
+machine) are identical. `ml/build_training_table.py` therefore compares a *measurement configuration id* that leaves out the safety-only limits
+(`run_timeout_s`, `graph_timeout_s`, `max_work_sum`), refuses to combine anything else, and keeps the recorded `config_id` as a column.
+
 ### 6. Results genuinely supported by artifacts
 
-All numbers below come from `datasets/derived/20261019T163326Z-pilot-full-5d1324/` (regenerable from the raw
-`runs.jsonl`) and `datasets/derived/coverage/`. Environment: one shared 2-core sandbox, one configuration
-(`config_id ab41b3ff27`), 5 valid measured runs per cell. **This is the first dataset that meets the "5 valid
-repeats for all 7 strategies" bar, but only for 10 graphs; it is still too small and too homogeneous to train on.**
+The first table below and the 10-graph paragraph come from `datasets/derived/20261019T163326Z-pilot-full-5d1324/`; the
+hub-heavy paragraph from `…pilot-hubs-67a899/`; the combined view from `datasets/derived/training/training_table_eligible.csv`
+(all four campaigns, 31 graphs). Everything is regenerable from the raw `runs.jsonl` files. Environment: one shared 2-core sandbox, one
+measurement configuration, 5 valid measured runs per cell. **31 graphs × 7 strategies × 5 runs is real data, but 31 graphs are
+too few, too homogeneous and too one-sided to train a selector that can be claimed to generalise.**
 
 - **Correctness (confirmed):** across all four campaigns every strategy that ran passed the correctness gate on every
   graph (output count equal to `work_sum`, checksums identical to native GraphFrames). 0 mismatches, 0 failures,
@@ -194,6 +204,22 @@ hypercube variants never win on `total_s`: they pay a profiling pass and, at thi
 dominate. No final adaptive plan in either campaign contains a skew split (`plan_skew_split_any_run = False` for every AQE-on strategy).
 Reading: hub-concentrated *work* alone did not make hypercube/salting pay off here. This does not show they are worse on larger graphs, other machines
 or truly byte-skewed partitions, which these graphs never produced.
+**Combined view, 31 graphs (`training_table_eligible.csv`):**
+
+| Quantity | Value |
+|---|---|
+| graphs by family | multi_hub 10, out_heavy 6, uniform 6, in_heavy 5, powerlaw_balanced 4 (all small); no powerlaw medium/large |
+| lowest median `total_s` | `edgejoin__aqe_on` 16, `edgejoin__aqe_off` 14, `native__aqe_on` 1 |
+| best edge-join vs best non-edge-join | non-edge-join is slower on 30 graphs (median 1.39×, up to 2.11×); on 1 graph (`uniform-small-s202`) native with AQE on is 16 % faster, in a cell with wide IQRs (5–7 s) |
+| best of salt1d / hypercube / hypercube_unified vs best edge-join | **never faster**: 1.52–2.63× slower (median 2.09×) |
+| native (AQE on) vs best edge-join | edge-join faster by a median 1.45× (max 2.11×) |
+| labels with a gap larger than both strategies' IQR (`label_clear`) | only 7 of 31; 6 graphs have a margin under 5 % |
+| skew splits in final adaptive plans | none in any campaign |
+
+Reading: on this machine and at these sizes, edge-join variants dominate and the salting/hypercube variants are consistently worse because they
+pay a profiling pass and the data never produced a byte-skewed partition. This is a statement about 2 cores, 200 partitions, 5–207 M work and
+these generators; it is not evidence about larger clusters or true byte skew.
+
 - **AQE (confirmed, narrow):** AQE only *coalesced* partitions in the AQE-on runs; the final adaptive plan never
   contained a skew split (`plan_skew_split = false`). No graph benchmarked so far produced a reduce partition near the
   256 MB threshold. Skew handling is therefore **untested**, not shown ineffective.
@@ -216,6 +242,8 @@ or truly byte-skewed partitions, which these graphs never produced.
      `label_eligible`, `strategies_expected`, `min_measured_runs_per_strategy`.
   4. Correctness gate did not release cached hypercube tables when a gate run failed. Fixed.
   5. Documentation claimed exact `m_target` edges for every family (see §4).
+- `pilot-ext1`: one sandbox restart during its second graph (resumed); `pilot-ext2`: stopped at 11 of 12 graphs by design (see §5). `in_heavy-large-s101` has partial, non-eligible records only.
+- 29 graphs remain un-benchmarked: 4 `powerlaw_balanced-large` (≈1.48B work, above the 600M default safety gate), 4 `powerlaw_balanced-medium` (≈535M), 2 `multi_hub-large` (≈205M) and 19 core graphs (in/out_heavy and uniform, mostly seeds 303/404 and some 202); the full matrix needs a bigger machine.
 - Evidence-quality caveat (`pilot-hubs`): unit tests ran on the same machine during the first graph, `multi_hub-small-s303`; see the campaign's `NOTES.md`.
 - Evidence-quality caveat: short audit scripts (a few seconds of Python) ran alongside the benchmark while it was
   measuring `out_heavy-small` in `pilot-full`; treat that graph's timings with extra caution.
@@ -229,7 +257,7 @@ or truly byte-skewed partitions, which these graphs never produced.
 | Required datasets generated or documented unavailable | **60/60 synthetic generated + validated** (family checks, Spark re-read); Pokec validated (HDFS not configured) |
 | Dataset integrity demonstrated | Yes for all 60 + Pokec (manifest hashes, deterministic regeneration of the original 11 unchanged) |
 | Query correctness demonstrated | Yes for every graph benchmarked (10 in `pilot-full` + smoke); 0 mismatches |
-| Benchmark matrix and exclusions documented | Coverage matrix exists (`datasets/derived/coverage/`); **10 of 60 graphs fully measured (5 valid runs × 7 strategies)**; hub-heavy expansion campaign running; ~50 graphs not yet run (compute-bound) |
+| Benchmark matrix and exclusions documented | Coverage matrix exists (`datasets/derived/coverage/`); **31 of 60 graphs fully measured (5 valid runs × 7 strategies = 1,085 runs)**; 29 graphs not run (compute-bound; 4 are above the 600M default safety gate) |
 | Labels only from valid measured runs | Yes — enforced by aggregator, unit-tested, `label_eligible` flag |
 | Raw results reproduce derived tables | Yes — `phase1_aggregate.py` / `phase1_coverage.py` regenerate everything; `SOURCE.txt` stores raw hashes |
 | Remaining gaps explicit | This document + `docs/PHASE1_REPORT.md` |
@@ -250,12 +278,40 @@ Checked against what the artifacts actually contain:
 | `log_num_vertices` vs `log_num_edges` | perfectly collinear in the 60 generated graphs: edges/vertices ≈ 7.0 for every graph, corr(log V, log E) = 0.99999999995 | `log_num_edges` adds no information on this dataset (it would only differ on Pokec); keep one for modelling and document why; `active_fraction` is the non-redundant size-related feature |
 | Hub columns | depend on the threshold (work > 1,000,000, P = 100 cells) | store the threshold as a column or in the schema doc so features stay reproducible |
 | Target `best_strategy` | must be blank when `label_eligible` is false; must not be filled from fewer than 5 valid runs per strategy | filter on `label_eligible == True`; keep ties/near-ties visible via the margin column |
-| Label quality | 10 of 10 labelled graphs choose an edge-join; margins as small as 1.2 % | add `margin_pct_total_s`; consider a noise-aware label (tie when margin < IQR) or regret-based training |
+| Label quality | 30 of 31 labelled graphs choose an edge-join and 1 chooses native; 6 margins < 5 %; only 7 labels are `label_clear` | keep `margin_pct_total_s` / `label_clear`; prefer regret-based training on measured runtimes over class labels; consider dropping or down-weighting non-clear labels |
 | Leakage | none of the X columns uses execution results | keep it that way; runtime columns are outcomes only |
 | Pokec | work_sum 1.78B, 1.6M active vertices, outside the synthetic range | use as an external test point, not as training data, until strategies have been measured on it |
 | Machine/config | `config_id` and `machine_id` are required columns | a model trained on one machine's labels must not be presented as machine-independent |
 
 Conclusion: the schema is correct to build pipelines against; the limiting factor is label data, not columns.
+
+## 8b. Phase 2 and Phase 3 prototype (delivered 2026-10-20)
+
+**Phase 2 (features) — delivered, final schema.** `ml/build_feature_table.py` → `datasets/derived/features/graph_features.csv` (61 rows: 60 synthetic
++ Pokec as `external`). Documented in `docs/PHASE2_FEATURES.md`. No execution results are used; unit-tested for leakage and for agreement with the manifest.
+`ml/build_training_table.py` joins features with the benchmark summaries on `graph_id` → `datasets/derived/training/training_table_eligible.csv`
+(31 label-eligible graphs). 15 tests pass in `ml/tests`.
+
+**Phase 3 prototype — pipeline delivered, performance not established.** `ml/train_selector.py` trains one multi-output Random Forest on
+log(median total_s) per strategy, selects the lowest prediction, and is evaluated by leave-one-graph-out and leave-one-family-out against native
+(AQE on/off), the best fixed strategy, a design-prior hub rule and the oracle. `--select <graph_id>` explains a choice. Outputs are in `datasets/derived/selector/`
+(`SUMMARY.md`, `cv_predictions.csv`, `regret_by_graph.png`, `model.joblib`, `model_meta.json`). Results (31 graphs, leave-one-graph-out, regret vs oracle on measured medians):
+
+| policy | mean regret | median regret | geomean speedup vs native (AQE on) | oracle chosen |
+|---|---:|---:|---:|---:|
+| oracle | 0.0 % | 0.0 % | 1.438 | 31 |
+| best fixed strategy (always `edgejoin__aqe_on`) | 10.1 % | 0.0 % | 1.317 | 16 |
+| **ML selector** | **14.8 %** | 3.6 % | 1.272 | 12 |
+| native, AQE on | 45.3 % | 44.6 % | 1.000 | 1 |
+| native, AQE off | 56.0 % | 51.1 % | 0.937 | 0 |
+| hub rule (hypercube_unified if hubs else native) | 84.7 % | 95.3 % | 0.802 | 1 |
+
+Honest reading: **the ML selector does not beat simply always choosing an edge-join** (mean regret 14.8 % vs 10.1 %); it picks between edge-join with AQE on and off,
+which is mostly within run-to-run noise, and its worst miss (103 %) is `multi_hub-small-s101`. Both are far better than native GraphFrames, but that gain comes from
+the edge-join strategy, not from the model. The hub rule is worse than native because the hypercube variants lose everywhere here. Inference takes a median of
+17.7 ms per graph; feature-extraction time is **not** measured and not included. Leave-one-family-out gives the same picture (mean regret 15.2 %).
+There is nothing for the model to learn about *which* family of strategy to pick, because one family always wins; the open question is whether
+that changes on larger graphs, bigger machines and byte-skewed inputs (§14).
 
 ## 9. Team responsibilities
 
@@ -268,32 +324,26 @@ Conclusion: the schema is correct to build pipelines against; the limiting facto
 
 ## 10. What each member can start now
 
-- **Member 2:** build feature extraction on the 11 pilot graphs (`edges.parquet` + `graph.json`). Pre-execution
-  candidates already computed per graph in the manifest: |V|, |E|, degree means/maxima/CV/Gini, `work_sum`,
-  `work_max_share`, `num_work_hubs`, `work_in_hubs_share`, `log_degree_corr`. Do **not** use `query_s`, shuffle bytes,
-  task durations or any `runs.jsonl` field as an input feature. Record extraction time per graph. Use
-  `docs/PHASE1_DATA_COLLECTION.md` §5 "Handoff reference for Member 2" for the schema and an example record.
-- **Member 3:** build the training/selection pipeline on mock data or on `strategy_summary.csv` rows; filter labels
-  by `label_eligible == True` (currently only `uniform-small` in `pilot-full`). Split by `graph_id` (and keep seeds of
-  one family/tier together if testing generalisation). Do not train a final model yet.
-- **Member 4:** report skeleton, plot scripts reading `datasets/derived/coverage/*.csv` and
-  `datasets/derived/<campaign>/strategy_summary.csv`; mark every current figure **preliminary**.
+- **Member 2 (features):** the feature table is already delivered (`datasets/derived/features/graph_features.csv`, schema in `docs/PHASE2_FEATURES.md`).
+  Review and extend it; do not recompute the same columns differently. Open questions: add `in_p999`/`out_p999` to the manifest; decide whether to keep
+  both `log_num_vertices` and `log_num_edges` (perfectly collinear on the synthetic graphs); measure feature-extraction time on Parquet (not done yet).
+  Do **not** use `query_s`, shuffle bytes, task durations or any `runs.jsonl` field as an input feature.
+- **Member 3 (ML):** start from `ml/train_selector.py` and `datasets/derived/training/training_table_eligible.csv` (31 label-eligible graphs, one
+  measurement configuration). Split by `graph_id` or family, never by run. The prototype shows the pipeline works and does not beat "always edge-join";
+  do not report a final model or a speedup from it.
+- **Member 4 (evaluation):** use `datasets/derived/selector/cv_predictions.csv`, `datasets/derived/coverage/*.csv` and
+  `datasets/derived/<campaign>/strategy_summary.csv` for tables and plots; mark every current figure **preliminary** and report graph counts next to run counts.
 
 ## 11. Dependencies and timeline
 
 | Workstream | Depends on | Can proceed now? |
 |---|---|---|
-| Phase 1 benchmarks | machine time | yes (slow here: ~20 min per small graph with 5 runs × 7 strategies) |
-| Phase 1 benchmarking of the other ~50 graphs | machine time (≈16–29 min per graph here) | yes, but ≈17+ h on this sandbox; better on a larger machine |
-| Phase 2 features | pilot graphs + agreed schema | yes |
-| Phase 3 pipeline scaffolding | feature/label schema | yes (mock / eligible data only) |
-| Phase 3 final training | label-eligible data for many graphs | no |
+| Phase 1 benchmarks, remaining 29 graphs | machine time (≈16–37 min per graph here, 7 strategies × (1 warm-up + 5 measured)) | yes; roughly 9–14 h on this sandbox for the 21 that fit the gates (19 core + 2 large multi_hub), and the 8 powerlaw medium/large graphs need a larger machine and a raised `--max-work-sum` |
+| Skew experiment (partitions > 256 MB) | new graph design + machine time | yes |
+| Phase 2 features | — | **delivered**; review by Member 2 |
+| Phase 3 pipeline | feature/label schema | prototype delivered; real training waits for more and more varied labels |
 | Phase 4 evaluation scripts | metrics/baselines agreed | yes |
 | Phase 4/5 final results | Phases 1–3 | later |
-
-Realistic Phase 1 completion requires a larger machine: at the measured pace (16–29 min per graph for 7 strategies × (1 warm-up + 5 measured) on the graphs run so far, nearly independent of
-work_sum) the remaining ~50 graphs need roughly 17 hours of uninterrupted time on this 2-core sandbox, and the heaviest
-graphs (powerlaw medium/large) need a larger machine and a raised `--max-work-sum`.
 
 ## 12. Paths and commands
 
@@ -334,16 +384,14 @@ Key files: `datasets/manifest/dataset_manifest.csv`, `datasets/raw_runs/<campaig
 
 ## 14. Next actions (priority order)
 
-1. Member 1: finish `pilot-hubs` (8 hub-heavy graphs, resumable with `--resume`), aggregate it, regenerate the coverage matrix.
-   This is the first test of whether any strategy other than edge-join wins on skewed workloads.
-2. Member 1: secure a larger machine for the rest of the matrix (`full60`, one fixed config, powerlaw medium/large with
-   a raised `--max-work-sum`); keep every campaign on one config/machine id.
-3. Member 1: design a skew experiment (graphs whose hub partition exceeds 256 MB at 200 partitions), alongside
-   compute-skewed graphs that do not trigger AQE. AQE skew splitting has never fired so far.
-4. Members 1–3: confirm feature and label schemas (see "Review of the proposed ML table" below; `graph_id` join,
-   `label_eligible` filter).
-5. Members 2–4: build pipelines on pilot data, clearly marked preliminary. **Do not train a final selector on the
-   current labels** (one class, several margins below noise).
+1. Member 1: obtain a larger machine (or a dedicated multi-hour slot) and run the remaining 29 graphs with the same measurement configuration
+   (`--resume` per campaign; powerlaw medium/large with a raised `--max-work-sum`). Keep one machine id.
+2. Member 1: design the skew experiment: graphs whose hub reduce-partition exceeds 256 MB at 200 partitions (AQE skew splitting has never fired),
+   alongside compute-skewed controls that do not trigger it. Only there can a non-edge-join strategy plausibly win.
+3. Members 1–3: confirm the feature/label schema (`docs/PHASE2_FEATURES.md`; `graph_id` join; `label_eligible` filter; `measurement_config_id`).
+4. Member 2: measure feature-extraction time; decide on the p999 manifest columns.
+5. Member 3: replace the prototype by a regret-aware model once labels are less one-sided; keep native/edge-join fallbacks and graph-grouped splits.
+6. Member 4: build tables/plots from the derived files, with the limitations in §6–§8b.
 
 ## 15. Definition of done
 

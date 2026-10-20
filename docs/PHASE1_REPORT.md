@@ -74,16 +74,51 @@ Its 17 raw records are kept (see `ABORTED.txt` in the campaign directory) and ar
 * Derived: `datasets/derived/20261019T140509Z-pilot-reduced-e1367c/{strategy_summary.csv,graph_summary.csv,SOURCE.txt}`
 * Manifest: `datasets/manifest/dataset_manifest.csv`
 
-## 6. Hand-off status and agreed next steps (2026-10-19)
+## 6. Final hand-off status (2026-10-20, ~11:00 IST)
 
-1. **Secure the code:** branch `phase1-data-collection` is committed locally (2 commits) and in `phase1-data-collection.bundle`.
-   Pushing is blocked until GitHub is linked to the Claude session (neither `Rayirth556/hypergraph` nor `Harshil24Agrawal/big-data`
-   is authorized) or the bundle is pushed manually.
-2. **Complete the campaign:** run the skipped graphs and the full 60 on a capable machine, one consistent config, 1 warm-up + 5 measured runs.
-3. **Investigate skew:** build cases that actually trigger AQE skew-partition splitting (a partition above the 256 MB threshold and
-   5x the median) alongside compute-skewed cases that do not, so the two regimes can be separated. Not started.
-4. **Confirm the downstream schema** with Members 2-4 before they build pipelines on it. Not yet confirmed.
-5. **Do not train the ML selector on the preliminary fastest-strategy labels** (see `datasets/derived/*/PRELIMINARY.md`).
+This section supersedes the earlier hand-off notes (2026-10-19) in this file; sections 1–5 describe the pilot as it stood on 2026-10-19.
 
-Member 2 can receive the generator and data-loading deliverables now to inspect and test feature extraction, with the benchmark
-data labelled preliminary; the timings are not validated training targets.
+**Data collection — complete.** 60 of 60 synthetic graphs generated, validated (family checks, deterministic regeneration, Spark re-read) and in
+`datasets/manifest/dataset_manifest.csv` (224 M edges, 1.3 GB Parquet); Pokec validated (30.6 M edges, 131 MB; HDFS not configured, not claimed).
+
+**Benchmark collection — partial, 31 of 60 graphs.** Four campaigns on one machine and one measurement configuration, same acceptance rule
+(`measured` + `ok` + `match`, latest Spark application per graph):
+
+| Campaign | Graphs done | Valid runs |
+|---|---:|---:|
+| `20261019T163326Z-pilot-full-5d1324` | 10 of 10 (one more skipped by the gate) | 350 |
+| `20261019T205726Z-pilot-hubs-67a899` | 8 of 8 | 280 |
+| `20261019T235430Z-pilot-ext1-7aa307` | 2 of 2 | 70 |
+| `20261020T011920Z-pilot-ext2-777331` | 11 of 12 (stopped deliberately in the 12th) | 385 |
+| **Total** | **31** | **1,085** (0 failures, 0 timeouts, 0 correctness mismatches) |
+
+Earlier campaigns (smoke, aborted pilot, reduced pilot) are kept as raw records but are not usable for labels.
+The sandbox restarted twice during `pilot-full` and once during `pilot-ext1`; each was resumed and documented (`INTERRUPTIONS.md`).
+
+**Not done (needs a bigger machine or a design decision):** 29 graphs — 19 core graphs, 2 large multi_hub, 4 powerlaw_balanced medium (≈535M work) and
+4 powerlaw_balanced large (≈1.48B work, above the 600M gate); the AQE skew experiment; Pokec benchmarking; any HDFS test.
+
+**What the 31 graphs show (preliminary):** an edge-join strategy has the lowest median `total_s` on 30 graphs, native (AQE on) on 1; salting and hypercube variants
+are never faster (1.5–2.6× slower than the best edge-join); AQE never split a skewed partition; only 7 of 31 labels are clearly separated from the runner-up beyond
+run-to-run spread. Details and tables: `docs/PROJECT_STATUS_AND_TEAM_PLAN.md` §6 and §8b.
+
+**Files for Members 2–4**
+- features: `datasets/derived/features/graph_features.csv` (+ `SCHEMA.json`), documented in `docs/PHASE2_FEATURES.md`
+- training rows: `datasets/derived/training/training_table_eligible.csv` (31 rows; `training_table.csv` has all 61 graphs)
+- per-campaign summaries: `datasets/derived/<campaign_id>/{strategy_summary,graph_summary}.csv`; coverage: `datasets/derived/coverage/`
+- raw records (immutable): `datasets/raw_runs/<campaign_id>/runs.jsonl`
+
+**Tests run (final):** `python -m pytest datagen/tests bench/test_phase1.py ml/tests -q` → 40 passed, 15 subtests passed; the existing suites
+(`hypergraphframes/tests`, `bench/test_bench_variants_equivalence.py`) → 31 passed, 13 subtests passed (2 min 49 s).
+
+**Resume / regenerate**
+```bash
+export GRAPHFRAMES_JAR=$PWD/jars/graphframes-0.8.3-spark3.5-s_2.12.jar PYSPARK_PYTHON=$(which python)
+python bench/run_phase1.py --resume <campaign_id> --driver-memory 4g     # continue an interrupted campaign
+python bench/phase1_aggregate.py <campaign_id>                            # raw -> derived summaries
+python bench/phase1_coverage.py                                           # coverage matrix over all campaigns
+python ml/build_feature_table.py && python ml/build_training_table.py     # Phase 2 tables
+python ml/train_selector.py                                               # prototype selector (preliminary)
+```
+New campaigns must use the same measurement settings (200 shuffle/input partitions, broadcast off, 1 warm-up + 5 measured, 4g driver) on the same
+machine; `ml/build_training_table.py` refuses to mix configurations.

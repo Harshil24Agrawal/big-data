@@ -63,5 +63,24 @@ class TestLabels(unittest.TestCase):
         btt.assert_single_config({"g1": {"config_id": "x", "machine_id": "m"}, "g2": {"config_id": "x", "machine_id": "m"}})
 
 
+class TestMeasurementConfig(unittest.TestCase):
+    def test_safety_limits_do_not_change_measurement_config(self):
+        raw = os.path.join(btt.REPO_ROOT, "datasets", "raw_runs")
+        full = [d for d in os.listdir(raw) if "pilot-full" in d]
+        ext1 = [d for d in os.listdir(raw) if "pilot-ext1" in d]
+        if not (full and ext1):
+            self.skipTest("campaigns not present")
+        self.assertEqual(btt.measurement_config_id(full[0]), btt.measurement_config_id(ext1[0]))
+
+    def test_shuffle_partition_change_would_be_detected(self):
+        raw = os.path.join(btt.REPO_ROOT, "datasets", "raw_runs")
+        full = [d for d in os.listdir(raw) if "pilot-full" in d]
+        reduced = [d for d in os.listdir(raw) if "pilot-reduced" in d]
+        if not (full and reduced):
+            self.skipTest("campaigns not present")
+        # the reduced pilot used a different protocol (fewer measured runs): it must not compare equal
+        self.assertNotEqual(btt.measurement_config_id(full[0]), btt.measurement_config_id(reduced[0]))
+
+
 if __name__ == "__main__":
     unittest.main()

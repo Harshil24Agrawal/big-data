@@ -242,6 +242,10 @@ application, instead of relying on `INTERRUPTIONS.md`. Both only add information
 `graph_summary.csv` (fastest strategy by median `total_s` and `query_s`, runner-up, margin),
 `SOURCE.txt` (raw file hash). Regenerate any time with `phase1_aggregate.py`.
 
+Across all campaigns: `datasets/derived/coverage/{coverage_matrix.csv,campaign_status.csv}` (`python bench/phase1_coverage.py`).
+Phase 2 tables (features, training rows) and their schema: `docs/PHASE2_FEATURES.md`, `python ml/build_feature_table.py && python ml/build_training_table.py`.
+Current benchmark coverage: 31 of 60 graphs (1,085 valid runs); see `docs/PHASE1_REPORT.md` §6.
+
 ## 6. Tests
 
 ```bash
@@ -249,6 +253,7 @@ python -m pytest datagen/tests -q                       # generators/validators 
 python -m pytest bench/test_phase1.py -q                # unified hypercube, checksums, record schema (Spark)
 cd hypergraphframes && python -m pytest tests -q        # existing package suite
 python -m pytest bench/test_bench_variants_equivalence.py -q
+python -m pytest ml/tests -q                            # feature/training tables and selector logic
 ```
 
 ## 7. Scaling from the pilot to 60 graphs
