@@ -43,5 +43,10 @@
     "status": "done",
     "seconds": 1431.4,
     "finished_utc": "2026-10-20T04:12:59.539174+00:00"
+  },
+  "in_heavy-large-s202-1ab20d7b": {
+    "status": "done",
+    "seconds": 1426.2,
+    "finished_utc": "2026-10-20T04:36:45.699766+00:00"
   }
 }
