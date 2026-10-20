@@ -1,0 +1,135 @@
+{
+  "graph_id": "hubsweep-H4-w98-n100k-s202-4e0ec13e",
+  "spec": {
+    "family": "hub_sweep",
+    "size_tier": "n100k",
+    "seed": 202,
+    "num_vertices": 100000,
+    "avg_degree": 7,
+    "m_target": 700000,
+    "generator_version": "hubsweep-v1",
+    "params": {
+      "hub_count": 4,
+      "hub_work_share": 0.98,
+      "background": "uniform random"
+    },
+    "edge_policy": "directed;no_self_loops;no_duplicates;int32"
+  },
+  "created_utc": "2026-10-20T12:33:21.828274+00:00",
+  "generation_seconds": 1.238,
+  "validation_seconds": 0.0,
+  "edges_sha256": "20de5d9d77356576022291e7e2fd4af1ff4de52b49340eadc341655d7e5a1dc2",
+  "files": [
+    {
+      "path": "datasets/hubsweep/hubsweep-H4-w98-n100k-s202-4e0ec13e/edges.parquet",
+      "format": "parquet",
+      "bytes": 3292637,
+      "sha256": "397c5855f982c56733b9a2f9350e6847107cde446e528c5d9f16eab4d687aab8"
+    }
+  ],
+  "schema": {
+    "src": "int32",
+    "dst": "int32"
+  },
+  "cleaning": {
+    "raw_edges_sampled": 721000,
+    "self_loops_removed": 3,
+    "duplicates_removed": 32,
+    "sampling_rounds": 1,
+    "unique_edges_before_subsample": 720969,
+    "background_edges": 700000,
+    "hub_edges": 61984
+  },
+  "family_meta": {
+    "hub_count": 4,
+    "hub_ids": [
+      44365,
+      18607,
+      42726,
+      34628
+    ],
+    "planned_hub_degree_each_side": 7748,
+    "planned_hub_work_share": 0.98
+  },
+  "measured": {
+    "num_vertices": 100000,
+    "num_edges": 761980,
+    "num_active_vertices": 100000,
+    "hub_k": 4,
+    "work_threshold": 1000000,
+    "work_sum": 245932014,
+    "work_max": 60202065,
+    "work_max_vertex": 18607,
+    "work_max_share": 0.244791,
+    "num_work_hubs": 4,
+    "work_in_hubs_share": 0.978283,
+    "top_hubs_work_share": 0.978283,
+    "top_hubs_min_over_max_work": 0.998454,
+    "log_degree_corr": 0.0107,
+    "max_in_over_max_out": 1.0006,
+    "in_mean": 7.6198,
+    "in_std": 49.0798,
+    "in_cv": 6.4411,
+    "in_max": 7763,
+    "in_p50": 7.0,
+    "in_p99": 14.0,
+    "in_p999": 17.0,
+    "in_max_over_mean": 1018.7931,
+    "in_gini": 0.2381,
+    "in_top1pct_edge_share": 0.0608,
+    "in_top_hub_edge_share": 0.0407,
+    "in_zero_degree_vertices": 75,
+    "out_mean": 7.6198,
+    "out_std": 49.0743,
+    "out_cv": 6.4404,
+    "out_max": 7758,
+    "out_p50": 7.0,
+    "out_p99": 14.0,
+    "out_p999": 17.0,
+    "out_max_over_mean": 1018.137,
+    "out_gini": 0.239,
+    "out_top1pct_edge_share": 0.061,
+    "out_top_hub_edge_share": 0.0407,
+    "out_zero_degree_vertices": 67
+  },
+  "structure": {
+    "min_id": 0,
+    "max_id": 99999,
+    "ids_in_range": true,
+    "self_loops": 0,
+    "duplicate_edges": 0
+  },
+  "validation_status": "PASS",
+  "family_checks": [
+    {
+      "metric": "structure_clean",
+      "passed": true
+    }
+  ],
+  "spark_validation": {
+    "schema": {
+      "src": "int",
+      "dst": "int"
+    },
+    "rows": 761980,
+    "null_endpoints": 0,
+    "min_id": 0,
+    "max_id": 99999,
+    "self_loops": 0,
+    "duplicate_edges": 0,
+    "active_vertices": 100000,
+    "work_sum": 245932014,
+    "work_max": 60202065,
+    "mismatches": [],
+    "status": "PASS",
+    "seconds": 1.53,
+    "validated_utc": "2026-10-20T12:34:08.588917+00:00",
+    "spark_version": "3.5.5"
+  },
+  "environment": {
+    "python": "3.11.17",
+    "numpy": "2.4.6",
+    "pyarrow": "26.0.0",
+    "platform": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39"
+  }
+}

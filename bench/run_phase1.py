@@ -78,7 +78,7 @@ def machine_info() -> dict:
 def load_graphs(args) -> list:
     graphs = []
     if not args.pokec_only:
-        with open(MANIFEST, newline="") as f:
+        with open(args.manifest or MANIFEST, newline="") as f:
             for row in csv.DictReader(f):
                 if args.graph_id and row["graph_id"] not in args.graph_id:
                     continue
@@ -142,6 +142,7 @@ def main():
     ap.add_argument("--name", default="run")
     ap.add_argument("--resume", metavar="CAMPAIGN_ID")
     ap.add_argument("--graph-id", action="append")
+    ap.add_argument("--manifest", help="Alternative manifest CSV (default: datasets/manifest/dataset_manifest.csv)")
     ap.add_argument("--pokec", action="store_true", help="Also benchmark the validated Pokec graph")
     ap.add_argument("--pokec-only", action="store_true")
     ap.add_argument("--strategies", nargs="+", default=PILOT_STRATEGIES)

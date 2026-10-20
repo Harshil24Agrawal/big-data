@@ -1,0 +1,17 @@
+{
+  "hubsweep-H1-w50-n100k-s101-9ddafffc": {
+    "status": "done",
+    "seconds": 528.3,
+    "finished_utc": "2026-10-20T12:11:57.134817+00:00"
+  },
+  "hubsweep-H1-w80-n100k-s101-6c7a5084": {
+    "status": "done",
+    "seconds": 511.8,
+    "finished_utc": "2026-10-20T12:20:28.963269+00:00"
+  },
+  "hubsweep-H1-w95-n100k-s101-060407be": {
+    "status": "done",
+    "seconds": 697.5,
+    "finished_utc": "2026-10-20T12:32:06.490801+00:00"
+  }
+}
