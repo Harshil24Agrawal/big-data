@@ -1,0 +1,12 @@
+{
+  "graph_id": "out_heavy-large-s202-4303b68b",
+  "source": "synthetic",
+  "family": "out_heavy",
+  "size_tier": "large",
+  "seed": 202,
+  "num_vertices": 1000000,
+  "num_edges": 7000000,
+  "work_sum": 46355807,
+  "work_max": 900999,
+  "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/out_heavy/out_heavy-large-s202-4303b68b/edges.parquet"
+}

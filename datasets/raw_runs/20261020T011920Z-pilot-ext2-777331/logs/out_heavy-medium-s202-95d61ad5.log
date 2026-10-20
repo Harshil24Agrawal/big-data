@@ -10,3 +10,48 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [out_heavy-medium-s202-95d61ad5] gate native__aqe_on               ok       match n=24655000
 [out_heavy-medium-s202-95d61ad5] gate edgejoin__aqe_off            ok       match n=24655000
 [out_heavy-medium-s202-95d61ad5] gate salt1d__aqe_off              ok       match n=24655000
+[out_heavy-medium-s202-95d61ad5] gate hypercube__aqe_off           ok       match n=24655000
+[out_heavy-medium-s202-95d61ad5] gate hypercube_unified__aqe_off   ok       match n=24655000
+[out_heavy-medium-s202-95d61ad5] gate edgejoin__aqe_on             ok       match n=24655000
+[out_heavy-medium-s202-95d61ad5] warmup   r0 hypercube_unified__aqe_off   ok       q=22.0209s total=40.8113s paths=24655000 dom max/med=2.2857 cv=0.2373 skew=None
+[out_heavy-medium-s202-95d61ad5] warmup   r0 hypercube__aqe_off           ok       q=26.7146s total=41.4292s paths=24655000 dom max/med=2.2222 cv=0.2366 skew=None
+[out_heavy-medium-s202-95d61ad5] warmup   r0 edgejoin__aqe_off            ok       q=13.2423s total=13.2423s paths=24655000 dom max/med=12.6 cv=0.8861 skew=None
+[out_heavy-medium-s202-95d61ad5] warmup   r0 native__aqe_on               ok       q=21.4929s total=21.4929s paths=24655000 dom max/med=2.6486 cv=0.2227 skew=0
+[out_heavy-medium-s202-95d61ad5] warmup   r0 salt1d__aqe_off              ok       q=20.6878s total=35.4107s paths=24655000 dom max/med=15.75 cv=1.3912 skew=None
+[out_heavy-medium-s202-95d61ad5] warmup   r0 native__aqe_off              ok       q=13.8898s total=13.8898s paths=24655000 dom max/med=20.9796 cv=1.2392 skew=None
+[out_heavy-medium-s202-95d61ad5] warmup   r0 edgejoin__aqe_on             ok       q=10.5189s total=10.5189s paths=24655000 dom max/med=1.0 cv=0.0286 skew=0
+[out_heavy-medium-s202-95d61ad5] measured r1 edgejoin__aqe_on             ok       q=9.1759s total=9.1759s paths=24655000 dom max/med=1.0 cv=0.0644 skew=0
+[out_heavy-medium-s202-95d61ad5] measured r1 native__aqe_on               ok       q=20.2791s total=20.2791s paths=24655000 dom max/med=2.3725 cv=0.1296 skew=0
+[out_heavy-medium-s202-95d61ad5] measured r1 hypercube__aqe_off           ok       q=26.2382s total=47.1371s paths=24655000 dom max/med=2.5139 cv=0.1813 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r1 native__aqe_off              ok       q=18.1594s total=18.1594s paths=24655000 dom max/med=16.62 cv=1.1116 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r1 hypercube_unified__aqe_off   ok       q=11.9875s total=23.4834s paths=24655000 dom max/med=7.0222 cv=0.6019 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r1 edgejoin__aqe_off            ok       q=10.0086s total=10.0086s paths=24655000 dom max/med=9.5588 cv=0.7047 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r1 salt1d__aqe_off              ok       q=20.0065s total=29.639s paths=24655000 dom max/med=10.3929 cv=1.1599 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r2 salt1d__aqe_off              ok       q=23.6158s total=34.5178s paths=24655000 dom max/med=2.5345 cv=0.3397 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r2 native__aqe_on               ok       q=17.4554s total=17.4554s paths=24655000 dom max/med=1.1521 cv=0.6417 skew=0
+[out_heavy-medium-s202-95d61ad5] measured r2 edgejoin__aqe_off            ok       q=14.5632s total=14.5632s paths=24655000 dom max/med=13.6364 cv=0.9707 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r2 edgejoin__aqe_on             ok       q=12.7235s total=12.7235s paths=24655000 dom max/med=2.3953 cv=0.2171 skew=0
+[out_heavy-medium-s202-95d61ad5] measured r2 native__aqe_off              ok       q=20.6154s total=20.6154s paths=24655000 dom max/med=2.2353 cv=0.2219 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r2 hypercube__aqe_off           ok       q=26.0666s total=46.6267s paths=24655000 dom max/med=1.9844 cv=0.1427 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r2 hypercube_unified__aqe_off   ok       q=15.1139s total=27.9012s paths=24655000 dom max/med=2.6301 cv=0.3597 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r3 edgejoin__aqe_off            ok       q=11.0927s total=11.0927s paths=24655000 dom max/med=9.6579 cv=0.6658 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r3 salt1d__aqe_off              ok       q=19.6978s total=30.9023s paths=24655000 dom max/med=10.1667 cv=1.1871 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r3 hypercube__aqe_off           ok       q=21.4011s total=34.8074s paths=24655000 dom max/med=2.5769 cv=0.2964 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r3 hypercube_unified__aqe_off   ok       q=17.9608s total=29.2162s paths=24655000 dom max/med=2.2679 cv=0.2767 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r3 native__aqe_on               ok       q=19.2843s total=19.2843s paths=24655000 dom max/med=1.1867 cv=0.6395 skew=0
+[out_heavy-medium-s202-95d61ad5] measured r3 native__aqe_off              ok       q=19.0947s total=19.0947s paths=24655000 dom max/med=2.3111 cv=0.2417 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r3 edgejoin__aqe_on             ok       q=21.1864s total=21.1864s paths=24655000 dom max/med=2.1412 cv=0.1904 skew=0
+[out_heavy-medium-s202-95d61ad5] measured r4 edgejoin__aqe_off            ok       q=17.7523s total=17.7523s paths=24655000 dom max/med=2.3 cv=0.1727 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r4 hypercube__aqe_off           ok       q=16.9767s total=30.7604s paths=24655000 dom max/med=5.0 cv=0.7782 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r4 native__aqe_on               ok       q=16.4911s total=16.4911s paths=24655000 dom max/med=1.1643 cv=0.654 skew=0
+[out_heavy-medium-s202-95d61ad5] measured r4 native__aqe_off              ok       q=17.8552s total=17.8552s paths=24655000 dom max/med=11.7571 cv=0.9205 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r4 hypercube_unified__aqe_off   ok       q=13.1665s total=23.0881s paths=24655000 dom max/med=3.7826 cv=0.396 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r4 salt1d__aqe_off              ok       q=33.8375s total=52.0513s paths=24655000 dom max/med=2.241 cv=0.2755 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r4 edgejoin__aqe_on             ok       q=16.4637s total=16.4637s paths=24655000 dom max/med=2.6393 cv=0.2334 skew=0
+[out_heavy-medium-s202-95d61ad5] measured r5 salt1d__aqe_off              ok       q=21.6842s total=34.6464s paths=24655000 dom max/med=2.4545 cv=0.3517 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r5 native__aqe_off              ok       q=15.2489s total=15.2489s paths=24655000 dom max/med=14.0189 cv=0.9364 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r5 edgejoin__aqe_on             ok       q=12.7457s total=12.7457s paths=24655000 dom max/med=2.6098 cv=0.2886 skew=0
+[out_heavy-medium-s202-95d61ad5] measured r5 hypercube_unified__aqe_off   ok       q=18.843s total=30.3984s paths=24655000 dom max/med=2.4632 cv=0.196 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r5 hypercube__aqe_off           ok       q=27.5351s total=48.2009s paths=24655000 dom max/med=2.3919 cv=0.192 skew=None
+[out_heavy-medium-s202-95d61ad5] measured r5 native__aqe_on               ok       q=19.6119s total=19.6119s paths=24655000 dom max/med=2.75 cv=0.2966 skew=0
+[out_heavy-medium-s202-95d61ad5] measured r5 edgejoin__aqe_off            ok       q=12.1012s total=12.1012s paths=24655000 dom max/med=13.3243 cv=0.8888 skew=None
