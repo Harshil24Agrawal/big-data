@@ -1,0 +1,12 @@
+{
+  "graph_id": "uniform-medium-s101-5b7704b2",
+  "source": "synthetic",
+  "family": "uniform",
+  "size_tier": "medium",
+  "seed": 101,
+  "num_vertices": 500000,
+  "num_edges": 3499978,
+  "work_sum": 24499695,
+  "work_max": 49,
+  "edges_path": "/home/claude/rayirth556/hypergraph/datasets/synthetic/uniform/uniform-medium-s101-5b7704b2/edges.parquet"
+}
