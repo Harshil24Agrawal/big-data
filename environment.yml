@@ -1,0 +1,20 @@
+# Conda environment for the selector notebook (notebooks/selector.ipynb).
+#   conda env create -f environment.yml
+#   conda activate bigdata-selector
+# Then in VS Code: open notebooks/selector.ipynb -> Select Kernel -> Python Environments -> bigdata-selector
+name: bigdata-selector
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - ipykernel
+  - pip:
+      - numpy==2.4.6
+      - scipy==1.17.1
+      - scikit-learn==1.9.1
+      - pandas==3.0.6
+      - matplotlib==3.11.2
+      - nbformat
+      - nbconvert
+      - tableauhyperapi
