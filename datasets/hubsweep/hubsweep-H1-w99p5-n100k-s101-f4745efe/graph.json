@@ -103,7 +103,26 @@
       "passed": true
     }
   ],
-  "spark_validation": null,
+  "spark_validation": {
+    "schema": {
+      "src": "int",
+      "dst": "int"
+    },
+    "rows": 762451,
+    "null_endpoints": 0,
+    "min_id": 0,
+    "max_id": 99999,
+    "self_loops": 0,
+    "duplicate_edges": 0,
+    "active_vertices": 100000,
+    "work_sum": 980812864,
+    "work_max": 975469054,
+    "mismatches": [],
+    "status": "PASS",
+    "seconds": 2.26,
+    "validated_utc": "2026-10-20T16:43:46.624613+00:00",
+    "spark_version": "3.5.5"
+  },
   "environment": {
     "python": "3.11.17",
     "numpy": "2.4.6",

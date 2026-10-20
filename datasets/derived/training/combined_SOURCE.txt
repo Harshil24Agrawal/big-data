@@ -1,3 +1,3 @@
-derived_utc=2026-10-20T15:39:29.995047+00:00
-rows=51
-campaigns=['20261019T163326Z-pilot-full-5d1324', '20261019T205726Z-pilot-hubs-67a899', '20261019T235430Z-pilot-ext1-7aa307', '20261020T011920Z-pilot-ext2-777331', '20261020T123435Z-hubsweep-sweep_a-58d79a', '20261020T142958Z-hubsweep-sweep_b-02f2b7']
+derived_utc=2026-10-20T16:44:36.836904+00:00
+rows=59
+campaigns=['20261019T163326Z-pilot-full-5d1324', '20261019T205726Z-pilot-hubs-67a899', '20261019T235430Z-pilot-ext1-7aa307', '20261020T011920Z-pilot-ext2-777331', '20261020T123435Z-hubsweep-sweep_a-58d79a', '20261020T142958Z-hubsweep-sweep_b-02f2b7', '20261020T153825Z-hubsweep-sweep_c-3c53db']

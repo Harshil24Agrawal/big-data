@@ -20,3 +20,4 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 [hubsweep-H4-w98-n100k-s202-4e0ec13e] measured r2 edgejoin__aqe_off            ok       q=24.3133s total=24.3133s paths=245932014 dom max/med=555.25 cv=6.3611 skew=None
 [hubsweep-H4-w98-n100k-s202-4e0ec13e] measured r3 native__aqe_on               ok       q=52.8518s total=52.8518s paths=245932014 dom max/med=1.0 cv=0.485 skew=0
 [hubsweep-H4-w98-n100k-s202-4e0ec13e] measured r3 edgejoin__aqe_off            ok       q=24.1734s total=24.1734s paths=245932014 dom max/med=498.6667 cv=6.2976 skew=None
+[hubsweep-H4-w98-n100k-s202-4e0ec13e] measured r3 hypercube_unified__aqe_off   ok       q=19.3087s total=25.9662s paths=245932014 dom max/med=3.3636 cv=0.6562 skew=None
