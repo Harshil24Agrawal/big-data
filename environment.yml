@@ -1,6 +1,8 @@
 # Conda environment for the selector notebook (notebooks/selector.ipynb).
+# Two steps (pip is run by hand because conda's own pip step breaks on Windows user names that contain a space):
 #   conda env create -f environment.yml
 #   conda activate bigdata-selector
+#   python -m pip install -r notebooks/requirements.txt
 # Then in VS Code: open notebooks/selector.ipynb -> Select Kernel -> Python Environments -> bigdata-selector
 name: bigdata-selector
 channels:
@@ -9,12 +11,3 @@ dependencies:
   - python=3.11
   - pip
   - ipykernel
-  - pip:
-      - numpy==2.4.6
-      - scipy==1.17.1
-      - scikit-learn==1.9.1
-      - pandas==3.0.6
-      - matplotlib==3.11.2
-      - nbformat
-      - nbconvert
-      - tableauhyperapi

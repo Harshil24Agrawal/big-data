@@ -427,7 +427,9 @@ Splitting by **graph** (never by run) matters: runs of the same graph are not in
 ```
 conda env create -f environment.yml
 conda activate bigdata-selector
+python -m pip install -r notebooks/requirements.txt
 ```
+(The pip step is separate on purpose: conda's built-in pip step fails when the Windows user name contains a space, e.g. `Harshil Agrawal`. If the env already exists, skip the first command.)
 Then in VS Code: open the `big-data` folder, open `notebooks/selector.ipynb`, click **Select Kernel → Python Environments → bigdata-selector**, then **Run All**. (If the kernel is not listed: Ctrl+Shift+P → "Developer: Reload Window".) The notebook needs no Spark or Java; it only reads `datasets/derived/training/combined_table.csv`. Spark is only needed to re-run the benchmark itself.
 
 ```
