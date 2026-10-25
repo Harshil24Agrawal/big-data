@@ -146,7 +146,8 @@ ax[1].set_title("Same size, very different work (bubble = busiest vertex's share
 plt.tight_layout(); plt.savefig(f"{OUT}/01_dataset.png", dpi=130); plt.show()
 RES["n_graphs"] = len(df); RES["total_edges_M"] = round(df.edges.sum() / 1e6, 1)
 small = df[df.edges < 1e6]
-display(Markdown(f"""**How we got it:** we counted the rows per family (bar chart). For the bubble chart, each graph is placed by its number of edges (x) and its number of two-hop results, i.e. the work (y); a bigger bubble means more of the work sits on one vertex.
+display(Markdown(f"""**Why this chart:** it shows our data is varied (6 families, very different workloads), so a single fixed strategy cannot fit every graph. This is the reason a selector is needed.
+**How we got it:** we counted the rows per family (bar chart). For the bubble chart, each graph is placed by its number of edges (x) and its number of two-hop results, i.e. the work (y); a bigger bubble means more of the work sits on one vertex.
 **What it tells us:** {len(df)} graphs and {df.edges.sum()/1e6:.0f} M edges in total. Half the graphs ({fam['hub_sweep']}) are the hub sweep, built to test the hub case.
 Graphs with the **same** number of edges (about 0.7 M) need anywhere from **{small.two_hop_paths.min()/1e6:.1f} M to {small.two_hop_paths.max()/1e6:.0f} M** paths of work, and the big bubbles (one heavy vertex) sit at the top.
 So **size alone cannot pick the strategy**; we need features that describe the graph's shape."""))
@@ -180,7 +181,8 @@ for i, v in enumerate(avg): ax[1].text(i, v + .3, f"{v:.1f}s", ha="center")
 ax[1].set_title("Average runtime per strategy (all 62 graphs)"); ax[1].set_ylabel("seconds")
 plt.tight_layout(); plt.savefig(f"{OUT}/02_runtimes.png", dpi=130); plt.show()
 cross = sw[sw["median_total_s__hypercube_unified__aqe_off"] < sw["median_total_s__edgejoin__aqe_off"]].hub_work_share_planned.min()
-display(Markdown(f"""**How we got it:** the median Spark runtime of each strategy on the one-hub graphs (line chart), and the average over all graphs (bar chart).
+display(Markdown(f"""**Why this chart:** it proves the core problem with real Spark timings: the fastest strategy changes as the hub gets heavier, so no one strategy is always best.
+**How we got it:** the median Spark runtime of each strategy on the one-hub graphs (line chart), and the average over all graphs (bar chart).
 **What it tells us:** while the hub carries little work, edge-join is fastest. When the hub carries about **{cross*100:.0f}%** or more of the work,
 edge-join's time shoots up because one Spark task gets all the hub's paths, and **hub-split** becomes the fastest.
 The fastest choice **changes with the graph's shape**, and that is why a model is needed."""))
@@ -221,7 +223,8 @@ for b, v in zip(bars, cnt.values): ax[1].text(b.get_x() + b.get_width() / 2, v +
 ax[1].set_title("Labels: which strategy was fastest"); ax[1].set_ylabel("graphs")
 plt.tight_layout(); plt.savefig(f"{OUT}/03_features_labels.png", dpi=130); plt.show()
 MAJ = cnt.max() / cnt.sum(); RES["class_counts"] = cnt.to_dict()
-display(Markdown(f"""**How we got it:** the Pearson correlation between every pair of the 13 features (heatmap; red = they rise together, blue = one rises as the other falls), and a count of the labels (bar chart).
+display(Markdown(f"""**Why this chart:** it justifies our features (they carry different information) and our metrics (labels are imbalanced, so accuracy alone would mislead).
+**How we got it:** the Pearson correlation between every pair of the 13 features (heatmap; red = they rise together, blue = one rises as the other falls), and a count of the labels (bar chart).
 **What it tells us:** the features form three groups that move together: **size** (vertices, edges), **degree skew** (Gini and top-0.1% degrees, which are high when active_fraction is low) and **hub work** (the work and hub features at the bottom right).
 The groups are only weakly related to each other, so each one adds new information and all of them are kept.
 The labels are **imbalanced**: edge-join wins {cnt['edgejoin']} of {len(y)} graphs ({MAJ:.1%}). So a "model" that always says edge-join already gets {MAJ:.1%} accuracy.
@@ -303,7 +306,8 @@ ax.set_xticks(xs); ax.set_xticklabels(clf.index); ax.set_ylim(0, 1.1); ax.set_yl
 ax.set_title("Classifier comparison on held-out graphs (leave-one-graph-out, 62 tests)"); ax.legend(fontsize=8, ncol=4, loc="upper left")
 plt.tight_layout(); plt.savefig(f"{OUT}/05a_classifiers.png", dpi=130); plt.show()
 best = clf.drop(["Majority baseline", "Rule baseline"]).accuracy.idxmax()
-display(Markdown(f"""**How we got it:** each model predicted every graph while that graph was hidden from training (62 rounds), and we scored the 62 predictions.
+display(Markdown(f"""**Why this chart:** it picks the model fairly: every model is scored on graphs it never saw, and compared with the simple baselines it must beat.
+**How we got it:** each model predicted every graph while that graph was hidden from training (62 rounds), and we scored the 62 predictions.
 **What it tells us:** the majority baseline has high accuracy ({clf.loc['Majority baseline','accuracy']:.1%}) but only **{clf.loc['Majority baseline','balanced_accuracy']:.1%} balanced accuracy**, because it never finds hub-split or native.
 **{best}** is best on accuracy (**{clf.loc[best,'accuracy']:.1%}**) and macro-F1 (**{clf.loc[best,'macro_f1']:.2f}** vs {clf.loc['Majority baseline','macro_f1']:.2f}).
 Logistic regression has the highest balanced accuracy (**{clf.loc['Logistic regression','balanced_accuracy']:.1%}**) but lower accuracy, so it over-predicts the rare classes.
@@ -350,7 +354,8 @@ plt.tight_layout(); plt.savefig(f"{OUT}/05b_train_val_test.png", dpi=130, bbox_i
 g = tvt.set_index(["model", "split"])
 te = tvt[(tvt.split == "Test") & (tvt.model != "Majority baseline")].set_index("model")
 bt = te.accuracy.idxmax()
-display(Markdown(f"""**How we got it:** the same models are trained on 53 graphs. We scored them on those 53 (train), with leave-one-out inside the 53 (validation), and on the 9 graphs they never saw (test).
+display(Markdown(f"""**Why this chart:** it shows the model is not just memorising: the honest validation and unseen-test scores still beat the baseline.
+**How we got it:** the same models are trained on 53 graphs. We scored them on those 53 (train), with leave-one-out inside the 53 (validation), and on the 9 graphs they never saw (test).
 **What it tells us:** the tree models reach 100% on train because they memorise the data, so the train score is not trusted; validation and test are the honest numbers.
 On validation, the tree models reach **{g.loc[('Extra-Trees','Validation'),'accuracy']:.1%}** accuracy versus {g.loc[('Majority baseline','Validation'),'accuracy']:.1%} for the baseline.
 On the 9 unseen test graphs **every ML model beats the baseline**: the best is **{bt}** with **{te.loc[bt,'accuracy']:.1%}** accuracy and **{te.loc[bt,'balanced_accuracy']:.1%}** balanced accuracy,
@@ -376,7 +381,8 @@ ax[0].set_xlabel("predicted"); ax[0].set_ylabel("actual fastest"); ax[0].set_tit
 imp.plot.barh(ax=ax[1], color="#2E8B57"); ax[1].set_title("Which features the model uses most"); ax[1].set_xlabel("importance")
 plt.tight_layout(); plt.savefig(f"{OUT}/05c_confusion_importance.png", dpi=130); plt.show()
 rec = cm.diagonal() / cm.sum(1)
-display(Markdown(f"""**How we got it:** the confusion matrix counts actual vs predicted for the 62 held-out predictions (the diagonal is correct). The importance bars show how much each feature reduced errors inside the trees.
+display(Markdown(f"""**Why this chart:** it explains the model's decisions: which cases it gets right, where it errs, and which features drive it. This makes the result defensible, not a black box.
+**How we got it:** the confusion matrix counts actual vs predicted for the 62 held-out predictions (the diagonal is correct). The importance bars show how much each feature reduced errors inside the trees.
 **What it tells us:** edge-join is found **{cm[0,0]} of {cm[0].sum()}** times, hub-split **{cm[1,1]} of {cm[1].sum()}** and native **{cm[2,2]} of {cm[2].sum()}**. Most mistakes ({cm[0,2] + cm[2,0]} of {cm.sum() - np.trace(cm)}) are between edge-join and native,
 whose runtimes are often close, and the native class has only 6 examples to learn from. The most-used features are **{imp.index[-1]}**, **{imp.index[-2]}** and **{imp.index[-3]}**:
 the model decides mostly by how much work piles onto the busiest vertices, which matches what we saw in Step 2."""))
@@ -406,7 +412,8 @@ for a in (ax.xaxis, ax.yaxis):
 ax.set_title("Selector's runtime prediction (graph unseen)"); ax.legend(fontsize=8)
 plt.tight_layout(); plt.savefig(f"{OUT}/05d_regressor.png", dpi=130); plt.show()
 RES["regressor_median_error_pct"] = round(float(err), 2)
-display(Markdown(f"""**How we got it:** for each held-out graph the regressor predicted three runtimes. Each dot is one prediction against the real Spark time (both axes are on a log scale, so 1, 10 and 100 s are evenly spaced).
+display(Markdown(f"""**Why this chart:** it checks the regressor behind the selector is accurate enough to rank the three strategies.
+**How we got it:** for each held-out graph the regressor predicted three runtimes. Each dot is one prediction against the real Spark time (both axes are on a log scale, so 1, 10 and 100 s are evenly spaced).
 **What it tells us:** the dots sit close to the dashed "perfect" line. The median prediction error is **{err:.1f}%**, which is accurate enough to rank the three strategies correctly for most graphs."""))
 ''')
 
@@ -446,7 +453,8 @@ b = ax[1].barh(order, POL.loc[order, "mean_regret_pct"], color=cols); ax[1].bar_
 ax[1].set_title("Mean regret: % slower than the best strategy (lower is better)"); ax[1].set_xlabel("%"); ax[1].set_xlim(0, POL.mean_regret_pct.max() * 1.18)
 plt.tight_layout(); plt.savefig(f"{OUT}/05e_selector_vs_baselines.png", dpi=130); plt.show()
 p = POL.loc
-display(Markdown(f"""**How we got it:** for every graph each policy chooses one strategy. We add up the real measured Spark time of that choice (left) and average how far it is from the fastest choice (right).
+display(Markdown(f"""**Why this chart:** it is the main proof of our proposal: the selector gives the lowest real Spark time and the lowest slowdown of all the options.
+**How we got it:** for every graph each policy chooses one strategy. We add up the real measured Spark time of that choice (left) and average how far it is from the fastest choice (right).
 **What it tells us:** the ML selector has the **lowest total time ({p['ML selector','total_time_s']:.0f} s)** and the **lowest regret ({p['ML selector','mean_regret_pct']:.1f}%)**.
 That is **{(1-p['ML selector','total_time_s']/p['Always native','total_time_s'])*100:.0f}% less time than always using native** (the default) and
 **{(1-p['ML selector','total_time_s']/p['Always edge-join','total_time_s'])*100:.0f}% less than the best fixed strategy, edge-join**, whose regret ({p['Always edge-join','mean_regret_pct']:.1f}%) is almost double ours.
@@ -468,7 +476,8 @@ o2 = POL_T.loc[order, "mean_regret_pct"]
 b = ax.bar(o2.index, o2.values, color=cols); ax.bar_label(b, fmt="%.1f%%")
 ax.set_ylabel("mean regret (%)"); ax.set_title("Unseen test graphs: % slower than the best strategy (lower is better)")
 plt.tight_layout(); plt.savefig(f"{OUT}/05f_test_policies.png", dpi=130); plt.show()
-display(Markdown(f"""**How we got it:** the same regret measure as in 5e, but only on the 9 held-out hub-sweep graphs, with a selector that never saw them.
+display(Markdown(f"""**Why this chart:** it repeats the proof on graphs the selector never saw, so the gain is not a training artefact.
+**How we got it:** the same regret measure as in 5e, but only on the 9 held-out hub-sweep graphs, with a selector that never saw them.
 **What it tells us:** on new graphs the selector is still the best: **{POL_T.loc['ML selector','mean_regret_pct']:.1f}%** regret against {POL_T.loc['Always edge-join','mean_regret_pct']:.1f}% for always edge-join
 and {POL_T.loc['Always native','mean_regret_pct']:.1f}% for always native. These test graphs include heavy-hub cases, where a fixed choice is costly and the selector helps the most."""))
 ''')
@@ -498,7 +507,8 @@ ax[1].text(-1, -.08, "0%", ha="center"); ax[1].text(1, -.08, "100%", ha="center"
 plt.tight_layout(); plt.savefig(f"{OUT}/05g_cumulative_gauge.png", dpi=130); plt.show()
 RES["time_saved_vs_native_pct"] = round(float(saved), 2)
 last5 = (cum["Always edge-join"][-1] - cum["Always edge-join"][-6]) - (cum["ML selector"][-1] - cum["ML selector"][-6])
-display(Markdown(f"""**How we got it:** graphs are sorted from quickest to slowest (by native runtime), and each area shows the running total of time if we use that policy (area chart). The gauge shows the final saving against the default.
+display(Markdown(f"""**Why this chart:** it turns the result into the headline number (time saved) and shows where the saving comes from.
+**How we got it:** graphs are sorted from quickest to slowest (by native runtime), and each area shows the running total of time if we use that policy (area chart). The gauge shows the final saving against the default.
 **What it tells us:** against **native** the gap opens steadily, graph after graph. Against **edge-join** the selector is about equal on most graphs (both pick edge-join),
 and then pulls ahead on the last, slowest, hub-heavy graphs, where it switches to hub-split: **{last5:.0f} s** saved on the last 5 graphs alone.
 Overall the selector saves **{saved:.0f}%** of the time of the default GraphFrames strategy."""))
@@ -551,7 +561,8 @@ wrong = L[~L.correct].sort_values("regret_pct", ascending=False)
 print(f"selector picked the fastest strategy on {int(L.correct.sum())} of {len(L)} graphs; the misses:")
 display(wrong[["graph_id", "family", "selector_pick", "actual_fastest", "regret_pct", "saved_vs_native_s"]].head(11))
 best_f = byfam.saved_vs_native_s.idxmax()
-display(Markdown(f"""**How we got it:** we summed the per-graph "seconds saved" columns of the Tableau file by family, and listed the graphs where the pick was not the fastest.
+display(Markdown(f"""**Why this chart:** it shows how the shared Tableau file is useful: it reveals where the selector saves time and what its mistakes cost.
+**How we got it:** we summed the per-graph "seconds saved" columns of the Tableau file by family, and listed the graphs where the pick was not the fastest.
 **What it tells us:** most of the saving comes from **{best_f}** graphs (hub-heavy ones), which is exactly where a smart choice matters. Against edge-join the saving is smaller,
 because edge-join is already right for most graphs. The selector is wrong on {len(wrong)} graphs, but these are mostly small, close calls: together they cost only
 **{(wrong.selector_s - L.loc[wrong.index, ['actual_s_edge_join','actual_s_native','actual_s_hub_split']].min(axis=1)).sum():.0f} s** more than the fastest choice,
