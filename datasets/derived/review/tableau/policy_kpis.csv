@@ -1,0 +1,6 @@
+policy,total_time_s,mean_regret_pct,picked_fastest_pct,speedup_vs_native
+Always native,1809.5336,49.5489,9.6774,1.0
+Always edge-join,1226.0493,8.3192,80.6452,1.3432
+Always hub-split,1640.9823,77.5675,9.6774,0.8412
+Rule,1490.2228,56.9427,14.5161,0.9514
+ML selector,1069.5348,4.634,82.2581,1.3789

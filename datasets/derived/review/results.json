@@ -1,0 +1,188 @@
+{
+ "n_graphs": 62,
+ "total_edges_M": 116.4,
+ "class_counts": {
+  "edgejoin": 50,
+  "hubsplit": 6,
+  "native": 6
+ },
+ "classifier_LOGO": {
+  "Majority baseline": {
+   "accuracy": 0.8065,
+   "balanced_accuracy": 0.3333,
+   "macro_f1": 0.2976
+  },
+  "Rule baseline": {
+   "accuracy": 0.1452,
+   "balanced_accuracy": 0.5,
+   "macro_f1": 0.1707
+  },
+  "Logistic regression": {
+   "accuracy": 0.7581,
+   "balanced_accuracy": 0.7533,
+   "macro_f1": 0.6562
+  },
+  "Random Forest": {
+   "accuracy": 0.8387,
+   "balanced_accuracy": 0.6889,
+   "macro_f1": 0.6776
+  },
+  "Extra-Trees": {
+   "accuracy": 0.8548,
+   "balanced_accuracy": 0.6956,
+   "macro_f1": 0.7026
+  }
+ },
+ "train_val_test": [
+  {
+   "model": "Majority baseline",
+   "split": "Train",
+   "accuracy": 0.8491,
+   "balanced_accuracy": 0.3333,
+   "macro_f1": 0.3061
+  },
+  {
+   "model": "Majority baseline",
+   "split": "Validation",
+   "accuracy": 0.8491,
+   "balanced_accuracy": 0.3333,
+   "macro_f1": 0.3061
+  },
+  {
+   "model": "Majority baseline",
+   "split": "Test",
+   "accuracy": 0.5556,
+   "balanced_accuracy": 0.3333,
+   "macro_f1": 0.2381
+  },
+  {
+   "model": "Logistic regression",
+   "split": "Train",
+   "accuracy": 0.8679,
+   "balanced_accuracy": 0.9481,
+   "macro_f1": 0.7993
+  },
+  {
+   "model": "Logistic regression",
+   "split": "Validation",
+   "accuracy": 0.7736,
+   "balanced_accuracy": 0.7333,
+   "macro_f1": 0.631
+  },
+  {
+   "model": "Logistic regression",
+   "split": "Test",
+   "accuracy": 0.7778,
+   "balanced_accuracy": 0.6,
+   "macro_f1": 0.6
+  },
+  {
+   "model": "Random Forest",
+   "split": "Train",
+   "accuracy": 1.0,
+   "balanced_accuracy": 1.0,
+   "macro_f1": 1.0
+  },
+  {
+   "model": "Random Forest",
+   "split": "Validation",
+   "accuracy": 0.9057,
+   "balanced_accuracy": 0.6815,
+   "macro_f1": 0.7487
+  },
+  {
+   "model": "Random Forest",
+   "split": "Test",
+   "accuracy": 0.6667,
+   "balanced_accuracy": 0.4889,
+   "macro_f1": 0.5091
+  },
+  {
+   "model": "Extra-Trees",
+   "split": "Train",
+   "accuracy": 1.0,
+   "balanced_accuracy": 1.0,
+   "macro_f1": 1.0
+  },
+  {
+   "model": "Extra-Trees",
+   "split": "Validation",
+   "accuracy": 0.9057,
+   "balanced_accuracy": 0.6815,
+   "macro_f1": 0.7487
+  },
+  {
+   "model": "Extra-Trees",
+   "split": "Test",
+   "accuracy": 0.6667,
+   "balanced_accuracy": 0.4889,
+   "macro_f1": 0.5091
+  }
+ ],
+ "regressor_median_error_pct": 10.08,
+ "policies_LOGO": {
+  "Always native": {
+   "total_time_s": 1809.5336,
+   "mean_regret_pct": 49.5489,
+   "picked_fastest_pct": 9.6774,
+   "speedup_vs_native": 1.0
+  },
+  "Always edge-join": {
+   "total_time_s": 1226.0493,
+   "mean_regret_pct": 8.3192,
+   "picked_fastest_pct": 80.6452,
+   "speedup_vs_native": 1.3432
+  },
+  "Always hub-split": {
+   "total_time_s": 1640.9823,
+   "mean_regret_pct": 77.5675,
+   "picked_fastest_pct": 9.6774,
+   "speedup_vs_native": 0.8412
+  },
+  "Rule": {
+   "total_time_s": 1490.2228,
+   "mean_regret_pct": 56.9427,
+   "picked_fastest_pct": 14.5161,
+   "speedup_vs_native": 0.9514
+  },
+  "ML selector": {
+   "total_time_s": 1069.5348,
+   "mean_regret_pct": 4.634,
+   "picked_fastest_pct": 82.2581,
+   "speedup_vs_native": 1.3789
+  }
+ },
+ "policies_test9": {
+  "Always native": {
+   "total_time_s": 367.5169,
+   "mean_regret_pct": 80.1394,
+   "picked_fastest_pct": 11.1111,
+   "speedup_vs_native": 1.0
+  },
+  "Always edge-join": {
+   "total_time_s": 228.7932,
+   "mean_regret_pct": 18.5119,
+   "picked_fastest_pct": 55.5556,
+   "speedup_vs_native": 1.4655
+  },
+  "Always hub-split": {
+   "total_time_s": 216.5317,
+   "mean_regret_pct": 44.4216,
+   "picked_fastest_pct": 33.3333,
+   "speedup_vs_native": 1.2313
+  },
+  "Rule": {
+   "total_time_s": 216.5317,
+   "mean_regret_pct": 44.4216,
+   "picked_fastest_pct": 33.3333,
+   "speedup_vs_native": 1.2313
+  },
+  "ML selector": {
+   "total_time_s": 181.3138,
+   "mean_regret_pct": 7.3137,
+   "picked_fastest_pct": 66.6667,
+   "speedup_vs_native": 1.5856
+  }
+ },
+ "time_saved_vs_native_pct": 40.89
+}
