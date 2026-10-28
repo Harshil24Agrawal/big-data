@@ -54,7 +54,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, RandomForestRegressor
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, confusion_matrix
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, precision_score, f1_score, confusion_matrix
 warnings.filterwarnings("ignore")
 
 def find_repo(start):
@@ -80,6 +81,11 @@ CLASSES = ["edgejoin", "hubsplit", "native"]
 COL = {"edge-join": "#4C78A8", "native": "#72B7B2", "hub-split": "#E45756", "ML selector": "#2E8B57", "baseline": "#B0B0B0"}
 plt.rcParams.update({"figure.dpi": 110, "axes.grid": True, "grid.alpha": .3, "axes.spines.top": False, "axes.spines.right": False})
 RES = {}
+# Style for the charts that go on the slides: big fonts and plain-English axis titles, readable on a projector.
+SLIDE = {"font.size": 15, "axes.titlesize": 17, "axes.labelsize": 16, "xtick.labelsize": 14, "ytick.labelsize": 14, "legend.fontsize": 14}
+C = {"edge-join": "#4C78A8", "native": "#72B7B2", "hub-split": "#E45756", "ours": "#2E8B57", "base": "#A9A9A9"}
+def save_slide(fig, name):
+    fig.tight_layout(); fig.savefig(f"{OUT}/{name}", dpi=200); plt.show()
 print("Project folder:", REPO)
 ''')
 
@@ -208,7 +214,7 @@ y = df.best_class.values
 LOGT = np.log(T)
 print(f"input matrix X: {X.shape[0]} graphs x {X.shape[1]} features")
 
-fig, ax = plt.subplots(1, 2, figsize=(14, 5.4), gridspec_kw={"width_ratios": [1.5, 1]})
+fig, ax = plt.subplots(figsize=(9, 7)); ax = [ax]
 corr = df[FEATS].corr()
 im = ax[0].imshow(corr, cmap="RdBu_r", vmin=-1, vmax=1)
 ax[0].set_xticks(range(len(FEATS))); ax[0].set_xticklabels(FEATS, rotation=60, ha="right", fontsize=8)
@@ -217,18 +223,29 @@ for i in range(len(FEATS)):
     for j in range(len(FEATS)):
         v = corr.iloc[i, j]; ax[0].text(j, i, f"{v:.1f}", ha="center", va="center", fontsize=6, color="white" if abs(v) > .6 else "black")
 plt.colorbar(im, ax=ax[0], fraction=.04); ax[0].set_title("Feature correlation heatmap")
+plt.tight_layout(); plt.savefig(f"{OUT}/03_feature_heatmap.png", dpi=130); plt.show()
 cnt = pd.Series(y).value_counts().reindex(CLASSES)
-bars = ax[1].bar(["edge-join", "hub-split", "native"], cnt.values, color=[COL["edge-join"], COL["hub-split"], COL["native"]])
-for b, v in zip(bars, cnt.values): ax[1].text(b.get_x() + b.get_width() / 2, v + .5, f"{v} ({v/len(y):.0%})", ha="center")
-ax[1].set_title("Labels: which strategy was fastest"); ax[1].set_ylabel("graphs")
-plt.tight_layout(); plt.savefig(f"{OUT}/03_features_labels.png", dpi=130); plt.show()
+
+# Slide chart: which method was fastest, per family and overall  (slide "Results of Preprocessing")
+fam_name = {"hub_sweep": "hub sweep", "multi_hub": "many hubs", "out_heavy": "out-heavy", "uniform": "uniform (no hubs)", "in_heavy": "in-heavy", "powerlaw_balanced": "power-law"}
+lab = {"edgejoin": "edge-join", "hubsplit": "hub-split", "native": "native"}
+FASTEST = pd.crosstab(df.family.map(fam_name), df.best_class.map(lab))[["edge-join", "hub-split", "native"]]
+FASTEST = FASTEST.loc[FASTEST.sum(axis=1).sort_values().index]
+with plt.rc_context(SLIDE):
+    fig, ax2 = plt.subplots(1, 2, figsize=(10, 3.9), gridspec_kw={"width_ratios": [1.5, 1]})
+    FASTEST.plot.barh(stacked=True, ax=ax2[0], color=[C["edge-join"], C["hub-split"], C["native"]], width=.75)
+    ax2[0].set_xlabel("Number of graphs"); ax2[0].set_ylabel(""); ax2[0].set_title("Fastest method in each graph family"); ax2[0].legend(title=None, loc="lower right", fontsize=13)
+    tot = pd.Series(cnt.values, index=["edge-join", "hub-split", "native"])
+    b = ax2[1].bar(tot.index, tot.values, color=[C["edge-join"], C["hub-split"], C["native"]]); ax2[1].bar_label(b, fontsize=15, padding=2)
+    ax2[1].set_ylabel("Graphs won"); ax2[1].tick_params(axis="x", labelsize=12); ax2[1].set_title("Overall winner count"); ax2[1].set_ylim(0, 58)
+    save_slide(fig, "slide_preprocessing.png")
 MAJ = cnt.max() / cnt.sum(); RES["class_counts"] = cnt.to_dict()
-display(Markdown(f"""**Why this chart:** it justifies our features (they carry different information) and our metrics (labels are imbalanced, so accuracy alone would mislead).
-**How we got it:** the Pearson correlation between every pair of the 13 features (heatmap; red = they rise together, blue = one rises as the other falls), and a count of the labels (bar chart).
+display(Markdown(f"""**Why these charts:** they justify our features (they carry different information) and our metrics (labels are imbalanced, so accuracy alone would mislead).
+**How we got it:** the Pearson correlation between every pair of the 13 features (heatmap; red = they rise together, blue = one rises as the other falls), and a count of which method was fastest, per family and overall (bar charts, X-axis = number of graphs).
 **What it tells us:** the features form three groups that move together: **size** (vertices, edges), **degree skew** (Gini and top-0.1% degrees, which are high when active_fraction is low) and **hub work** (the work and hub features at the bottom right).
 The groups are only weakly related to each other, so each one adds new information and all of them are kept.
 The labels are **imbalanced**: edge-join wins {cnt['edgejoin']} of {len(y)} graphs ({MAJ:.1%}). So a "model" that always says edge-join already gets {MAJ:.1%} accuracy.
-That is our **baseline**, and it is why we also report **balanced accuracy** and **macro-F1**, which do not reward ignoring the rare classes."""))
+That is our **baseline**, and it is why we also report **precision** and **F1-score**, which do not reward ignoring the rare classes."""))
 ''')
 
 # ---------------------------------------------------------------- step 4
@@ -256,18 +273,19 @@ md(r'''
 Models compared:
 * **Majority baseline**: always predicts edge-join (the most common label)
 * **Rule baseline**: a hand-written rule, "if the graph has hubs use hub-split, else native"
-* **Logistic regression**, **Random Forest** (300 trees), **Extra-Trees** (300 trees): our ML models
+* **Logistic regression**, **Decision tree** (depth 2), **Random Forest** (300 trees), **Extra-Trees** (300 trees): our ML models
 
 **Primary metrics** (higher is better):
-* **Accuracy**: share of graphs where the predicted strategy is right
-* **Balanced accuracy**: the average of the per-class hit rates (a model that ignores hub-split and native scores only 33%)
-* **Macro-F1**: the average F1 over the three classes (it punishes both missed and false picks)
+* **Accuracy**: share of graphs where the predicted method is right
+* **Precision** (macro): when the model picks a method, how often it is right, averaged over the three methods
+* **F1-score** (macro): combines finding each method and not picking it wrongly, averaged over the three methods (0 to 1)
 ''')
 
 code(r'''
 def make_models():
     return {
         "Logistic regression": lambda: make_pipeline(StandardScaler(), LogisticRegression(C=1.0, max_iter=2000, class_weight="balanced")),
+        "Decision tree": lambda: DecisionTreeClassifier(max_depth=2, class_weight="balanced", random_state=SEED),
         "Random Forest": lambda: RandomForestClassifier(n_estimators=NTREES, class_weight="balanced_subsample", random_state=SEED, n_jobs=1),
         "Extra-Trees": lambda: ExtraTreesClassifier(n_estimators=NTREES, class_weight="balanced_subsample", random_state=SEED, n_jobs=1),
     }
@@ -276,7 +294,7 @@ def rule_pred(d):
     return np.where(d.work_in_hubs_share > 0, "hubsplit", "native")
 
 def scores(yt, yp):
-    return dict(accuracy=accuracy_score(yt, yp), balanced_accuracy=balanced_accuracy_score(yt, yp),
+    return dict(accuracy=accuracy_score(yt, yp), precision=precision_score(yt, yp, average="macro", labels=CLASSES, zero_division=0),
                 macro_f1=f1_score(yt, yp, average="macro", labels=CLASSES))
 
 def leave_one_out(idx):
@@ -297,21 +315,23 @@ clf = pd.DataFrame({m: scores(y, p) for m, p in LOGO_PRED.items()}).T
 display(clf.round(3))
 RES["classifier_LOGO"] = clf.round(4).to_dict(orient="index")
 
-fig, ax = plt.subplots(figsize=(12, 4.4)); xs = np.arange(len(clf)); w = .26
-for j, (m, lab, c) in enumerate([("accuracy", "Accuracy", "#4C78A8"), ("balanced_accuracy", "Balanced accuracy", "#F58518"), ("macro_f1", "Macro-F1", "#54A24B")]):
-    b = ax.bar(xs + (j - 1) * w, clf[m], w, label=lab, color=c)
-    ax.bar_label(b, fmt="%.2f", fontsize=7.5, padding=1)
-ax.axhline(clf.loc["Majority baseline", "accuracy"], ls="--", c="k", lw=1, label="majority accuracy (80.6%)")
-ax.set_xticks(xs); ax.set_xticklabels(clf.index); ax.set_ylim(0, 1.1); ax.set_ylabel("score")
-ax.set_title("Classifier comparison on held-out graphs (leave-one-graph-out, 62 tests)"); ax.legend(fontsize=8, ncol=4, loc="upper left")
-plt.tight_layout(); plt.savefig(f"{OUT}/05a_classifiers.png", dpi=130); plt.show()
+# Slide chart (slide "Comparison with existing classifier models")
+CMP = clf.loc[["Majority baseline", "Logistic regression", "Decision tree", "Random Forest", "Extra-Trees"], ["accuracy", "precision", "macro_f1"]] * 100
+with plt.rc_context(SLIDE):
+    fig, ax = plt.subplots(figsize=(5.6, 3.8)); xs = np.arange(len(CMP)); w = .27
+    for j, (m, lab_, c) in enumerate([("accuracy", "Accuracy (%)", "#1F3864"), ("precision", "Precision ×100", "#C0504D"), ("macro_f1", "F1-score ×100", "#4E9A5B")]):
+        b = ax.bar(xs + (j - 1) * w, CMP[m], w, label=lab_, color=c); ax.bar_label(b, fmt="%.0f", fontsize=9, padding=1)
+    ax.set_xticks(xs); ax.set_xticklabels(["Baseline", "Logistic\nregression", "Decision\ntree", "Random\nforest", "Extra-\ntrees"], fontsize=11)
+    ax.set_ylim(0, 112); ax.set_ylabel("Score (higher is better)", fontsize=13); ax.tick_params(axis="y", labelsize=11)
+    ax.legend(ncol=3, fontsize=10, loc="upper center", bbox_to_anchor=(.5, 1.13), frameon=False)
+    save_slide(fig, "slide_comparison.png")
 best = clf.drop(["Majority baseline", "Rule baseline"]).accuracy.idxmax()
 display(Markdown(f"""**Why this chart:** it picks the model fairly: every model is scored on graphs it never saw, and compared with the simple baselines it must beat.
 **How we got it:** each model predicted every graph while that graph was hidden from training (62 rounds), and we scored the 62 predictions.
-**What it tells us:** the majority baseline has high accuracy ({clf.loc['Majority baseline','accuracy']:.1%}) but only **{clf.loc['Majority baseline','balanced_accuracy']:.1%} balanced accuracy**, because it never finds hub-split or native.
-**{best}** is best on accuracy (**{clf.loc[best,'accuracy']:.1%}**) and macro-F1 (**{clf.loc[best,'macro_f1']:.2f}** vs {clf.loc['Majority baseline','macro_f1']:.2f}).
-Logistic regression has the highest balanced accuracy (**{clf.loc['Logistic regression','balanced_accuracy']:.1%}**) but lower accuracy, so it over-predicts the rare classes.
-The hand-written rule is far worse than every learned model: a fixed rule does not work, and learning from data does."""))
+**X-axis:** the five models. **Y-axis:** score, higher is better (precision and F1 shown ×100).
+**What it tells us:** the majority baseline has high accuracy ({clf.loc['Majority baseline','accuracy']:.1%}) but only **{clf.loc['Majority baseline','precision']:.2f} precision** and **{clf.loc['Majority baseline','macro_f1']:.2f} F1**, because it never finds hub-split or native.
+**{best}** is best on all three: accuracy **{clf.loc[best,'accuracy']:.1%}**, precision **{clf.loc[best,'precision']:.2f}**, F1 **{clf.loc[best,'macro_f1']:.2f}**.
+The depth-2 decision tree is too simple ({clf.loc['Decision tree','accuracy']:.1%} accuracy). The hand-written rule (in the table, not drawn) is far worse than every learned model: learning from data beats a fixed rule."""))
 ''')
 
 md(r'''
@@ -339,27 +359,32 @@ for m in ["Majority baseline", "Logistic regression", "Random Forest", "Extra-Tr
     for split, yt, yp in [("Train", y[train_idx], p_tr), ("Validation", y[train_idx], VAL_PRED[m]), ("Test", y[test_idx], p_te)]:
         rows.append(dict(model=m, split=split, **scores(yt, yp)))
 tvt = pd.DataFrame(rows)
-display(tvt.pivot(index="model", columns="split", values=["accuracy", "balanced_accuracy"]).round(3))
+display(tvt.pivot(index="model", columns="split", values=["accuracy", "macro_f1"]).round(3))
 RES["train_val_test"] = tvt.round(4).to_dict(orient="records")
 
-fig, ax = plt.subplots(1, 2, figsize=(13, 4.3), sharey=True)
-mods = ["Majority baseline", "Logistic regression", "Random Forest", "Extra-Trees"]; mc = ["#B0B0B0", "#F58518", "#4C78A8", "#2E8B57"]
-for a, met, title in [(ax[0], "accuracy", "Accuracy"), (ax[1], "balanced_accuracy", "Balanced accuracy")]:
-    for j, (m, c) in enumerate(zip(mods, mc)):
-        v = tvt[tvt.model == m].set_index("split").loc[["Train", "Validation", "Test"], met]
-        b = a.bar(np.arange(3) + (j - 1.5) * .2, v, .2, color=c, label=m); a.bar_label(b, fmt="%.2f", fontsize=7)
-    a.set_xticks(range(3)); a.set_xticklabels(["Train (53)", "Validation (53, LOGO)", "Test (9 unseen)"]); a.set_title(title); a.set_ylim(0, 1.12)
-ax[0].set_ylabel("score"); fig.legend(*ax[0].get_legend_handles_labels(), loc="upper center", ncol=4, fontsize=9, bbox_to_anchor=(.5, 1.06))
-plt.tight_layout(); plt.savefig(f"{OUT}/05b_train_val_test.png", dpi=130, bbox_inches="tight"); plt.show()
+# Slide chart (slide "Results of Classification 2/4")
+mods = ["Majority baseline", "Logistic regression", "Random Forest", "Extra-Trees"]; mc = [C["base"], "#F58518", "#4C78A8", C["ours"]]
+short = {"Majority baseline": "Baseline (always edge-join)", "Logistic regression": "Logistic regression", "Random Forest": "Random forest", "Extra-Trees": "Extra-trees"}
+with plt.rc_context(SLIDE):
+    fig, ax = plt.subplots(1, 2, figsize=(10, 3.9), sharey=True)
+    for a, met, title in [(ax[0], "accuracy", "Accuracy (%)"), (ax[1], "macro_f1", "F1-score (×100)")]:
+        for j, (m, c) in enumerate(zip(mods, mc)):
+            v = tvt[tvt.model == m].set_index("split").loc[["Train", "Validation", "Test"], met] * 100
+            b = a.bar(np.arange(3) + (j - 1.5) * .2, v, .2, color=c, label=short[m]); a.bar_label(b, fmt="%.0f", fontsize=8.5, padding=1)
+        a.set_xticks(range(3)); a.set_xticklabels(["Train\n(53 graphs)", "Validation\n(53 graphs)", "Test\n(9 new graphs)"], fontsize=13); a.set_title(title); a.set_ylim(0, 112)
+    ax[0].set_ylabel("Score (higher is better)")
+    fig.legend(*ax[0].get_legend_handles_labels(), loc="upper center", ncol=4, fontsize=12, bbox_to_anchor=(.5, 1.02), frameon=False)
+    fig.tight_layout(rect=(0, 0, 1, .92)); fig.savefig(f"{OUT}/slide_train_val_test.png", dpi=200); plt.show()
 g = tvt.set_index(["model", "split"])
 te = tvt[(tvt.split == "Test") & (tvt.model != "Majority baseline")].set_index("model")
 bt = te.accuracy.idxmax()
 display(Markdown(f"""**Why this chart:** it shows the model is not just memorising: the honest validation and unseen-test scores still beat the baseline.
 **How we got it:** the same models are trained on 53 graphs. We scored them on those 53 (train), with leave-one-out inside the 53 (validation), and on the 9 graphs they never saw (test).
+**X-axis:** the three splits. **Y-axis:** score, higher is better (left accuracy, right F1-score ×100).
 **What it tells us:** the tree models reach 100% on train because they memorise the data, so the train score is not trusted; validation and test are the honest numbers.
 On validation, the tree models reach **{g.loc[('Extra-Trees','Validation'),'accuracy']:.1%}** accuracy versus {g.loc[('Majority baseline','Validation'),'accuracy']:.1%} for the baseline.
-On the 9 unseen test graphs **every ML model beats the baseline**: the best is **{bt}** with **{te.loc[bt,'accuracy']:.1%}** accuracy and **{te.loc[bt,'balanced_accuracy']:.1%}** balanced accuracy,
-against **{g.loc[('Majority baseline','Test'),'accuracy']:.1%}** and **{g.loc[('Majority baseline','Test'),'balanced_accuracy']:.1%}** for the baseline.
+On the 9 unseen test graphs **every ML model beats the baseline**: the best is **{bt}** with **{te.loc[bt,'accuracy']:.1%}** accuracy and F1 **{te.loc[bt,'macro_f1']:.2f}**,
+against **{g.loc[('Majority baseline','Test'),'accuracy']:.1%}** and **{g.loc[('Majority baseline','Test'),'macro_f1']:.2f}** for the baseline.
 The test set is small (9 graphs), so one graph changes accuracy by 11 points. This is why our main numbers use leave-one-graph-out over all 62."""))
 ''')
 
@@ -371,20 +396,28 @@ code(r'''
 cm = confusion_matrix(y, LOGO_PRED["Extra-Trees"], labels=CLASSES)
 et_full = ExtraTreesClassifier(n_estimators=NTREES, class_weight="balanced_subsample", random_state=SEED, n_jobs=1).fit(X, y)
 imp = pd.Series(et_full.feature_importances_, index=FEATS).sort_values()
-fig, ax = plt.subplots(1, 2, figsize=(13, 4.6), gridspec_kw={"width_ratios": [1, 1.3]})
-ax[0].imshow(cm, cmap="Blues"); ax[0].grid(False)
-lab = ["edge-join", "hub-split", "native"]
-ax[0].set_xticks(range(3)); ax[0].set_xticklabels(lab); ax[0].set_yticks(range(3)); ax[0].set_yticklabels(lab)
-for i in range(3):
-    for j in range(3): ax[0].text(j, i, cm[i, j], ha="center", va="center", fontsize=14, color="white" if cm[i, j] > cm.max() / 2 else "black")
-ax[0].set_xlabel("predicted"); ax[0].set_ylabel("actual fastest"); ax[0].set_title("Extra-Trees confusion matrix (LOGO)")
-imp.plot.barh(ax=ax[1], color="#2E8B57"); ax[1].set_title("Which features the model uses most"); ax[1].set_xlabel("importance")
-plt.tight_layout(); plt.savefig(f"{OUT}/05c_confusion_importance.png", dpi=130); plt.show()
+PLAIN = {"work_max_share": "busiest point's share of work", "log_max_work": "work on the busiest point", "log_work_sum": "total work (two-hop paths)",
+         "work_in_hubs_share": "hubs' share of work", "log_hub_work": "work inside hubs", "log_num_edges": "number of edges", "out_gini": "unevenness of out-degree",
+         "log_num_work_hubs": "number of hubs", "in_gini": "unevenness of in-degree", "log_in_p999": "top in-degree", "log_out_p999": "top out-degree",
+         "log_num_vertices": "number of vertices", "active_fraction": "share of active vertices"}
+TOP8 = pd.Series(imp.values, index=[PLAIN[f] for f in imp.index]).tail(8)
+# Slide chart (slide "Comparison 2/2")
+with plt.rc_context(SLIDE):
+    fig, ax = plt.subplots(1, 2, figsize=(10, 3.9), gridspec_kw={"width_ratios": [1, 1.45]})
+    ax[0].imshow(cm, cmap="Blues"); ax[0].grid(False)
+    ax[0].set_xticks(range(3)); ax[0].set_xticklabels(["edge-\njoin", "hub-\nsplit", "native"], fontsize=12)
+    ax[0].set_yticks(range(3)); ax[0].set_yticklabels(["edge-join", "hub-split", "native"], fontsize=13)
+    for i in range(3):
+        for j in range(3): ax[0].text(j, i, cm[i, j], ha="center", va="center", fontsize=20, weight="bold", color="white" if cm[i, j] > 20 else "black")
+    ax[0].set_xlabel("Model's answer"); ax[0].set_ylabel("Actually fastest"); ax[0].set_title("Right vs wrong answers")
+    TOP8.plot.barh(ax=ax[1], color=C["ours"]); ax[1].set_xlabel("How much the model relies on it"); ax[1].set_title("Top 8 inputs the model uses")
+    ax[1].tick_params(axis="y", labelsize=13)
+    save_slide(fig, "slide_confusion_importance.png")
 rec = cm.diagonal() / cm.sum(1)
 display(Markdown(f"""**Why this chart:** it explains the model's decisions: which cases it gets right, where it errs, and which features drive it. This makes the result defensible, not a black box.
-**How we got it:** the confusion matrix counts actual vs predicted for the 62 held-out predictions (the diagonal is correct). The importance bars show how much each feature reduced errors inside the trees.
+**How we got it:** the confusion matrix counts actual vs predicted for the 62 held-out predictions (rows = actually fastest, columns = model's answer; the diagonal is correct). The importance bars (X-axis = how much the model relies on it) show how much each input reduced errors inside the trees.
 **What it tells us:** edge-join is found **{cm[0,0]} of {cm[0].sum()}** times, hub-split **{cm[1,1]} of {cm[1].sum()}** and native **{cm[2,2]} of {cm[2].sum()}**. Most mistakes ({cm[0,2] + cm[2,0]} of {cm.sum() - np.trace(cm)}) are between edge-join and native,
-whose runtimes are often close, and the native class has only 6 examples to learn from. The most-used features are **{imp.index[-1]}**, **{imp.index[-2]}** and **{imp.index[-3]}**:
+whose runtimes are often close, and the native class has only 6 examples to learn from. The most-used inputs are **{TOP8.index[-1]}**, **{TOP8.index[-2]}** and **{TOP8.index[-3]}**:
 the model decides mostly by how much work piles onto the busiest vertices, which matches what we saw in Step 2."""))
 ''')
 
@@ -444,17 +477,18 @@ def policies(rows_idx, pred):
 
 POL = pd.DataFrame({k: policy_scores(ALL, v) for k, v in policies(ALL, PRED).items()}).T
 display(POL.round(2)); RES["policies_LOGO"] = POL.round(4).to_dict(orient="index")
-order = ["Always native", "Always hub-split", "Rule", "Always edge-join", "ML selector"]
-cols = [COL["ML selector"] if o == "ML selector" else COL["baseline"] for o in order]
-fig, ax = plt.subplots(1, 2, figsize=(13, 4.3))
-b = ax[0].barh(order, POL.loc[order, "total_time_s"], color=cols); ax[0].bar_label(b, fmt="%.0f s", padding=3)
-ax[0].set_title("Total runtime over 62 graphs (lower is better)"); ax[0].set_xlabel("seconds"); ax[0].set_xlim(0, POL.total_time_s.max() * 1.18)
-b = ax[1].barh(order, POL.loc[order, "mean_regret_pct"], color=cols); ax[1].bar_label(b, fmt="%.1f%%", padding=3)
-ax[1].set_title("Mean regret: % slower than the best strategy (lower is better)"); ax[1].set_xlabel("%"); ax[1].set_xlim(0, POL.mean_regret_pct.max() * 1.18)
-plt.tight_layout(); plt.savefig(f"{OUT}/05e_selector_vs_baselines.png", dpi=130); plt.show()
+# Slide chart (slide "Results of Classification 1/4")
+TIME3 = POL.loc[["Always native", "Always edge-join", "ML selector"], "total_time_s"]
+with plt.rc_context(SLIDE):
+    fig, ax = plt.subplots(figsize=(5.1, 3.2))
+    b = ax.barh(["Always native\n(Spark default)", "Always edge-join", "Our ML selector"], TIME3.values, color=[C["base"], C["base"], C["ours"]])
+    ax.bar_label(b, labels=[f"{v:.0f} s" for v in TIME3.values], padding=4, fontsize=14)
+    ax.set_xlim(0, 2250); ax.set_xlabel("Total time for all 62 graphs (s)\nlower is better", fontsize=13); ax.tick_params(labelsize=12)
+    save_slide(fig, "slide_total_time.png")
 p = POL.loc
 display(Markdown(f"""**Why this chart:** it is the main proof of our proposal: the selector gives the lowest real Spark time and the lowest slowdown of all the options.
-**How we got it:** for every graph each policy chooses one strategy. We add up the real measured Spark time of that choice (left) and average how far it is from the fastest choice (right).
+**How we got it:** for every graph each policy chooses one strategy, and we add up the real measured Spark time of that choice. The regret of every policy is in the table above.
+**X-axis:** total seconds for all 62 graphs (shorter bar = faster). **Y-axis:** the ways of choosing a method.
 **What it tells us:** the ML selector has the **lowest total time ({p['ML selector','total_time_s']:.0f} s)** and the **lowest regret ({p['ML selector','mean_regret_pct']:.1f}%)**.
 That is **{(1-p['ML selector','total_time_s']/p['Always native','total_time_s'])*100:.0f}% less time than always using native** (the default) and
 **{(1-p['ML selector','total_time_s']/p['Always edge-join','total_time_s'])*100:.0f}% less than the best fixed strategy, edge-join**, whose regret ({p['Always edge-join','mean_regret_pct']:.1f}%) is almost double ours.
@@ -471,13 +505,17 @@ reg53 = fit_reg(X[train_idx], LOGT[train_idx])
 PRED_T = np.full_like(LOGT, np.nan); PRED_T[test_idx] = reg53.predict(X[test_idx])
 POL_T = pd.DataFrame({k: policy_scores(test_idx, v) for k, v in policies(test_idx, PRED_T).items()}).T
 display(POL_T.round(2)); RES["policies_test9"] = POL_T.round(4).to_dict(orient="index")
-fig, ax = plt.subplots(figsize=(8, 3.8))
-o2 = POL_T.loc[order, "mean_regret_pct"]
-b = ax.bar(o2.index, o2.values, color=cols); ax.bar_label(b, fmt="%.1f%%")
-ax.set_ylabel("mean regret (%)"); ax.set_title("Unseen test graphs: % slower than the best strategy (lower is better)")
-plt.tight_layout(); plt.savefig(f"{OUT}/05f_test_policies.png", dpi=130); plt.show()
+# Slide chart (slide "Results of Classification 4/4")
+TEST4 = POL_T.loc[["Always native", "Always hub-split", "Always edge-join", "ML selector"], "mean_regret_pct"]
+with plt.rc_context(SLIDE):
+    fig, ax = plt.subplots(figsize=(10, 3.6))
+    b = ax.bar(["Always native", "Always hub-split", "Always edge-join", "Our ML selector"], TEST4.values, color=[C["base"]] * 3 + [C["ours"]], width=.6)
+    ax.bar_label(b, labels=[f"{x:.1f}%" for x in TEST4.values], fontsize=15, padding=2)
+    ax.set_ylabel("How much slower than\nthe fastest method (%)"); ax.set_ylim(0, 92); ax.set_title("On 9 new graphs the model never saw (lower is better)")
+    save_slide(fig, "slide_unseen_test.png")
 display(Markdown(f"""**Why this chart:** it repeats the proof on graphs the selector never saw, so the gain is not a training artefact.
-**How we got it:** the same regret measure as in 5e, but only on the 9 held-out hub-sweep graphs, with a selector that never saw them.
+**How we got it:** the regret measure (how much slower the chosen method was than the fastest one for that graph), only on the 9 held-out hub-sweep graphs, with a selector that never saw them. The rule policy gives the same picks as always hub-split here, so it is not drawn.
+**X-axis:** the ways of choosing a method. **Y-axis:** average % slower than the fastest method (lower is better).
 **What it tells us:** on new graphs the selector is still the best: **{POL_T.loc['ML selector','mean_regret_pct']:.1f}%** regret against {POL_T.loc['Always edge-join','mean_regret_pct']:.1f}% for always edge-join
 and {POL_T.loc['Always native','mean_regret_pct']:.1f}% for always native. These test graphs include heavy-hub cases, where a fixed choice is costly and the selector helps the most."""))
 ''')
@@ -488,27 +526,27 @@ md(r'''
 
 code(r'''
 ordr = np.argsort(T[:, 1])                                   # graphs from fastest to slowest (under native)
-fig, ax = plt.subplots(1, 2, figsize=(14, 4.4), gridspec_kw={"width_ratios": [1.6, 1]})
 xs = np.arange(1, len(df) + 1)
 cum = {n: np.cumsum(T[ordr, k]) for n, k in [("Always native", 1), ("Always edge-join", 0)]}
 cum["ML selector"] = np.cumsum(T[ordr, pick[ordr]])
-ax[0].fill_between(xs, cum["Always native"], color=COL["native"], alpha=.35, label=f"Always native ({cum['Always native'][-1]:.0f} s)")
-ax[0].fill_between(xs, cum["Always edge-join"], color=COL["edge-join"], alpha=.45, label=f"Always edge-join ({cum['Always edge-join'][-1]:.0f} s)")
-ax[0].fill_between(xs, cum["ML selector"], color=COL["ML selector"], alpha=.75, label=f"ML selector ({cum['ML selector'][-1]:.0f} s)")
-ax[0].set_xlabel("number of graphs run (quickest to slowest)"); ax[0].set_ylabel("total seconds so far")
-ax[0].set_title("Cumulative runtime: the gap grows on big, skewed graphs"); ax[0].legend(loc="upper left")
-# gauge: % of time saved compared with the default (always native)
 saved = (1 - POL.loc["ML selector", "total_time_s"] / POL.loc["Always native", "total_time_s"]) * 100
-ax[1].axis("off"); ax[1].set_xlim(-1.2, 1.2); ax[1].set_ylim(-.35, 1.15); ax[1].set_aspect("equal")
-ax[1].add_patch(Wedge((0, 0), 1, 0, 180, width=.3, fc="#e6e6e6"))
-ax[1].add_patch(Wedge((0, 0), 1, 180 - 180 * saved / 100, 180, width=.3, fc=COL["ML selector"]))
-ax[1].text(0, .15, f"{saved:.0f}%", ha="center", fontsize=30, weight="bold"); ax[1].text(0, -.15, "less total time than default (native)", ha="center", fontsize=10)
-ax[1].text(-1, -.08, "0%", ha="center"); ax[1].text(1, -.08, "100%", ha="center"); ax[1].set_title("Time saved by the ML selector")
-plt.tight_layout(); plt.savefig(f"{OUT}/05g_cumulative_gauge.png", dpi=130); plt.show()
+# Slide chart (slide "Results of Classification 3/4"): running total (area) + gauge
+with plt.rc_context(SLIDE):
+    fig, ax = plt.subplots(1, 2, figsize=(10, 3.9), gridspec_kw={"width_ratios": [1.75, 1]})
+    ax[0].fill_between(xs, cum["Always native"], color=C["native"], alpha=.45, label=f"Always native ({cum['Always native'][-1]:.0f} s)")
+    ax[0].fill_between(xs, cum["Always edge-join"], color=C["edge-join"], alpha=.55, label=f"Always edge-join ({cum['Always edge-join'][-1]:.0f} s)")
+    ax[0].fill_between(xs, cum["ML selector"], color=C["ours"], alpha=.85, label=f"Our ML selector ({cum['ML selector'][-1]:.0f} s)")
+    ax[0].set_xlabel("Graphs run so far (quickest → slowest)"); ax[0].set_ylabel("Total time so far (s)"); ax[0].legend(loc="upper left", fontsize=12); ax[0].set_title("Running total of time")
+    a = ax[1]; a.axis("off"); a.set_xlim(-1.2, 1.2); a.set_ylim(-.45, 1.15); a.set_aspect("equal")
+    a.add_patch(Wedge((0, 0), 1, 0, 180, width=.32, fc="#e6e6e6")); a.add_patch(Wedge((0, 0), 1, 180 - 180 * saved / 100, 180, width=.32, fc=C["ours"]))
+    a.text(0, .12, f"{saved:.0f}%", ha="center", fontsize=34, weight="bold"); a.text(0, -.25, "less time than\nSpark's default", ha="center", fontsize=14, va="center")
+    a.text(-1, -.1, "0%", ha="center", fontsize=12); a.text(1, -.1, "100%", ha="center", fontsize=12); a.set_title("Time saved", fontsize=17)
+    save_slide(fig, "slide_running_total.png")
 RES["time_saved_vs_native_pct"] = round(float(saved), 2)
 last5 = (cum["Always edge-join"][-1] - cum["Always edge-join"][-6]) - (cum["ML selector"][-1] - cum["ML selector"][-6])
 display(Markdown(f"""**Why this chart:** it turns the result into the headline number (time saved) and shows where the saving comes from.
 **How we got it:** graphs are sorted from quickest to slowest (by native runtime), and each area shows the running total of time if we use that policy (area chart). The gauge shows the final saving against the default.
+**X-axis:** graphs run so far, quickest to slowest. **Y-axis:** total seconds spent so far (lower area = less time).
 **What it tells us:** against **native** the gap opens steadily, graph after graph. Against **edge-join** the selector is about equal on most graphs (both pick edge-join),
 and then pulls ahead on the last, slowest, hub-heavy graphs, where it switches to hub-split: **{last5:.0f} s** saved on the last 5 graphs alone.
 Overall the selector saves **{saved:.0f}%** of the time of the default GraphFrames strategy."""))
@@ -520,7 +558,8 @@ md(r'''
 We save three things:
 1. `datasets/derived/review/results.json`: every number shown above
 2. `datasets/derived/review/*.png`: all the charts (used in our slides and report)
-3. **Tableau "Decision Explorer"** (`datasets/derived/review/tableau/`). These are not the same charts again. They are a **per-graph decision log** that Tableau can filter and drill into:
+3. **Tableau sources for every slide chart** (`datasets/derived/review/tableau/slide_*.csv`): one small CSV behind each chart in our presentation, so each slide chart can be rebuilt (and filtered) in Tableau. The cell reads every file back and checks it gives the same numbers as the notebook.
+4. **Tableau "Decision Explorer"** (`datasets/derived/review/tableau/`). These are not the same charts again. They are a **per-graph decision log** that Tableau can filter and drill into:
    for each graph, what the selector predicted, what it picked, what was actually fastest, and how many seconds it saved compared with native and edge-join.
    In Tableau you can filter by family or hub share and see **where** the selector helps or makes mistakes. That is something the static charts above cannot do.
 ''')
@@ -544,6 +583,30 @@ kpi = pd.DataFrame([dict(policy=k, **v) for k, v in RES["policies_LOGO"].items()
 dec.to_csv(f"{TAB}/decision_explorer.csv", index=False); kpi.to_csv(f"{TAB}/policy_kpis.csv", index=False)
 json.dump(RES, open(f"{OUT}/results.json", "w"), indent=1, default=float)
 print("wrote", f"{TAB}/decision_explorer.csv", dec.shape, "|", f"{TAB}/policy_kpis.csv", kpi.shape, "| results.json")
+
+# One Tableau source per slide chart, plus how to build each chart in Tableau
+SLIDE_SOURCES = {
+    "slide_preprocessing.csv": (FASTEST.reset_index().rename(columns={"family": "graph_family"}),
+                                "Bar: graph_family on Rows, SUM of edge-join / hub-split / native on Columns (stacked)"),
+    "slide_total_time.csv": (TIME3.rename("total_time_s").rename_axis("policy").reset_index(), "Bar: policy on Rows, total_time_s on Columns"),
+    "slide_train_val_test.csv": (tvt[tvt.model.isin(mods)][["model", "split", "accuracy", "macro_f1"]], "Bar: split on Columns, model on Colour, accuracy (or macro_f1) on Rows"),
+    "slide_running_total.csv": (pd.DataFrame({"graphs_run": xs, **{f"cum_s_{k.replace(' ', '_').replace('-', '_').lower()}": v for k, v in cum.items()}}),
+                                "Area: graphs_run on Columns, the three cum_s_* measures on Rows (Measure Values)"),
+    "slide_unseen_test.csv": (TEST4.rename("mean_regret_pct").rename_axis("policy").reset_index(), "Bar: policy on Columns, mean_regret_pct on Rows"),
+    "slide_comparison.csv": (CMP.rename_axis("model").reset_index(), "Bar: model on Columns, Measure Values (accuracy, precision, macro_f1) on Rows"),
+    "slide_confusion.csv": (pd.DataFrame([(CLASSES[i], CLASSES[j], int(cm[i, j])) for i in range(3) for j in range(3)], columns=["actually_fastest", "model_answer", "graphs"]),
+                            "Highlight table: actually_fastest on Rows, model_answer on Columns, SUM(graphs) on Colour and Label"),
+    "slide_importance.csv": (TOP8.rename("importance").rename_axis("input").reset_index(), "Bar: input on Rows, importance on Columns, sorted"),
+}
+guide = []
+for fn, (t, how) in SLIDE_SOURCES.items():
+    t.to_csv(f"{TAB}/{fn}", index=False)
+    back = pd.read_csv(f"{TAB}/{fn}")
+    num = t.select_dtypes("number").values
+    assert back.shape == t.shape and np.allclose(back.select_dtypes("number").values, num), fn
+    guide.append(dict(slide_chart=fn.replace(".csv", ".png"), tableau_source=fn, rows=len(back), how_to_build_in_Tableau=how))
+display(pd.DataFrame(guide))
+print("All", len(guide), "slide-chart sources written, read back and matched.")
 
 # Preview of the Tableau view, read back from the file exactly as Tableau would
 L = pd.read_csv(f"{TAB}/decision_explorer.csv")
@@ -579,8 +642,10 @@ Fixed seeds, `n_jobs=1` and no random sampling mean that every run gives exactly
 code(r'''
 expected = {   # numbers in our report / slides (leave-one-graph-out, 62 graphs)
     "majority accuracy": (clf.loc["Majority baseline", "accuracy"], 0.806),
-    "majority balanced accuracy": (clf.loc["Majority baseline", "balanced_accuracy"], 0.333),
-    "logistic regression balanced accuracy": (clf.loc["Logistic regression", "balanced_accuracy"], 0.753),
+    "majority F1-score": (clf.loc["Majority baseline", "macro_f1"], 0.298),
+    "majority precision": (clf.loc["Majority baseline", "precision"], 0.269),
+    "decision tree accuracy": (clf.loc["Decision tree", "accuracy"], 0.516),
+    "extra-trees precision": (clf.loc["Extra-Trees", "precision"], 0.712),
     "random forest accuracy": (clf.loc["Random Forest", "accuracy"], 0.839),
     "extra-trees accuracy": (clf.loc["Extra-Trees", "accuracy"], 0.855),
     "extra-trees macro-F1": (clf.loc["Extra-Trees", "macro_f1"], 0.703),

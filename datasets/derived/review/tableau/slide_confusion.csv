@@ -1,0 +1,10 @@
+actually_fastest,model_answer,graphs
+edgejoin,edgejoin,46
+edgejoin,hubsplit,1
+edgejoin,native,3
+hubsplit,edgejoin,1
+hubsplit,hubsplit,5
+hubsplit,native,0
+native,edgejoin,4
+native,hubsplit,0
+native,native,2

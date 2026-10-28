@@ -1,0 +1,9 @@
+input,importance
+number of hubs,0.05937836212123591
+unevenness of out-degree,0.05948184545011425
+number of edges,0.06448631471744484
+work inside hubs,0.07979687048920087
+hubs' share of work,0.10483199676898568
+total work (two-hop paths),0.1251887298990551
+work on the busiest point,0.14216957523735013
+busiest point's share of work,0.21642338382283335

@@ -1,0 +1,7 @@
+graph_family,edge-join,hub-split,native
+power-law,4,0,0
+in-heavy,5,0,0
+uniform (no hubs),3,0,3
+out-heavy,6,0,0
+many hubs,9,0,1
+hub sweep,23,6,2

@@ -1,0 +1,5 @@
+policy,mean_regret_pct
+Always native,80.13935131533876
+Always hub-split,44.42159494419895
+Always edge-join,18.511887037841316
+ML selector,7.313724336888747

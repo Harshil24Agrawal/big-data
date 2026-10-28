@@ -9,27 +9,32 @@
  "classifier_LOGO": {
   "Majority baseline": {
    "accuracy": 0.8065,
-   "balanced_accuracy": 0.3333,
+   "precision": 0.2688,
    "macro_f1": 0.2976
   },
   "Rule baseline": {
    "accuracy": 0.1452,
-   "balanced_accuracy": 0.5,
+   "precision": 0.1092,
    "macro_f1": 0.1707
   },
   "Logistic regression": {
    "accuracy": 0.7581,
-   "balanced_accuracy": 0.7533,
+   "precision": 0.6145,
    "macro_f1": 0.6562
+  },
+  "Decision tree": {
+   "accuracy": 0.5161,
+   "precision": 0.5812,
+   "macro_f1": 0.5278
   },
   "Random Forest": {
    "accuracy": 0.8387,
-   "balanced_accuracy": 0.6889,
+   "precision": 0.6714,
    "macro_f1": 0.6776
   },
   "Extra-Trees": {
    "accuracy": 0.8548,
-   "balanced_accuracy": 0.6956,
+   "precision": 0.7118,
    "macro_f1": 0.7026
   }
  },
@@ -38,84 +43,84 @@
    "model": "Majority baseline",
    "split": "Train",
    "accuracy": 0.8491,
-   "balanced_accuracy": 0.3333,
+   "precision": 0.283,
    "macro_f1": 0.3061
   },
   {
    "model": "Majority baseline",
    "split": "Validation",
    "accuracy": 0.8491,
-   "balanced_accuracy": 0.3333,
+   "precision": 0.283,
    "macro_f1": 0.3061
   },
   {
    "model": "Majority baseline",
    "split": "Test",
    "accuracy": 0.5556,
-   "balanced_accuracy": 0.3333,
+   "precision": 0.1852,
    "macro_f1": 0.2381
   },
   {
    "model": "Logistic regression",
    "split": "Train",
    "accuracy": 0.8679,
-   "balanced_accuracy": 0.9481,
+   "precision": 0.7348,
    "macro_f1": 0.7993
   },
   {
    "model": "Logistic regression",
    "split": "Validation",
    "accuracy": 0.7736,
-   "balanced_accuracy": 0.7333,
+   "precision": 0.5818,
    "macro_f1": 0.631
   },
   {
    "model": "Logistic regression",
    "split": "Test",
    "accuracy": 0.7778,
-   "balanced_accuracy": 0.6,
+   "precision": 0.6,
    "macro_f1": 0.6
   },
   {
    "model": "Random Forest",
    "split": "Train",
    "accuracy": 1.0,
-   "balanced_accuracy": 1.0,
+   "precision": 1.0,
    "macro_f1": 1.0
   },
   {
    "model": "Random Forest",
    "split": "Validation",
    "accuracy": 0.9057,
-   "balanced_accuracy": 0.6815,
+   "precision": 0.8611,
    "macro_f1": 0.7487
   },
   {
    "model": "Random Forest",
    "split": "Test",
    "accuracy": 0.6667,
-   "balanced_accuracy": 0.4889,
+   "precision": 0.5556,
    "macro_f1": 0.5091
   },
   {
    "model": "Extra-Trees",
    "split": "Train",
    "accuracy": 1.0,
-   "balanced_accuracy": 1.0,
+   "precision": 1.0,
    "macro_f1": 1.0
   },
   {
    "model": "Extra-Trees",
    "split": "Validation",
    "accuracy": 0.9057,
-   "balanced_accuracy": 0.6815,
+   "precision": 0.8611,
    "macro_f1": 0.7487
   },
   {
    "model": "Extra-Trees",
    "split": "Test",
    "accuracy": 0.6667,
-   "balanced_accuracy": 0.4889,
+   "precision": 0.5556,
    "macro_f1": 0.5091
   }
  ],

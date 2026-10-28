@@ -1,0 +1,4 @@
+policy,total_time_s
+Always native,1809.5335499999999
+Always edge-join,1226.0493000000001
+ML selector,1069.5348000000004
