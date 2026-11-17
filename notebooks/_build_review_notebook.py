@@ -41,6 +41,19 @@ Every chart has two short notes: **How we got it** and **What it tells us**.
 Run it with *Kernel → Restart & Run All*. It takes about 2–3 minutes, and the last cell checks that the numbers are the same as in our report.
 ''')
 
+md(r'''
+**Running in Google Colab?** The next cell downloads the project files from GitHub automatically (about 1 minute). On your own computer it does nothing.
+''')
+
+code(r'''
+# Google Colab only: fetch the project (data table + helper code) from GitHub
+import os, sys
+if "google.colab" in sys.modules and not os.path.exists("/content/big-data"):
+    !git clone -q --depth 1 --branch phase1-data-collection https://github.com/Harshil24Agrawal/big-data.git /content/big-data
+if "google.colab" in sys.modules:
+    %cd /content/big-data/notebooks
+''')
+
 code(r'''
 # Setup: libraries, paths, fixed seeds (so every run gives the same numbers)
 import os, sys, json, warnings
@@ -273,7 +286,7 @@ md(r'''
 Models compared:
 * **Majority baseline**: always predicts edge-join (the most common label)
 * **Rule baseline**: a hand-written rule, "if the graph has hubs use hub-split, else native"
-* **Logistic regression**, **Decision tree** (depth 2), **Random Forest** (300 trees), **Extra-Trees** (300 trees): our ML models
+* **Logistic regression**, **Decision tree** (depth 2), **Random Forest** (300 trees), **Extra-Trees** (300 trees): the proposed ML models
 
 **Primary metrics** (higher is better):
 * **Accuracy**: share of graphs where the predicted method is right
@@ -451,7 +464,7 @@ display(Markdown(f"""**Why this chart:** it checks the regressor behind the sele
 ''')
 
 md(r'''
-### 5e. Is our selector actually better? Comparison with the baselines
+### 5e. Is the proposed selector actually better? Comparison with the baselines
 We compare the ML selector with what a Spark user would do without it:
 * **Always native**: the default GraphFrames way
 * **Always edge-join**: the single best fixed choice
@@ -481,7 +494,7 @@ display(POL.round(2)); RES["policies_LOGO"] = POL.round(4).to_dict(orient="index
 TIME3 = POL.loc[["Always native", "Always edge-join", "ML selector"], "total_time_s"]
 with plt.rc_context(SLIDE):
     fig, ax = plt.subplots(figsize=(5.1, 3.2))
-    b = ax.barh(["Always native\n(Spark default)", "Always edge-join", "Our ML selector"], TIME3.values, color=[C["base"], C["base"], C["ours"]])
+    b = ax.barh(["Always native\n(Spark default)", "Always edge-join", "Proposed ML selector"], TIME3.values, color=[C["base"], C["base"], C["ours"]])
     ax.bar_label(b, labels=[f"{v:.0f} s" for v in TIME3.values], padding=4, fontsize=14)
     ax.set_xlim(0, 2250); ax.set_xlabel("Total time for all 62 graphs (s)\nlower is better", fontsize=13); ax.tick_params(labelsize=12)
     save_slide(fig, "slide_total_time.png")
@@ -509,7 +522,7 @@ display(POL_T.round(2)); RES["policies_test9"] = POL_T.round(4).to_dict(orient="
 TEST4 = POL_T.loc[["Always native", "Always hub-split", "Always edge-join", "ML selector"], "mean_regret_pct"]
 with plt.rc_context(SLIDE):
     fig, ax = plt.subplots(figsize=(10, 3.6))
-    b = ax.bar(["Always native", "Always hub-split", "Always edge-join", "Our ML selector"], TEST4.values, color=[C["base"]] * 3 + [C["ours"]], width=.6)
+    b = ax.bar(["Always native", "Always hub-split", "Always edge-join", "Proposed ML selector"], TEST4.values, color=[C["base"]] * 3 + [C["ours"]], width=.6)
     ax.bar_label(b, labels=[f"{x:.1f}%" for x in TEST4.values], fontsize=15, padding=2)
     ax.set_ylabel("How much slower than\nthe fastest method (%)"); ax.set_ylim(0, 92); ax.set_title("On 9 new graphs the model never saw (lower is better)")
     save_slide(fig, "slide_unseen_test.png")
@@ -535,7 +548,7 @@ with plt.rc_context(SLIDE):
     fig, ax = plt.subplots(1, 2, figsize=(10, 3.9), gridspec_kw={"width_ratios": [1.75, 1]})
     ax[0].fill_between(xs, cum["Always native"], color=C["native"], alpha=.45, label=f"Always native ({cum['Always native'][-1]:.0f} s)")
     ax[0].fill_between(xs, cum["Always edge-join"], color=C["edge-join"], alpha=.55, label=f"Always edge-join ({cum['Always edge-join'][-1]:.0f} s)")
-    ax[0].fill_between(xs, cum["ML selector"], color=C["ours"], alpha=.85, label=f"Our ML selector ({cum['ML selector'][-1]:.0f} s)")
+    ax[0].fill_between(xs, cum["ML selector"], color=C["ours"], alpha=.85, label=f"Proposed ML selector ({cum['ML selector'][-1]:.0f} s)")
     ax[0].set_xlabel("Graphs run so far (quickest → slowest)"); ax[0].set_ylabel("Total time so far (s)"); ax[0].legend(loc="upper left", fontsize=12); ax[0].set_title("Running total of time")
     a = ax[1]; a.axis("off"); a.set_xlim(-1.2, 1.2); a.set_ylim(-.45, 1.15); a.set_aspect("equal")
     a.add_patch(Wedge((0, 0), 1, 0, 180, width=.32, fc="#e6e6e6")); a.add_patch(Wedge((0, 0), 1, 180 - 180 * saved / 100, 180, width=.32, fc=C["ours"]))
